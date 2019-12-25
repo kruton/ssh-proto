@@ -4,16 +4,6 @@ meta:
   xref:
     rfc: 4253
   ks-opaque-types: true
-seq:
-  - id: packet_length
-    type: u4
-  - id: padding_length
-    type: u1
-  - id: payload
-    type: payload
-    size: packet_length - padding_length - 1
-  - id: random_padding
-    size: padding_length
 types:
   byte_string:
     seq:
@@ -21,17 +11,52 @@ types:
         type: u4
       - id: data
         size: len
+  id_banner:
+    seq:
+      - id: prefix
+        contents: SSH-
+      - id: proto_version
+        type: str
+        encoding: UTF-8
+        terminator: 10
+  unencrypted_packet:
+    seq:
+      - id: packet_length
+        type: u4
+      - id: padding_length
+        type: u1
+      - id: payload
+        type: payload
+        size: packet_length - padding_length - 1
+      - id: random_padding
+        size: padding_length
+  encrypted_packet:
+    params:
+      - id: mac_length
+        type: u4
+        doc: |
+          The length of the MAC used for encrypted packets.
+    seq:
+      - id: packet_length
+        type: u4
+      - id: encrypted_payload
+        size: packet_length
+      - id: mac
+        size: mac_length
   payload:
     seq:
       - id: message_type
         type: u1
         enum: message_type
       - id: body
-        size: _root.packet_length - _root.padding_length - 2
+        size: _parent.as<unencrypted_packet>.packet_length - _parent.as<unencrypted_packet>.padding_length - 2
         type:
           switch-on: message_type
+          # This should only include messages 1-19, 20-29, 30-49.
           cases:
             'message_type::ssh_msg_kexinit': ssh_msg_kexinit
+            'message_type::ssh_msg_kexdh_init': ssh_msg_kexdh_init
+            'message_type::ssh_msg_kexdh_reply': ssh_msg_kexdh_reply
   ssh_msg_kexinit:
     doc-ref: RFC 4253 section 7.1
     seq:
@@ -118,6 +143,7 @@ enums:
     21: ssh_msg_newkeys
     30: ssh_msg_kexdh_init
     31: ssh_msg_kexdh_reply
+    # Types after here should not appear in unencrypted messages.
     50: ssh_msg_userauth_request
     51: ssh_msg_userauth_failure
     52: ssh_msg_userauth_success

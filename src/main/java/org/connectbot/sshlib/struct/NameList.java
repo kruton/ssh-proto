@@ -11,7 +11,7 @@ public class NameList extends ArrayList<String> {
     public NameList(KaitaiStream io) {
         super();
         long len = io.readU4be();
-        byte[] buf = io.readBytesFull();
+        byte[] buf = io.readBytes(len);
         String fullList = new String(buf, StandardCharsets.ISO_8859_1);
         addAll(Arrays.asList(fullList.split(",", -1)));
     }

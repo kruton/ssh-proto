@@ -22,6 +22,9 @@ configure<KaitaiExtension> {
 repositories {
     jcenter()
 }
+
 dependencies {
     implementation("io.kaitai:kaitai-struct-runtime:0.8")
+
+    testImplementation("junit:junit:4.12")
 }
