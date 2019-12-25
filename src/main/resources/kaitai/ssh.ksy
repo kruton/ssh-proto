@@ -26,24 +26,11 @@ types:
       - id: padding_length
         type: u1
       - id: payload
-        type: payload
+        type: unencrypted_payload
         size: packet_length - padding_length - 1
       - id: random_padding
         size: padding_length
-  encrypted_packet:
-    params:
-      - id: mac_length
-        type: u4
-        doc: |
-          The length of the MAC used for encrypted packets.
-    seq:
-      - id: packet_length
-        type: u4
-      - id: encrypted_payload
-        size: packet_length
-      - id: mac
-        size: mac_length
-  payload:
+  unencrypted_payload:
     seq:
       - id: message_type
         type: u1
@@ -57,6 +44,19 @@ types:
             'message_type::ssh_msg_kexinit': ssh_msg_kexinit
             'message_type::ssh_msg_kexdh_init': ssh_msg_kexdh_init
             'message_type::ssh_msg_kexdh_reply': ssh_msg_kexdh_reply
+  encrypted_packet:
+    params:
+      - id: mac_length
+        type: u4
+        doc: |
+          The length of the MAC used for encrypted packets.
+    seq:
+      - id: packet_length
+        type: u4
+      - id: encrypted_payload
+        size: packet_length
+      - id: mac
+        size: mac_length
   ssh_msg_kexinit:
     doc-ref: RFC 4253 section 7.1
     seq:
