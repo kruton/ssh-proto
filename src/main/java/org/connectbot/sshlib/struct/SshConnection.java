@@ -17,6 +17,15 @@
 package org.connectbot.sshlib.struct;
 
 public interface SshConnection {
-    void sendBanner();
     void disconnect();
+
+    void receiveVersion(Ssh.IdBanner banner);
+
+    void sendVersion();
+
+    void sendKexInit();
+
+    void receiveKexInit(Ssh.SshMsgKexinit kexInit);
+
+    void debug(Object arg0);
 }

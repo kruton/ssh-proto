@@ -57,6 +57,15 @@ types:
         size: packet_length
       - id: mac
         size: mac_length
+  ssh_msg_debug:
+    doc-ref: RFC 4253 section 11.3
+    seq:
+      - id: always_display
+        type: u1
+      - id: message
+        type: byte_string
+      - id: language
+        type: byte_string
   ssh_msg_kexinit:
     doc-ref: RFC 4253 section 7.1
     seq:

@@ -19,15 +19,57 @@
 %class SshConnection
 %package org.connectbot.sshlib.struct
 
+%import org.connectbot.sshlib.struct.Ssh.IdBanner
+%import org.connectbot.sshlib.struct.Ssh.SshMsgDebug
+%import org.connectbot.sshlib.struct.Ssh.SshMsgKexinit
+%import org.connectbot.sshlib.struct.Ssh.SshMsgNewkeys
+
 %start ClientMap::Unconnected
 
 %map ClientMap
 %%
-  Unconnected {
-    connect WaitVersionBanner { sendBanner(); }
+  Default {
+    disconnect Unconnected { disconnect(); }
+    ignore nil {}
+    debug(msg: SshMsgDebug) nil { debug(msg); }
   }
 
-  WaitVersionBanner {
-    disconnect Unconnected { disconnect(); }
+  Unconnected {
+    connect WaitVersion { sendVersion(); }
+  }
+
+  WaitVersion {
+    kexInit(msg: IdBanner)
+      WaitKexInit
+      {
+        receiveVersion(msg);
+        sendKexInit();
+      }
+  }
+
+  WaitKexInit {
+    kex(msg: SshMsgKexinit)
+      WaitKex
+      {
+        receiveKexInit(msg);
+      }
+  }
+
+  WaitKex {
+  }
+
+  WaitNewKeys {
+  }
+
+  WaitAuthentication {
+  }
+
+  WaitChannel {
+  }
+
+  ServerRekex {
+  }
+
+  ClientRekex {
   }
 %%
