@@ -1,9 +1,11 @@
 meta:
   id: ssh
+  title: SSH
   endian: be
   xref:
     rfc: 4253
   ks-opaque-types: true
+  license: CC0-1.0
 types:
   byte_string:
     seq:
@@ -41,6 +43,12 @@ types:
           switch-on: message_type
           # This should only include messages 1-19, 20-29, 30-49.
           cases:
+            'message_type::ssh_msg_disconnect': ssh_msg_disconnect
+            'message_type::ssh_msg_ignore': ssh_msg_ignore
+            'message_type::ssh_msg_unimplemented': ssh_msg_unimplemented
+            'message_type::ssh_msg_service_request': ssh_msg_service_request
+            'message_type::ssh_msg_service_accept': ssh_msg_service_accept
+            'message_type::ssh_msg_debug': ssh_msg_debug
             'message_type::ssh_msg_kexinit': ssh_msg_kexinit
             'message_type::ssh_msg_kexdh_init': ssh_msg_kexdh_init
             'message_type::ssh_msg_kexdh_reply': ssh_msg_kexdh_reply
@@ -57,14 +65,63 @@ types:
         size: packet_length
       - id: mac
         size: mac_length
+  ssh_msg_disconnect:
+    doc-ref: RFC 4253 section 11.1
+    doc: |
+      This message causes an immediate termination of the connection. After
+      this message, the sender must not send or receiver data. The receiver
+      must not accept any data after receiving this message.
+    seq:
+      - id: reason_code
+        doc: machine-readable reason for disconnection
+        enum: disconnect_reason
+        type: u4
+      - id: description
+        doc: human readable reason for disconnection in ISO-10646 UTF-8
+        type: byte_string
+      - id: language
+        doc: language tag according to RFC 3066
+        type: byte_string
+  ssh_msg_ignore:
+    doc-ref: RFC 4253 section 11.2
+    doc: |
+      This is a message that must be ignored. It can be used to defeat traffic
+      analysis.
+    seq:
+      - id: data
+        type: byte_string
+  ssh_msg_unimplemented:
+    doc-ref: RFC 4253 section 11.4
+    doc: This is sent in reply to an unknown packet type.
+    seq:
+      - id: packet_sequence
+        doc: Indicates the packet sequence number that was unrecognized.
+        type: u4
   ssh_msg_debug:
     doc-ref: RFC 4253 section 11.3
+    doc: |
+      This is a debug message that may help with debugging the connection. If
+      "always_display" is true, then this message should always be displayed.
+      Otherwise it should only be displayed if the user specifically requested
+      debugging output.
     seq:
       - id: always_display
         type: u1
       - id: message
+        doc: debug message in ISO-10646 UTF-8 encoding
         type: byte_string
       - id: language
+        doc: language tag according to RFC 3066
+        type: byte_string
+  ssh_msg_service_request:
+    doc-ref: RFC 4253 section 10
+    seq:
+      - id: service_name
+        type: byte_string
+  ssh_msg_service_accept:
+    doc-ref: RFC 4253 section 10
+    seq:
+      - id: service_name
         type: byte_string
   ssh_msg_kexinit:
     doc-ref: RFC 4253 section 7.1
@@ -98,17 +155,29 @@ types:
     doc: This type has no payload
   ssh_msg_kexdh_init:
     doc-ref: RFC 4253 section 8
+    doc: Diffie-Hellman key exchange initialization packet
     seq:
       - id: e
+        doc: |
+          Client's public key portion of ephemeral Diffie-Hellman key exchange
+          (i.e., e = g^x mod p).
         type: mpint
   ssh_msg_kexdh_reply:
     doc-ref: RFC 4253 section 8
+    doc: Diffie-Hellman key exchange reply packet
     seq:
       - id: server_key
+        doc: Server's key (K_S) in the appropriate format.
         type: byte_string
       - id: f
+        doc: |
+          Server's public key portion of ephemeral Diffie-Hellman key exchange
+          (i.e., f = g^y mod p).
         type: mpint
       - id: signature_h
+        doc: |
+          Signature over hash of the connection details. For the server,
+          K = e^y mod p. See "kexdh_hash" type for contents of the hash.
         type: byte_string
   kexdh_hash:
     doc-ref: RFC 4253 section 8
@@ -139,7 +208,7 @@ types:
         type: mpint
 
 enums:
-  message_type:
+  message_type: # https://www.iana.org/assignments/ssh-parameters/ssh-parameters.xhtml#ssh-parameters-1
     1: ssh_msg_disconnect
     2: ssh_msg_ignore
     3: ssh_msg_unimplemented
