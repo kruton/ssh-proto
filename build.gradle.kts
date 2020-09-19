@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import java.net.URL
+import com.fsryan.gradle.smc.SmcExtension
 import name.valery1707.kaitai.KaitaiExtension
 
 buildscript {
@@ -22,7 +24,7 @@ buildscript {
     }
     dependencies {
         classpath("name.valery1707.kaitai:kaitai-gradle-plugin:0.1.3")
-        classpath("com.fsryan.gradle.smc:smc:0.0.2")
+        classpath("com.fsryan.gradle.smc:smc:0.1.0")
     }
 }
 
@@ -35,6 +37,12 @@ apply(plugin = "smc")
 
 configure<KaitaiExtension> {
     packageName = "org.connectbot.sshlib.struct"
+    url = rootProject.file("./prebuilts/kaitai-struct-compiler-0.9-SNAPSHOT.zip").toURI().toURL()
+}
+
+configure<SmcExtension> {
+    smcUri = rootProject.file("./prebuilts/Smc-7.1.0.jar").toURI().toString()
+    statemapJarUri = rootProject.file("./libs/statemap.jar").toURI().toString()
 }
 
 repositories {
@@ -42,7 +50,6 @@ repositories {
 }
 
 dependencies {
-    implementation("io.kaitai:kaitai-struct-runtime:0.8")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     testImplementation("junit:junit:4.12")
