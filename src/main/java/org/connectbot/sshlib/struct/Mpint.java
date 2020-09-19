@@ -21,20 +21,31 @@ import java.math.BigInteger;
 import io.kaitai.struct.KaitaiStream;
 
 public class Mpint {
-    private final BigInteger value;
+    private final KaitaiStream _io;
+    private BigInteger _value;
 
     public Mpint(KaitaiStream io) {
-        long len = io.readU4be();
-        byte[] buf = io.readBytes(len);
+        this._io = io;
+    }
+
+    public void _read() {
+        long len = _io.readU4be();
+        byte[] buf = _io.readBytes(len);
 
         if (buf.length == 0) {
-            value = BigInteger.ZERO;
+            _value = BigInteger.ZERO;
         } else {
-            value = new BigInteger(1, buf);
+            _value = new BigInteger(1, buf);
         }
     }
 
+    public void _write(KaitaiStream io) {
+        byte[] encoded = _value.toByteArray();
+        io.writeU4be(encoded.length);
+        io.writeBytes(encoded);
+    }
+
     public BigInteger getValue() {
-        return value;
+        return _value;
     }
 }
