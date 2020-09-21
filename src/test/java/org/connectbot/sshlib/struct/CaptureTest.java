@@ -31,6 +31,8 @@ public class CaptureTest {
         dis.readFully(bytes);
         ByteBufferKaitaiStream bb = new ByteBufferKaitaiStream(bytes);
         Ssh.IdBanner banner = new Ssh.IdBanner(bb);
+        banner._read();
+        System.out.println("Banner: " + banner.protoVersion());
 
         while (printPlain(bb) != Ssh.MessageType.SSH_MSG_NEWKEYS) {}
         while (!bb.isEof()) {
@@ -40,6 +42,7 @@ public class CaptureTest {
 
     private Ssh.MessageType printPlain(ByteBufferKaitaiStream bb) {
         Ssh.UnencryptedPacket msg = new Ssh.UnencryptedPacket(bb);
+        msg._read();
         System.out.print("unencrypted msg: ");
         System.out.println(msg.payload().messageType());
         switch (msg.payload().messageType()) {
@@ -59,6 +62,7 @@ public class CaptureTest {
 
     private void printEnc(ByteBufferKaitaiStream bb) {
         Ssh.EncryptedPacket msg = new Ssh.EncryptedPacket(bb, 16);
+        msg._read();
         System.out.print("encrypted size: ");
         System.out.println(msg.packetLength());
     }
