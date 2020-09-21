@@ -52,6 +52,7 @@ types:
             'message_type::ssh_msg_kexinit': ssh_msg_kexinit
             'message_type::ssh_msg_kexdh_init': ssh_msg_kexdh_init
             'message_type::ssh_msg_kexdh_reply': ssh_msg_kexdh_reply
+            _: invalid_message
   encrypted_packet:
     params:
       - id: mac_length
@@ -65,6 +66,10 @@ types:
         size: packet_length
       - id: mac
         size: mac_length
+  invalid_message:
+    doc: |
+      This type is created when the message is not supported. This should
+      cause an immediate disconnect.
   ssh_msg_disconnect:
     doc-ref: RFC 4253 section 11.1
     doc: |
