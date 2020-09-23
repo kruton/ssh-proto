@@ -98,14 +98,14 @@ public class CaptureTest {
             case SSH_MSG_KEXDH_INIT:
                 System.out.print("e: ");
                 Ssh.SshMsgKexdhInit dhinit = (Ssh.SshMsgKexdhInit) kexdhPayload.body();
-                System.out.println(dhinit.e().getValue().toString(16));
+                System.out.println(new BigInteger(1, dhinit.e().body()).toString(16));
                 break;
             case SSH_MSG_KEXDH_REPLY:
                 Ssh.SshMsgKexdhReply dhreply = (Ssh.SshMsgKexdhReply) kexdhPayload.body();
                 System.out.print("server_key: ");
                 System.out.println(new String(dhreply.serverKey().data()));
                 System.out.print("f: ");
-                System.out.println(dhreply.f().getValue().toString(16));
+                System.out.println(new BigInteger(1, dhreply.f().body()).toString(16));
                 break;
         }
     }

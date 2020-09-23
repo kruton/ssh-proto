@@ -4,72 +4,18 @@ meta:
   endian: be
   xref:
     rfc: 4253
+    wikidata: Q170460
   license: CC0-1.0
+  imports:
+    - name_list
+    - byte_string
+    - ascii_string
+    - utf8_string
+    - mpint
+doc: |
+  The Secure Shell Protocol as laid out starting with RFC 4253. This also
+  incorporates extensions from OpenSSH.
 types:
-  name_entry:
-    seq:
-      - id: data
-        type: str
-        terminator: 0x2C
-        encoding: ascii
-        eos-error: false
-        repeat: eos
-  name_list:
-    seq:
-      - id: len
-        type: u4
-      - id: entries
-        type: name_entry
-        size: len
-  mpint:
-    doc: |
-      Big integers serialization format used by SSH.
-    doc-ref: |
-      https://tools.ietf.org/html/rfc4251#section-5
-    seq:
-      - id: len
-        type: u4
-      - id: body
-        size: len
-    instances:
-      length_in_bits:
-        value: (len - 1) * 8
-        doc: |
-          Length of big integer in bits. In OpenSSH sources, this corresponds to
-          `BN_num_bits` function.
-  byte_string:
-    doc: |
-      An integer-prefixed byte array designed to be used for arbitrary data
-      that is not expected to be a string.
-    -webide-representation: '{value}'
-    seq:
-      - id: len
-        type: u4
-      - id: data
-        size: len
-  utf8string:
-    -webide-representation: '{value}'
-    seq:
-      - id: len
-        type: u4
-      - id: value
-        type: str
-        size: len
-        encoding: UTF-8
-  cstring:
-    doc: |
-      A integer-prefixed string designed to be read using `sshbuf_get_cstring`
-      and written by `sshbuf_put_cstring` routines in ssh sources. Name is an
-      obscure misnomer, as typically "C string" means a null-terminated string.
-    doc-ref: 'https://github.com/openssh/openssh-portable/blob/master/sshbuf-getput-basic.c#L181'
-    -webide-representation: '{value}'
-    seq:
-      - id: len
-        type: u4
-      - id: value
-        type: str
-        size: len
-        encoding: ASCII
   id_banner:
     seq:
       - id: prefix
@@ -227,10 +173,10 @@ types:
         type: u4
       - id: description
         doc: human readable reason for disconnection in ISO-10646 UTF-8
-        type: utf8string
+        type: utf8_string
       - id: language
         doc: language tag according to RFC 3066
-        type: cstring
+        type: ascii_string
   ssh_msg_ignore:
     doc-ref: RFC 4253 section 11.2
     doc: |
@@ -258,20 +204,20 @@ types:
         type: u1
       - id: message
         doc: debug message in ISO-10646 UTF-8 encoding
-        type: utf8string
+        type: utf8_string
       - id: language
         doc: language tag according to RFC 3066
-        type: cstring
+        type: ascii_string
   ssh_msg_service_request:
     doc-ref: RFC 4253 section 10
     seq:
       - id: service_name
-        type: cstring
+        type: ascii_string
   ssh_msg_service_accept:
     doc-ref: RFC 4253 section 10
     seq:
       - id: service_name
-        type: cstring
+        type: ascii_string
   ssh_msg_kexinit:
     doc-ref: RFC 4253 section 7.1
     seq:
@@ -535,9 +481,9 @@ types:
     doc-ref: RFC 4252 section 5
     seq:
       - id: user_name
-        type: cstring
+        type: ascii_string
       - id: service_name
-        type: cstring
+        type: ascii_string
       - id: method_name_length
         type: u4
       - id: method_name
@@ -564,7 +510,7 @@ types:
       - id: always_false
         contents: [0]
       - id: public_key_algorithm_name
-        type: cstring
+        type: ascii_string
       - id: public_key_blob
         type: byte_string
   userauth_request_password:
@@ -573,17 +519,17 @@ types:
       - id: change_password
         type: u1
       - id: plaintext_password
-        type: utf8string
+        type: utf8_string
         doc: plaintext password in UTF-8
       - id: new_plaintext_password
-        type: utf8string
+        type: utf8_string
         doc: new password in UTF-8
         if: change_password != 0
   userauth_request_hostbased:
     doc-ref: RFC 4252 section 9
     seq:
       - id: algorithm
-        type: cstring
+        type: ascii_string
         doc: public key algorithm for host key
       - id: host_key
         type: byte_string
@@ -592,7 +538,7 @@ types:
         type: byte_string
         doc: client host name expressed as the FQDN in US-ASCII
       - id: user_name
-        type: utf8string
+        type: utf8_string
         doc: user name on the client host in UTF-8
   userauth_request_none:
     doc: |
@@ -656,7 +602,7 @@ types:
     doc-ref: RFC 4252 section 5.4
     seq:
       - id: message
-        type: utf8string
+        type: utf8_string
         doc: banner message in UTF-8 encoding
       - id: language_tag
         type: byte_string
@@ -1035,7 +981,7 @@ types:
       - id: core_dumped
         type: u1
       - id: error_message
-        type: utf8string
+        type: utf8_string
         doc: error message in UTF-8 encoding
       - id: language_tag
         type: byte_string
