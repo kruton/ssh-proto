@@ -20,7 +20,7 @@ import name.valery1707.kaitai.KaitaiExtension
 
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath("name.valery1707.kaitai:kaitai-gradle-plugin:0.1.3")
@@ -46,7 +46,7 @@ configure<SmcExtension> {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
