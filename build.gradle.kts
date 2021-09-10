@@ -52,5 +52,5 @@ repositories {
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
-    testImplementation("junit:junit:4.12")
+    testImplementation("junit:junit:4.13.2")
 }
