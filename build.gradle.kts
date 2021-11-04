@@ -24,7 +24,7 @@ buildscript {
     }
     dependencies {
         classpath("name.valery1707.kaitai:kaitai-gradle-plugin:0.1.3")
-        classpath("com.fsryan.gradle.smc:smc:0.1.0")
+        classpath("com.fsryan.gradle.smc:smc:0.2.0")
     }
 }
 
