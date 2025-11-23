@@ -8,13 +8,13 @@ meta:
 doc: Big integers serialization format used by SSH.
 doc-ref: 'https://tools.ietf.org/html/rfc4251#section-5'
 seq:
-  - id: len
+  - id: len_body
     type: u4
   - id: body
-    size: len
+    size: len_body
 instances:
   length_in_bits:
-    value: (len - 1) * 8
+    value: (len_body - 1) * 8
     doc: |
       Length of big integer in bits. In OpenSSH sources, this corresponds to
       `BN_num_bits` function.

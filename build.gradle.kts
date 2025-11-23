@@ -37,7 +37,7 @@ apply(plugin = "smc")
 
 configure<KaitaiExtension> {
     packageName = "org.connectbot.sshlib.struct"
-    url = rootProject.file("./prebuilts/kaitai-struct-compiler-0.9-SNAPSHOT.zip").toURI().toURL()
+    url = rootProject.file("./prebuilts/kaitai-struct-compiler-0.11.zip").toURI().toURL()
 }
 
 configure<SmcExtension> {

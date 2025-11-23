@@ -26,22 +26,22 @@ types:
         terminator: 10
   unencrypted_packet:
     seq:
-      - id: packet_length
+      - id: len_packet
         type: u4
-      - id: padding_length
+      - id: len_random_padding
         type: u1
       - id: payload
         type: unencrypted_payload
-        size: packet_length - padding_length - 1
+        size: len_packet - len_random_padding - 1
       - id: random_padding
-        size: padding_length
+        size: len_random_padding
   unencrypted_payload:
     seq:
       - id: message_type
         type: u1
         enum: message_type
       - id: body
-        size: _parent.as<unencrypted_packet>.packet_length - _parent.as<unencrypted_packet>.padding_length - 2
+        size: _parent.as<unencrypted_packet>.len_packet - _parent.as<unencrypted_packet>.len_random_padding - 2
         type:
           switch-on: message_type
           # This should only include messages 1-19, 20-29, 30-49.
@@ -98,33 +98,33 @@ types:
             _: invalid_message
   encrypted_packet:
     params:
-      - id: mac_length
+      - id: len_mac
         type: u4
         doc: |
           The length of the MAC used for encrypted packets.
     seq:
-      - id: packet_length
+      - id: len_encrypted_payload
         type: u4
       - id: encrypted_payload
-        size: packet_length
+        size: len_encrypted_payload
       - id: mac
-        size: mac_length
+        size: len_mac
   decrypted_packet:
     seq:
-      - id: padding_length
+      - id: len_random_padding
         type: u1
       - id: payload
         type: decrypted_payload
-        size: _parent.as<encrypted_packet>.packet_length - padding_length - 1
+        size: _parent.as<encrypted_packet>.len_encrypted_payload - len_random_padding - 1
       - id: random_padding
-        size: padding_length
+        size: len_random_padding
   decrypted_payload:
     seq:
       - id: message_type
         type: u1
         enum: message_type
       - id: body
-        size: _parent.as<decrypted_packet>._parent.as<encrypted_packet>.packet_length - _parent.as<decrypted_packet>.padding_length - 2
+        size: _parent.as<decrypted_packet>._parent.as<encrypted_packet>.len_encrypted_payload - _parent.as<decrypted_packet>.len_random_padding - 2
         type:
           switch-on: message_type
           # This should only include messages 50 and higher.
@@ -152,10 +152,10 @@ types:
     seq:
       - id: sequence_number
         type: u4
-      - id: packet_length
+      - id: len_encrypted_packet
         type: u4
       - id: encrypted_packet
-        size: packet_length
+        size: len_encrypted_packet
   invalid_message:
     doc: |
       This type is created when the message is not supported. This should
@@ -484,11 +484,11 @@ types:
         type: ascii_string
       - id: service_name
         type: ascii_string
-      - id: method_name_length
+      - id: len_method_name
         type: u4
       - id: method_name
         type: str
-        size: method_name_length
+        size: len_method_name
         encoding: ASCII
       - id: method_specific_fields
         type:
@@ -555,13 +555,13 @@ types:
   userauth_request_gssapi_with_mic:
     doc-ref: RFC 4462 section 3.2
     seq:
-      - id: number_of_mechanisms
+      - id: num_mechanisms
         type: u4
         doc: The number of mechanism OIDs client supports
       - id: mechanisms
         type: byte_string
         repeat: expr
-        repeat-expr: number_of_mechanisms
+        repeat-expr: num_mechanisms
         doc: Mechanism OIDs encoded as ASN.1 DER rules
   userauth_request_gssapi_keyex:
     doc-ref: RFC 4462 section 4
@@ -610,11 +610,11 @@ types:
   ssh_msg_global_request:
     doc-ref: RFC 4254 section 4
     seq:
-      - id: request_name_length
+      - id: len_request_name
         type: u4
       - id: request_name
         type: str
-        size: request_name_length
+        size: len_request_name
         encoding: ASCII
       - id: want_reply
         type: u1
@@ -708,11 +708,11 @@ types:
   ssh_msg_channel_open:
     doc-ref: RFC 4254 section 5.1
     seq:
-      - id: channel_type_length
+      - id: len_channel_type
         type: u4
       - id: channel_type
         type: str
-        size: channel_type_length
+        size: len_channel_type
         encoding: ASCII
       - id: sender_channel
         type: u4
@@ -854,11 +854,11 @@ types:
     seq:
       - id: recipient_channel
         type: u4
-      - id: request_type_length
+      - id: len_request_type
         type: u4
       - id: request_type
         type: str
-        size: request_type_length
+        size: len_request_type
         encoding: ASCII
       - id: want_reply
         type: u1

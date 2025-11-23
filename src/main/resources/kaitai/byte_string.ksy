@@ -10,7 +10,7 @@ doc: |
   that is not expected to be a string.
 -webide-representation: '{value}'
 seq:
-  - id: len
+  - id: len_data
     type: u4
   - id: data
-    size: len
+    size: len_data

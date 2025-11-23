@@ -166,12 +166,12 @@ public class CaptureTest {
         Ssh.EncryptedPacket msg = new Ssh.EncryptedPacket(bb, 32);
         msg._read();
         System.out.print("encrypted size: ");
-        System.out.println(msg.packetLength());
+        System.out.println(msg.lenEncryptedPayload());
         Mac mac = Mac.getInstance(MAC_ALGO);
         mac.init(MAC_KEY);
 
         Ssh.EtmMac macInput = new Ssh.EtmMac();
-        macInput.setPacketLength(msg.packetLength());
+        macInput.setLenEncryptedPacket(msg.lenEncryptedPayload());
         macInput.setEncryptedPacket(msg.encryptedPayload());
         macInput.setSequenceNumber(seqNum);
         byte[] tag = mac.doFinal(toByteArray(macInput));

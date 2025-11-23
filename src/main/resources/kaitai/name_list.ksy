@@ -11,11 +11,11 @@ doc: |
   individual values in Kaitai.
 doc-ref: 'https://tools.ietf.org/html/rfc4251#section-5'
 seq:
-  - id: len
+  - id: len_entries
     type: u4
   - id: entries
     type: name_entry
-    size: len
+    size: len_entries
 types:
   name_entry:
     doc: 'An individual entry in a `name_list`.'
@@ -24,6 +24,6 @@ types:
       - id: data
         type: str
         terminator: 0x2C
-        encoding: ascii
+        encoding: ASCII
         eos-error: false
         repeat: eos
