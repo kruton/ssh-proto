@@ -96,6 +96,32 @@ types:
             'kex_dh_gex::ssh_msg_kex_dh_gex_init': ssh_msg_kex_dh_gex_init
             'kex_dh_gex::ssh_msg_kex_dh_gex_reply': ssh_msg_kex_dh_gex_reply
             _: invalid_message
+  kex_ecdh_payload:
+    seq:
+      - id: message_type
+        type: u1
+        enum: kex_ecdh
+      - id: body
+        size-eos: true
+        type:
+          switch-on: message_type
+          cases:
+            'kex_ecdh::ssh_msg_kex_ecdh_init': ssh_msg_kex_ecdh_init
+            'kex_ecdh::ssh_msg_kex_ecdh_reply': ssh_msg_kex_ecdh_reply
+            _: invalid_message
+  kex_ecmqv_payload:
+    seq:
+      - id: message_type
+        type: u1
+        enum: kex_ecmqv
+      - id: body
+        size-eos: true
+        type:
+          switch-on: message_type
+          cases:
+            'kex_ecmqv::ssh_msg_kex_ecmqv_init': ssh_msg_kex_ecmqv_init
+            'kex_ecmqv::ssh_msg_kex_ecmqv_reply': ssh_msg_kex_ecmqv_reply
+            _: invalid_message
   encrypted_packet:
     params:
       - id: len_mac
@@ -473,6 +499,108 @@ types:
         type: byte_string
       - id: encrypted_secret
         doc: RSAES_OAEP_ENCRYPT(K_T, K), the encrypted secret
+        type: byte_string
+      - id: k
+        doc: the shared secret
+        type: mpint
+  ssh_msg_kex_ecdh_init:
+    doc-ref: RFC 5656 section 4
+    doc: Elliptic Curve Diffie-Hellman key exchange initialization packet
+    seq:
+      - id: q_c
+        doc: Client's ephemeral public key octet string
+        type: byte_string
+  ssh_msg_kex_ecdh_reply:
+    doc-ref: RFC 5656 section 4
+    doc: Elliptic Curve Diffie-Hellman key exchange reply packet
+    seq:
+      - id: k_s
+        doc: Server's public host key
+        type: byte_string
+      - id: q_s
+        doc: Server's ephemeral public key octet string
+        type: byte_string
+      - id: signature_h
+        doc: Signature on the exchange hash
+        type: byte_string
+  kex_ecdh_hash:
+    doc-ref: RFC 5656 section 4
+    doc: |
+      The exchange hash H is formed by applying the hash algorithm
+      specified by the chosen key exchange method to the concatenation
+      of the following values.
+    seq:
+      - id: v_c
+        doc: the client's identification string (CR and LF excluded)
+        type: byte_string
+      - id: v_s
+        doc: the server's identification string (CR and LF excluded)
+        type: byte_string
+      - id: i_c
+        doc: the payload of the client's SSH_MSG_KEXINIT
+        type: byte_string
+      - id: i_s
+        doc: the payload of the server's SSH_MSG_KEXINIT
+        type: byte_string
+      - id: k_s
+        doc: the server's public host key
+        type: byte_string
+      - id: q_c
+        doc: client's ephemeral public key octet string
+        type: byte_string
+      - id: q_s
+        doc: server's ephemeral public key octet string
+        type: byte_string
+      - id: k
+        doc: the shared secret
+        type: mpint
+  ssh_msg_kex_ecmqv_init:
+    doc-ref: RFC 5656 section 5
+    doc: Elliptic Curve Menezes-Qu-Vanstone key exchange initialization packet
+    seq:
+      - id: q_c
+        doc: Client's ephemeral public key octet string
+        type: byte_string
+  ssh_msg_kex_ecmqv_reply:
+    doc-ref: RFC 5656 section 5
+    doc: Elliptic Curve Menezes-Qu-Vanstone key exchange reply packet
+    seq:
+      - id: k_s
+        doc: Server's public host key
+        type: byte_string
+      - id: q_s
+        doc: Server's ephemeral public key octet string
+        type: byte_string
+      - id: hmac_tag
+        doc: HMAC tag computed on H using the shared secret
+        type: byte_string
+  kex_ecmqv_hash:
+    doc-ref: RFC 5656 section 5
+    doc: |
+      The hash H is formed by applying the hash algorithm specified
+      by the chosen key exchange method to the concatenation of the
+      following values.
+    seq:
+      - id: v_c
+        doc: the client's identification string (CR and LF excluded)
+        type: byte_string
+      - id: v_s
+        doc: the server's identification string (CR and LF excluded)
+        type: byte_string
+      - id: i_c
+        doc: the payload of the client's SSH_MSG_KEXINIT
+        type: byte_string
+      - id: i_s
+        doc: the payload of the server's SSH_MSG_KEXINIT
+        type: byte_string
+      - id: k_s
+        doc: the server's public host key
+        type: byte_string
+      - id: q_c
+        doc: client's ephemeral public key octet string
+        type: byte_string
+      - id: q_s
+        doc: server's ephemeral public key octet string
         type: byte_string
       - id: k
         doc: the shared secret
