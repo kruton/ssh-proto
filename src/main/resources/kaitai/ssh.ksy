@@ -52,6 +52,8 @@ types:
             'message_type::ssh_msg_service_request': ssh_msg_service_request
             'message_type::ssh_msg_service_accept': ssh_msg_service_accept
             'message_type::ssh_msg_debug': ssh_msg_debug
+            'message_type::ssh_msg_ext_info': ssh_msg_ext_info
+            'message_type::ssh_msg_newcompress': ssh_msg_newcompress
             'message_type::ssh_msg_kexinit': ssh_msg_kexinit
             _: invalid_message
   userauth_keyboard_interactive_payload:
@@ -66,6 +68,30 @@ types:
           cases:
             'message_userauth_keyboard_interactive::ssh_msg_userauth_info_request': ssh_msg_userauth_info_request
             'message_userauth_keyboard_interactive::ssh_msg_userauth_info_response': ssh_msg_userauth_info_response
+            _: invalid_message
+  userauth_publickey_payload:
+    seq:
+      - id: message_type
+        type: u1
+        enum: message_userauth_publickey
+      - id: body
+        size-eos: true
+        type:
+          switch-on: message_type
+          cases:
+            'message_userauth_publickey::ssh_msg_userauth_pk_ok': ssh_msg_userauth_pk_ok
+            _: invalid_message
+  userauth_password_payload:
+    seq:
+      - id: message_type
+        type: u1
+        enum: message_userauth_password
+      - id: body
+        size-eos: true
+        type:
+          switch-on: message_type
+          cases:
+            'message_userauth_password::ssh_msg_userauth_passwd_changereq': ssh_msg_userauth_passwd_changereq
             _: invalid_message
   kexdh_payload:
     seq:
@@ -274,6 +300,33 @@ types:
   ssh_msg_newkeys:
     doc-ref: RFC 4253 section 7.2
     doc: This type has no payload
+  ssh_msg_ext_info:
+    doc-ref: RFC 8308 section 2.3
+    doc: |
+      Extension negotiation message. Sent after SSH_MSG_NEWKEYS to advertise
+      supported extensions and their values. Each extension is a name-value pair.
+    seq:
+      - id: num_extensions
+        type: u4
+        doc: Number of extension name-value pairs
+      - id: extensions
+        type: extension
+        repeat: expr
+        repeat-expr: num_extensions
+    types:
+      extension:
+        seq:
+          - id: extension_name
+            type: ascii_string
+            doc: Extension name
+          - id: extension_value
+            type: byte_string
+            doc: Extension value (binary data, interpretation depends on extension)
+  ssh_msg_newcompress:
+    doc-ref: RFC 4253 section 6
+    doc: |
+      Compression re-negotiation message. This message has no payload and
+      indicates that compression parameters will be renegotiated.
   ssh_msg_kexdh_init:
     doc-ref: RFC 4253 section 8
     doc: Diffie-Hellman key exchange initialization packet
@@ -635,12 +688,23 @@ types:
   userauth_request_publickey:
     doc-ref: RFC 4252 section 7
     seq:
-      - id: always_false
-        contents: [0]
+      - id: has_signature
+        type: u1
+        doc: |
+          FALSE (0) to query if the public key is acceptable for authentication.
+          TRUE (1) to perform actual authentication with signature.
       - id: public_key_algorithm_name
         type: ascii_string
+        doc: Public key algorithm name
       - id: public_key_blob
         type: byte_string
+        doc: Public key blob (may contain certificates)
+      - id: signature
+        type: byte_string
+        doc: |
+          Signature over session identifier and authentication request.
+          Only present when has_signature is TRUE.
+        if: has_signature != 0
   userauth_request_password:
     doc-ref: RFC 4252 section 8
     seq:
@@ -735,6 +799,61 @@ types:
       - id: language_tag
         type: byte_string
         doc: language tag in RFC 3066 format
+  ssh_msg_userauth_pk_ok:
+    doc-ref: RFC 4252 section 7
+    doc: |
+      Response to publickey authentication query indicating that the
+      public key is acceptable for authentication.
+    seq:
+      - id: public_key_algorithm_name
+        type: ascii_string
+        doc: Public key algorithm name from the request
+      - id: public_key_blob
+        type: byte_string
+        doc: Public key blob from the request
+  userauth_publickey_signature_data:
+    doc-ref: RFC 4252 section 7
+    doc: |
+      The data over which the signature is computed for publickey authentication.
+      This is used to verify the signature sent by the client.
+    seq:
+      - id: session_identifier
+        type: byte_string
+        doc: Session identifier from key exchange
+      - id: message_type
+        contents: [50]
+        doc: SSH_MSG_USERAUTH_REQUEST (50)
+      - id: user_name
+        type: byte_string
+        doc: User name
+      - id: service_name
+        type: byte_string
+        doc: Service name
+      - id: method_name
+        type: byte_string
+        doc: Authentication method name (should be "publickey")
+      - id: has_signature
+        contents: [1]
+        doc: TRUE (1)
+      - id: public_key_algorithm_name
+        type: byte_string
+        doc: Public key algorithm name
+      - id: public_key_blob
+        type: byte_string
+        doc: Public key to be used for authentication
+  ssh_msg_userauth_passwd_changereq:
+    doc-ref: RFC 4252 section 8
+    doc: |
+      Server requests that the client change the password. The client
+      may respond with a new password change request or try a different
+      authentication method.
+    seq:
+      - id: prompt
+        type: utf8_string
+        doc: Prompt message in UTF-8 encoding
+      - id: language_tag
+        type: ascii_string
+        doc: Language tag in RFC 3066 format
   ssh_msg_global_request:
     doc-ref: RFC 4254 section 4
     seq:
@@ -752,10 +871,10 @@ types:
           cases:
             '"tcpip-forward"': global_request_tcpip_forward
             '"cancel-tcpip-forward"': global_request_cancel_tcpip_forward
-            #'"streamlocal-forward@openssh.com"': global_request_streamlocal_forward_openssh # TODO
-            #'"cancel-streamlocal-forward@openssh.com"': global_request_cancel_streamlocal_forward_openssh # TODO
-            #'"hostkeys-00@openssh.com"': global_request_hostkeys_00_openssh # TODO
-            #'"hostkeys-prove-00@openssh.com"': global_request_hostkeys_prove_00_openssh # TODO
+            '"streamlocal-forward@openssh.com"': global_request_streamlocal_forward_openssh
+            '"cancel-streamlocal-forward@openssh.com"': global_request_cancel_streamlocal_forward_openssh
+            '"hostkeys-00@openssh.com"': global_request_hostkeys_00_openssh
+            '"hostkeys-prove-00@openssh.com"': global_request_hostkeys_prove_00_openssh
             _: invalid_message
   global_request_tcpip_forward:
     doc-ref: RFC 4254 section 7.1
@@ -775,6 +894,30 @@ types:
       - id: port_to_bind
         type: u4
         doc: Port number to bind
+  global_request_streamlocal_forward_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: socket_path
+        type: byte_string
+        doc: Unix domain socket path
+  global_request_cancel_streamlocal_forward_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: socket_path
+        type: byte_string
+        doc: Unix domain socket path
+  global_request_hostkeys_00_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: hostkeys
+        size-eos: true
+        doc: Concatenated sequence of all server host keys
+  global_request_hostkeys_prove_00_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: signature
+        type: byte_string
+        doc: Signature proving possession of private host keys
   ssh_msg_request_success:
     doc-ref: RFC 4254 section 4
     seq:
@@ -856,9 +999,9 @@ types:
             '"x11"': channel_open_x11
             '"forwarded-tcpip"': channel_open_forwarded_tcpip
             '"direct-tcpip"': channel_open_direct_tcpip
-            #'"tun@openssh.com"': channel_open_tun_openssh # TODO
-            #'"direct-streamlocal@openssh.com"': channel_open_direct_streamlocal_openssh # TODO
-            #'"forwarded-streamlocal@openssh.com"': channel_open_forwarded_streamlocal_openssh # TODO
+            '"tun@openssh.com"': channel_open_tun_openssh
+            '"direct-streamlocal@openssh.com"': channel_open_direct_streamlocal_openssh
+            '"forwarded-streamlocal@openssh.com"': channel_open_forwarded_streamlocal_openssh
             _: invalid_message
   channel_open_session:
     doc: Clients SHOULD reject this message from a server.
@@ -913,6 +1056,36 @@ types:
       - id: originator_port
         doc: Originator port
         type: u4
+  channel_open_tun_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: tun_mode
+        type: u4
+        doc: Tunnel mode (SSH_TUNMODE_POINTOPOINT or SSH_TUNMODE_ETHERNET)
+      - id: tun_unit
+        type: u4
+        doc: Tunnel device unit number (or 0x7fffffff for auto-allocation)
+  channel_open_direct_streamlocal_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: socket_path
+        type: byte_string
+        doc: Unix domain socket path to connect to
+      - id: reserved_1
+        type: byte_string
+        doc: Reserved for future use
+      - id: reserved_2
+        type: u4
+        doc: Reserved for future use
+  channel_open_forwarded_streamlocal_openssh:
+    doc-ref: openssh-PROTOCOL.txt
+    seq:
+      - id: socket_path
+        type: byte_string
+        doc: Unix domain socket path that was connected
+      - id: reserved
+        type: byte_string
+        doc: Reserved for future use
   ssh_msg_channel_open_confirmation:
     doc: |
       The recipient channel is the channel number given in the original
@@ -1124,6 +1297,134 @@ types:
     seq:
       - id: recipient_channel
         type: u4
+  ssh_signature:
+    doc-ref: RFC 4253 section 6.6
+    doc: |
+      Generic SSH signature structure. The signature blob format is defined
+      by the public key algorithm.
+    seq:
+      - id: algorithm_name_len
+        type: u4
+      - id: algorithm_name
+        type: str
+        size: algorithm_name_len
+        encoding: ASCII
+      - id: signature_blob
+        type:
+          switch-on: algorithm_name
+          cases:
+            '"ssh-rsa"': ssh_rsa_signature_blob
+            '"rsa-sha2-256"': ssh_rsa_signature_blob
+            '"rsa-sha2-512"': ssh_rsa_signature_blob
+            '"ssh-dss"': ssh_dss_signature_blob
+            '"ecdsa-sha2-nistp256"': ecdsa_signature_blob
+            '"ecdsa-sha2-nistp384"': ecdsa_signature_blob
+            '"ecdsa-sha2-nistp521"': ecdsa_signature_blob
+            '"ssh-ed25519"': ssh_ed25519_signature_blob
+            '"ssh-ed448"': ssh_ed448_signature_blob
+            _: byte_string
+  ssh_rsa_signature_blob:
+    doc-ref: RFC 4253 section 6.6
+    seq:
+      - id: signature
+        type: byte_string
+        doc: RSA signature (integer s in network byte order)
+  ssh_dss_signature_blob:
+    doc-ref: RFC 4253 section 6.6
+    seq:
+      - id: signature
+        type: byte_string
+        doc: DSS signature (160-bit r followed by 160-bit s, 40 bytes total)
+  ecdsa_signature_blob:
+    doc-ref: RFC 5656 section 3.1.2
+    seq:
+      - id: r
+        type: mpint
+        doc: ECDSA signature component r
+      - id: s
+        type: mpint
+        doc: ECDSA signature component s
+  ssh_ed25519_signature_blob:
+    doc-ref: RFC 8709 section 6
+    seq:
+      - id: signature
+        type: byte_string
+        doc: Ed25519 signature (64 bytes)
+  ssh_ed448_signature_blob:
+    doc-ref: RFC 8709 section 6
+    seq:
+      - id: signature
+        type: byte_string
+        doc: Ed448 signature (114 bytes)
+  ssh_public_key:
+    doc-ref: RFC 4253 section 6.6
+    doc: |
+      Generic SSH public key structure. The key blob format is defined
+      by the public key algorithm.
+    seq:
+      - id: algorithm_name_len
+        type: u4
+      - id: algorithm_name
+        type: str
+        size: algorithm_name_len
+        encoding: ASCII
+      - id: key_blob
+        type:
+          switch-on: algorithm_name
+          cases:
+            '"ssh-rsa"': ssh_rsa_public_key_blob
+            '"ssh-dss"': ssh_dss_public_key_blob
+            '"ecdsa-sha2-nistp256"': ecdsa_public_key_blob
+            '"ecdsa-sha2-nistp384"': ecdsa_public_key_blob
+            '"ecdsa-sha2-nistp521"': ecdsa_public_key_blob
+            '"ssh-ed25519"': ssh_ed25519_public_key_blob
+            '"ssh-ed448"': ssh_ed448_public_key_blob
+            _: byte_string
+  ssh_rsa_public_key_blob:
+    doc-ref: RFC 4253 section 6.6
+    seq:
+      - id: e
+        type: mpint
+        doc: RSA public exponent
+      - id: n
+        type: mpint
+        doc: RSA modulus
+  ssh_dss_public_key_blob:
+    doc-ref: RFC 4253 section 6.6
+    seq:
+      - id: p
+        type: mpint
+        doc: DSS prime p
+      - id: q
+        type: mpint
+        doc: DSS subprime q
+      - id: g
+        type: mpint
+        doc: DSS generator g
+      - id: y
+        type: mpint
+        doc: DSS public key y
+  ecdsa_public_key_blob:
+    doc-ref: RFC 5656 section 3.1
+    seq:
+      - id: curve_identifier
+        type: ascii_string
+        doc: Elliptic curve identifier (e.g., "nistp256")
+      - id: q
+        type: byte_string
+        doc: Public key point Q (SEC1 octet string encoding)
+  ssh_ed25519_public_key_blob:
+    doc-ref: RFC 8709 section 4
+    seq:
+      - id: key
+        type: byte_string
+        doc: Ed25519 public key (32 bytes)
+  ssh_ed448_public_key_blob:
+    doc-ref: RFC 8709 section 4
+    seq:
+      - id: key
+        type: byte_string
+        doc: Ed448 public key (57 bytes)
 
 enums:
   message_type: # https://www.iana.org/assignments/ssh-parameters/ssh-parameters.xhtml#ssh-parameters-1
