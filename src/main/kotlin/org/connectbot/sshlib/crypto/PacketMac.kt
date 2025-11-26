@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Kenny Root
+ * Copyright 2025 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,23 @@
  * limitations under the License.
  */
 
-package org.connectbot.sshlib.struct;
+package org.connectbot.sshlib.crypto
 
-public interface SshConnection {
-    void disconnect();
+/**
+ * Interface for SSH packet message authentication codes (MAC).
+ */
+interface PacketMac {
+    /**
+     * MAC length in bytes.
+     */
+    val macLength: Int
 
-    void receiveVersion(Ssh.IdBanner banner);
-
-    void sendVersion();
-
-    void sendKexInit();
-
-    void receiveKexInit(Ssh.SshMsgKexinit kexInit);
-
-    void debug(Object arg0);
+    /**
+     * Compute MAC for packet.
+     *
+     * @param sequenceNumber Packet sequence number
+     * @param packet Complete packet data (including length, padding, etc.)
+     * @return MAC bytes
+     */
+    fun compute(sequenceNumber: Long, packet: ByteArray): ByteArray
 }

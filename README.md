@@ -35,10 +35,11 @@ and modern algorithms:
 - Algorithm-specific payload parsing
 - Comprehensive enums for all protocol constants
 
-### State Machine (In progress)
-- Basic connection state machine framework (SMC)
-- States defined but transitions incomplete
-- Intended for connection lifecycle management
+### State Machine
+- SSH client state machine using KStateMachine
+- Complete state transitions for SSH client connection lifecycle
+- Event-driven architecture with strongly-typed callback interface
+- Client-only (server would require separate state machine)
 
 ## What This Project Does NOT Provide
 

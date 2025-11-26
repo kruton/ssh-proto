@@ -14,35 +14,55 @@
  * limitations under the License.
  */
 
-import java.net.URL
-import com.fsryan.gradle.smc.SmcExtension
-import name.valery1707.kaitai.KaitaiExtension
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("name.valery1707.kaitai:kaitai-gradle-plugin:0.1.3")
-        classpath("com.fsryan.gradle.smc:smc:0.2.0")
-    }
-}
-
 plugins {
     java
+    kotlin("jvm") version "2.1.0"
 }
 
-apply(plugin = "name.valery1707.kaitai")
-apply(plugin = "smc")
+val kaitaiInputDir = file("src/main/resources/kaitai")
+val kaitaiOutputDir = file("build/generated/kaitai")
+val kaitaiCompilerZip = file("prebuilts/kaitai-struct-compiler-0.11.zip")
+val kaitaiCompilerDir = file("build/kaitai-compiler")
 
-configure<KaitaiExtension> {
-    packageName = "org.connectbot.sshlib.struct"
-    url = rootProject.file("./prebuilts/kaitai-struct-compiler-0.11.zip").toURI().toURL()
+tasks.register<Copy>("unzipKaitaiCompiler") {
+    from(zipTree(kaitaiCompilerZip))
+    into(kaitaiCompilerDir)
 }
 
-configure<SmcExtension> {
-    smcUri = rootProject.file("./prebuilts/Smc-7.1.0.jar").toURI().toString()
-    statemapJarUri = rootProject.file("./libs/statemap.jar").toURI().toString()
+tasks.register<Exec>("kaitai") {
+    dependsOn("unzipKaitaiCompiler")
+
+    inputs.dir(kaitaiInputDir)
+    outputs.dir(kaitaiOutputDir)
+
+    doFirst {
+        kaitaiOutputDir.mkdirs()
+    }
+
+    commandLine(
+        "${kaitaiCompilerDir}/kaitai-struct-compiler-0.11/bin/kaitai-struct-compiler",
+        "--read-write",
+        "--target", "java",
+        "--outdir", kaitaiOutputDir.absolutePath,
+        "--java-package", "org.connectbot.sshlib.struct",
+        *fileTree(kaitaiInputDir).filter { it.extension == "ksy" }.map { it.absolutePath }.toTypedArray()
+    )
+}
+
+tasks.named("compileJava") {
+    dependsOn("kaitai")
+}
+
+tasks.named("compileKotlin") {
+    dependsOn("kaitai")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir(kaitaiOutputDir)
+        }
+    }
 }
 
 repositories {
@@ -50,7 +70,34 @@ repositories {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    // Kaitai Struct runtime
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("kaitai-struct-runtime-*.jar"))))
 
-    testImplementation("junit:junit:4.13.2")
+    // KStateMachine for state machine implementation (JVM/Android artifact)
+    implementation("io.github.nsk90:kstatemachine-jvm:0.35.0")
+
+    // Kotlin standard library
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+
+    // Ktor for networking (lightweight TCP transport)
+    implementation("io.ktor:ktor-network:2.3.7")
+
+    // SLF4J API for logging
+    implementation("org.slf4j:slf4j-api:2.0.9")
+
+    // Testing dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
+    testImplementation("junit:junit:4.13.2")  // For CaptureTest (JUnit 4)
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.2")
+    testImplementation("org.testcontainers:testcontainers:2.0.2")
+    testImplementation("ch.qos.logback:logback-classic:1.4.14")
+    testImplementation(kotlin("test"))
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
