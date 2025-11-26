@@ -84,7 +84,7 @@ dependencies {
     implementation("io.ktor:ktor-network:2.3.7")
 
     // SLF4J API for logging
-    implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("org.slf4j:slf4j-api:2.0.17")
 
     // Testing dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
