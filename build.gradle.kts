@@ -95,7 +95,7 @@ dependencies {
     testImplementation("ch.qos.logback:logback-classic:1.4.14")
     testImplementation(kotlin("test"))
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.1")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:6.0.1")
 }
 
 tasks.test {
