@@ -20,15 +20,23 @@ package org.connectbot.sshlib.client
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.connectbot.sshlib.HostKeyVerifier
 import org.connectbot.sshlib.PublicKey
 import org.connectbot.sshlib.crypto.AesCtrCipher
@@ -361,6 +369,126 @@ class KeystrokeObfuscationTest {
         advanceUntilIdle()
 
         coVerify(exactly = 0) { conn.sendChaff() }
+    }
+
+    @Test
+    fun `failed chaff write reports transport failure without escaping background worker`() = runTest {
+        val uncaught = mutableListOf<Throwable>()
+        val scope = CoroutineScope(
+            SupervisorJob() + StandardTestDispatcher(testScheduler) +
+                CoroutineExceptionHandler { _, error -> uncaught += error },
+        )
+        val conn = mockk<SshConnection>(relaxed = true)
+        val failure = TransportException("Connection closed: Socket closed")
+        coEvery { conn.sendChaff() } throws failure
+        val channel = createObfuscatingChannel(
+            conn,
+            canSendChaff = true,
+            intervalMs = 20L,
+            scope = scope,
+            obfuscatorClockMs = { testScheduler.currentTime },
+            obfuscatorRandom = Random(0),
+        )
+        try {
+            channel.markPtyGranted()
+            channel.write("a".toByteArray())
+            testScheduler.advanceTimeBy(21)
+            runCurrent()
+
+            assertTrue(uncaught.isEmpty(), "Chaff must not crash its caller's process: $uncaught")
+            coVerify(exactly = 1) { conn.sendChaff() }
+            coVerify(exactly = 1) { conn.transportFailed(failure) }
+        } finally {
+            scope.cancel()
+            runCurrent()
+        }
+    }
+
+    @Test
+    fun `chaff write failing during shutdown does not escape cancelled worker`() = runTest {
+        val uncaught = mutableListOf<Throwable>()
+        val scope = CoroutineScope(
+            SupervisorJob() + StandardTestDispatcher(testScheduler) +
+                CoroutineExceptionHandler { _, error -> uncaught += error },
+        )
+        val conn = mockk<SshConnection>(relaxed = true)
+        val writing = CompletableDeferred<Unit>()
+        val finish = CompletableDeferred<Unit>()
+        val failure = TransportException("Packet writer stopped", CancellationException("Connection closed"))
+        coEvery { conn.sendChaff() } coAnswers {
+            // An admitted SSH write can finish with a transport error even after cancellation.
+            withContext(NonCancellable) {
+                writing.complete(Unit)
+                finish.await()
+                throw failure
+            }
+        }
+        val channel = createObfuscatingChannel(
+            conn,
+            canSendChaff = true,
+            intervalMs = 20L,
+            scope = scope,
+            obfuscatorClockMs = { testScheduler.currentTime },
+            obfuscatorRandom = Random(0),
+        )
+        try {
+            channel.markPtyGranted()
+            channel.write("a".toByteArray())
+            testScheduler.advanceTimeBy(21)
+            runCurrent()
+            assertTrue(writing.isCompleted)
+
+            scope.cancel()
+            finish.complete(Unit)
+            runCurrent()
+
+            assertTrue(uncaught.isEmpty(), "Shutdown must not crash its caller's process: $uncaught")
+            // Coroutine stack recovery may copy the exception and retain the original as cause.
+            coVerify(exactly = 1) { conn.transportFailed(match { it === failure || it.cause === failure }) }
+        } finally {
+            finish.complete(Unit)
+            scope.cancel()
+            runCurrent()
+        }
+    }
+
+    @Test
+    fun `normal chaff cancellation does not report transport failure`() = runTest {
+        val uncaught = mutableListOf<Throwable>()
+        val scope = CoroutineScope(
+            SupervisorJob() + StandardTestDispatcher(testScheduler) +
+                CoroutineExceptionHandler { _, error -> uncaught += error },
+        )
+        val conn = mockk<SshConnection>(relaxed = true)
+        val writing = CompletableDeferred<Unit>()
+        coEvery { conn.sendChaff() } coAnswers {
+            writing.complete(Unit)
+            awaitCancellation()
+        }
+        val channel = createObfuscatingChannel(
+            conn,
+            canSendChaff = true,
+            intervalMs = 20L,
+            scope = scope,
+            obfuscatorClockMs = { testScheduler.currentTime },
+            obfuscatorRandom = Random(0),
+        )
+        try {
+            channel.markPtyGranted()
+            channel.write("a".toByteArray())
+            testScheduler.advanceTimeBy(21)
+            runCurrent()
+            assertTrue(writing.isCompleted)
+
+            scope.cancel()
+            runCurrent()
+
+            assertTrue(uncaught.isEmpty())
+            coVerify(exactly = 0) { conn.transportFailed(any()) }
+        } finally {
+            scope.cancel()
+            runCurrent()
+        }
     }
 
     private fun enableTestEncryption(connection: SshConnection) {
