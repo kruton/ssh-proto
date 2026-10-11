@@ -422,28 +422,36 @@ class SessionChannel internal constructor(
     private fun startChaffLoopIfNeeded(obs: KeystrokeObfuscator) {
         if (chaffJob?.isActive == true) return
         chaffJob = connectionScope.launch {
-            while (obfuscatorMutex.withLock { obs.isActive() }) {
-                val delayMs = obfuscatorMutex.withLock {
-                    obs.delayUntilNextSendMs()
-                }
-                if (delayMs > 0) {
-                    delay(delayMs)
-                }
-                val shouldSendChaff = obfuscatorMutex.withLock {
-                    if (!obs.isActive()) {
-                        false
-                    } else if (pendingObfuscatedWrites.get() > 0) {
-                        null
-                    } else {
-                        obs.advanceInterval()
-                        true
+            try {
+                while (obfuscatorMutex.withLock { obs.isActive() }) {
+                    val delayMs = obfuscatorMutex.withLock {
+                        obs.delayUntilNextSendMs()
+                    }
+                    if (delayMs > 0) {
+                        delay(delayMs)
+                    }
+                    val shouldSendChaff = obfuscatorMutex.withLock {
+                        if (!obs.isActive()) {
+                            false
+                        } else if (pendingObfuscatedWrites.get() > 0) {
+                            null
+                        } else {
+                            obs.advanceInterval()
+                            true
+                        }
+                    }
+                    when (shouldSendChaff) {
+                        true -> connection.sendChaff()
+                        false -> break
+                        null -> obfuscatedWritesIdle.receiveCatching()
                     }
                 }
-                when (shouldSendChaff) {
-                    true -> connection.sendChaff()
-                    false -> break
-                    null -> obfuscatedWritesIdle.receiveCatching()
-                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                // An admitted packet may fail with a transport error after cancellation.
+                // Chaff has no caller to receive it; use the normal connection failure path.
+                connection.transportFailed(failure)
             }
         }
     }
