@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>Builder</title>
+    <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg">
+        <script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer="defer"></script>
+<!-- BEGIN DOCS NAVIGATION -->
+<link rel="stylesheet" href="https://sshlib.connectbot.org/docs-version.css">
+<script src="https://sshlib.connectbot.org/docs-version.js" defer data-docs-root="https://sshlib.connectbot.org/" data-docs-version="v0.5.1"></script>
+<!-- END DOCS NAVIGATION -->
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    ConnectBot SSH Library
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version"><label class="docs-version-label">Version <select id="docs-version" aria-label="Documentation version"><option value="v0.5.1" selected>v0.5.1</option><option value="v0.5.0">v0.5.0</option><option value="main">main</option></select></label></div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":sshlib/main">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":sshlib/main"
+                                       data-filter=":sshlib/main"/>
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    ConnectBot SSH Library
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="ConnectBot SSH Library::org.connectbot.sshlib/SshClientConfig.Builder///PointingToDeclaration//-1357994179">
+  <div class="breadcrumbs"><a href="../../../../index.html">ConnectBot SSH Library</a><span class="delimiter">/</span><a href="../../index.html">org.connectbot.sshlib</a><span class="delimiter">/</span><a href="../index.html">SshClientConfig</a><span class="delimiter">/</span><span class="current">Builder</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Builder</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">Builder</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/51ce1b5d308e8f4f3593c43fae95db492fcaac31/sshlib/src/main/kotlin/org/connectbot/sshlib/SshClientConfig.kt#L68">source</a>)</span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-2143593510%2FConstructors%2F-1357994179" anchor-label="Builder" id="-2143593510%2FConstructors%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-builder.html"><span><span>Builder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2143593510%2FConstructors%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="828658096%2FProperties%2F-1357994179" anchor-label="autoDisconnectOnLastChannelClose" id="828658096%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="auto-disconnect-on-last-channel-close.html"><span>auto</span><wbr></wbr><span>Disconnect</span><wbr></wbr><span>On</span><wbr></wbr><span>Last</span><wbr></wbr><span>Channel</span><wbr></wbr><span><span>Close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="828658096%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="auto-disconnect-on-last-channel-close.html">autoDisconnectOnLastChannelClose</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether to automatically disconnect the SSH connection when the last channel is closed.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-772383992%2FProperties%2F-1357994179" anchor-label="clientVersion" id="-772383992%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="client-version.html"><span>client</span><wbr></wbr><span><span>Version</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-772383992%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="client-version.html">clientVersion</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Client version string sent during SSH handshake.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2092751246%2FProperties%2F-1357994179" anchor-label="enableCompression" id="-2092751246%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="enable-compression.html"><span>enable</span><wbr></wbr><span><span>Compression</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2092751246%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="enable-compression.html">enableCompression</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Enable zlib compression. When true, the client offers <code class="lang-kotlin">zlib@openssh.com,zlib,none</code>; when false, only <code class="lang-kotlin">none</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-908103778%2FProperties%2F-1357994179" anchor-label="encryptionAlgorithms" id="-908103778%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="encryption-algorithms.html"><span>encryption</span><wbr></wbr><span><span>Algorithms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-908103778%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="encryption-algorithms.html">encryptionAlgorithms</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1059524542%2FProperties%2F-1357994179" anchor-label="environment" id="-1059524542%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="environment.html"><span><span>environment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1059524542%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="environment.html">environment</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Environment variables sent before each session starts, including SFTP. Servers may ignore variables not allowed by their policy (OpenSSH AcceptEnv). Names and values use UTF-8 and must not contain NUL. Only supplied variables are sent.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1046771421%2FProperties%2F-1357994179" anchor-label="host" id="1046771421%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="host.html"><span><span>host</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1046771421%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="host.html">host</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">Hostname for TCP connections. Used with default KtorTcpTransport. Ignored if <a href="transport-factory.html">transportFactory</a> is set explicitly.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2095395962%2FProperties%2F-1357994179" anchor-label="hostKeyAlgorithms" id="2095395962%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="host-key-algorithms.html"><span>host</span><wbr></wbr><span>Key</span><wbr></wbr><span><span>Algorithms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2095395962%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="host-key-algorithms.html">hostKeyAlgorithms</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1599334392%2FProperties%2F-1357994179" anchor-label="hostKeyVerifier" id="-1599334392%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="host-key-verifier.html"><span>host</span><wbr></wbr><span>Key</span><wbr></wbr><span><span>Verifier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1599334392%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="host-key-verifier.html">hostKeyVerifier</a><span class="token operator">: </span><a href="../../-host-key-verifier/index.html">HostKeyVerifier</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Host key verifier.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="484073572%2FProperties%2F-1357994179" anchor-label="ipVersion" id="484073572%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="ip-version.html"><span>ip</span><wbr></wbr><span><span>Version</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="484073572%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="ip-version.html">ipVersion</a><span class="token operator">: </span><a href="../../../org.connectbot.sshlib.transport/-ip-version/index.html">IpVersion</a></div><div class="brief "><p class="paragraph">IP version preference for the default TCP transport. Ignored if <a href="transport-factory.html">transportFactory</a> is set explicitly.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1925471582%2FProperties%2F-1357994179" anchor-label="keepAliveIntervalMs" id="-1925471582%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="keep-alive-interval-ms.html"><span>keep</span><wbr></wbr><span>Alive</span><wbr></wbr><span>Interval</span><wbr></wbr><span><span>Ms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1925471582%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="keep-alive-interval-ms.html">keepAliveIntervalMs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Send an SSH_MSG_IGNORE heartbeat every N milliseconds to keep the connection alive across NAT/VPN/firewall idle timeouts.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-208964525%2FProperties%2F-1357994179" anchor-label="kexAlgorithms" id="-208964525%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="kex-algorithms.html"><span>kex</span><wbr></wbr><span><span>Algorithms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-208964525%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="kex-algorithms.html">kexAlgorithms</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-564019262%2FProperties%2F-1357994179" anchor-label="macAlgorithms" id="-564019262%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mac-algorithms.html"><span>mac</span><wbr></wbr><span><span>Algorithms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-564019262%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="mac-algorithms.html">macAlgorithms</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-869578658%2FProperties%2F-1357994179" anchor-label="obscureKeystrokeTimingIntervalMs" id="-869578658%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="obscure-keystroke-timing-interval-ms.html"><span>obscure</span><wbr></wbr><span>Keystroke</span><wbr></wbr><span>Timing</span><wbr></wbr><span>Interval</span><wbr></wbr><span><span>Ms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-869578658%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="obscure-keystroke-timing-interval-ms.html">obscureKeystrokeTimingIntervalMs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Quantize outbound keystroke packet timing to this interval (milliseconds) to mask inter-keystroke timing patterns. Requires a PTY session and server support for <code class="lang-kotlin">ping@openssh.com</code>. Set to 0 to disable.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1335003684%2FProperties%2F-1357994179" anchor-label="port" id="1335003684%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="port.html"><span><span>port</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1335003684%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="port.html">port</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Port for TCP connections. Used with default KtorTcpTransport. Ignored if <a href="transport-factory.html">transportFactory</a> is set explicitly.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="462821330%2FProperties%2F-1357994179" anchor-label="preferPasswordAuth" id="462821330%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="prefer-password-auth.html"><span>prefer</span><wbr></wbr><span>Password</span><wbr></wbr><span><span>Auth</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="462821330%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="prefer-password-auth.html">preferPasswordAuth</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">When true, prefer <code class="lang-kotlin">password</code> over <code class="lang-kotlin">keyboard-interactive</code> when both are available. By default, <code class="lang-kotlin">keyboard-interactive</code> is preferred.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1192653831%2FProperties%2F-1357994179" anchor-label="rekeyBytesLimit" id="-1192653831%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rekey-bytes-limit.html"><span>rekey</span><wbr></wbr><span>Bytes</span><wbr></wbr><span><span>Limit</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1192653831%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="rekey-bytes-limit.html">rekeyBytesLimit</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Re-key after this many wire bytes (sent or received). Default: 1 GB.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1843226910%2FProperties%2F-1357994179" anchor-label="rekeyIntervalMs" id="1843226910%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rekey-interval-ms.html"><span>rekey</span><wbr></wbr><span>Interval</span><wbr></wbr><span><span>Ms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1843226910%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="rekey-interval-ms.html">rekeyIntervalMs</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a></div><div class="brief "><p class="paragraph">Re-key after this many milliseconds. Default: 1 hour.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1576237170%2FProperties%2F-1357994179" anchor-label="sessionWindowSize" id="-1576237170%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="session-window-size.html"><span>session</span><wbr></wbr><span>Window</span><wbr></wbr><span><span>Size</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1576237170%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="session-window-size.html">sessionWindowSize</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Receive window, in bytes, for shells, commands and manually opened subsystems. SFTP channels opened by <a href="../../-ssh-client/open-sftp.html">SshClient.openSftp</a> use <a href="sftp-window-size.html">sftpWindowSize</a>. A channel moves at most one window of data per network round trip, so a larger window speeds up bulk transfers on slower links. Each channel may buffer up to this much unread data. Default: 2 MiB. Reduce this for sessions with tighter memory limits.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2005857285%2FProperties%2F-1357994179" anchor-label="sftpWindowSize" id="2005857285%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="sftp-window-size.html"><span>sftp</span><wbr></wbr><span>Window</span><wbr></wbr><span><span>Size</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2005857285%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="sftp-window-size.html">sftpWindowSize</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">Receive window, in bytes, for channels opened by <a href="../../-ssh-client/open-sftp.html">SshClient.openSftp</a>. Default: 8 MiB, to sustain bulk downloads on higher-latency links. Each channel may buffer up to this much unread data; reduce this for tighter memory limits.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1220352260%2FProperties%2F-1357994179" anchor-label="transportFactory" id="1220352260%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="transport-factory.html"><span>transport</span><wbr></wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1220352260%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">var </span><a href="transport-factory.html">transportFactory</a><span class="token operator">: </span><a href="../../../org.connectbot.sshlib.transport/-transport-factory/index.html">TransportFactory</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Custom transport factory. If not set, uses <a href="../../../org.connectbot.sshlib.transport/-ktor-tcp-transport-factory/index.html">KtorTcpTransportFactory</a> with <a href="host.html">host</a>, <a href="port.html">port</a>, and <a href="ip-version.html">ipVersion</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-1863699897%2FFunctions%2F-1357994179" anchor-label="build" id="-1863699897%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="build.html"><span><span>build</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1863699897%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="build.html"><span class="token function">build</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">SshClientConfig</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>Copyright Kenny Root</div>
+                    <div>
+                        <a class="footer--link" id="markdown-link" href="index.md">View as Markdown</a>
+                        <script>
+                            document.getElementById("markdown-link").href =
+                                location.pathname.split("/").pop().replace(/\.html$/, ".md") || "index.md";
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

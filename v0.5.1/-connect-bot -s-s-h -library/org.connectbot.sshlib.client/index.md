@@ -1,0 +1,10 @@
+//[ConnectBot SSH Library](../../index.md)/[org.connectbot.sshlib.client](index.md)
+
+# Package-level declarations
+
+## Types
+
+| Name | Summary |
+|---|---|
+| [SessionChannel](-session-channel/index.md) | [jvm]<br>class [SessionChannel](-session-channel/index.md) : [SshSession](../org.connectbot.sshlib/-ssh-session/index.md) |
+| [SshConnection](-ssh-connection/index.md) | [jvm]<br>class [SshConnection](-ssh-connection/index.md)(transport: [Transport](../org.connectbot.sshlib.transport/-transport/index.md), clientVersion: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) = &quot;SSH-2.0-CBSSH_1.0&quot;, hostKeyVerifier: [HostKeyVerifier](../org.connectbot.sshlib/-host-key-verifier/index.md), kexAlgorithms: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) = KexEntry.defaultString, hostKeyAlgorithms: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) = SignatureEntry.defaultString, encryptionAlgorithms: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) = CipherEntry.defaultString, macAlgorithms: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) = MacEntry.defaultString, compressionAlgorithms: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) = CompressionEntry.defaultString, preferPasswordAuth: [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html) = false, rekeyIntervalMs: [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html), rekeyBytesLimit: [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html), obscureKeystrokeTimingIntervalMs: [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) = 20, coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO)<br>SSH connection handler that manages the protocol flow. |
