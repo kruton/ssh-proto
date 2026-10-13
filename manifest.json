@@ -17,12 +17,12 @@
     "v0.5.0": {
       "published": {
         "commit": "e84332aa870611f9f230d1908811fe4c71addc30",
-        "config": "3391932c172513080eef8980d62d1465a6cece5f902d7542f601a66a6e288712",
+        "config": "c3819e21dfc65ac01d3be5a92900dff24710f384640f12c1b11a41fc00dd161e",
         "policy": 1
       },
       "attempt": {
         "commit": "e84332aa870611f9f230d1908811fe4c71addc30",
-        "config": "3391932c172513080eef8980d62d1465a6cece5f902d7542f601a66a6e288712",
+        "config": "c3819e21dfc65ac01d3be5a92900dff24710f384640f12c1b11a41fc00dd161e",
         "policy": 1,
         "status": "success"
       }
