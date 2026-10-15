@@ -3,7 +3,7 @@
 # ConnectBot SSH Library
 
 [jvm]\
-[[Continuous Integration](https://img.shields.io/github/actions/workflow/status/connectbot/cbssh/ci.yml?branch=main&label=CI)](https://github.com/connectbot/cbssh/actions/workflows/ci.yml?query=branch%3Amain)[[Maven Central](https://img.shields.io/maven-central/v/org.connectbot.sshlib/sshlib?label=Maven%20Central&color=blue)](https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib)[[License](https://img.shields.io/github/license/connectbot/cbssh?label=License&color=blue)](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/LICENSE)[[Quality Gate Status](https://img.shields.io/sonar/quality_gate/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Quality%20Gate)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)[[Coverage](https://img.shields.io/sonar/coverage/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Coverage)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)
+[[Continuous Integration](https://img.shields.io/github/actions/workflow/status/connectbot/cbssh/ci.yml?branch=main&label=CI)](https://github.com/connectbot/cbssh/actions/workflows/ci.yml?query=branch%3Amain)[[Maven Central](https://img.shields.io/maven-central/v/org.connectbot.sshlib/sshlib?label=Maven%20Central&color=blue)](https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib)[[License](https://img.shields.io/github/license/connectbot/cbssh?label=License&color=blue)](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/LICENSE)[[Quality Gate Status](https://img.shields.io/sonar/quality_gate/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Quality%20Gate)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)[[Coverage](https://img.shields.io/sonar/coverage/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Coverage)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)
 
 ConnectBot SSH is a Kotlin client library for SSH connections, authentication, interactive shells, command execution, SFTP, and port forwarding. It uses coroutines, declarative protocol definitions, and explicit state machines.
 
@@ -43,7 +43,7 @@ The library supports a wide range of post-quantum and other modern SSH algorithm
 - 
    **MACs**: HMAC-SHA2 (including ETM variants)
 
-For a complete list of supported algorithms and their respective RFCs, see [docs/ALGORITHMS.md](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/docs/ALGORITHMS.md).
+For a complete list of supported algorithms and their respective RFCs, see [docs/ALGORITHMS.md](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/docs/ALGORITHMS.md).
 
 The defaults offer only encrypt-then-MAC (ETM) HMAC-SHA2 variants and exclude SHA-1 key exchange and MACs, CBC/3DES ciphers, and `ssh-rsa` host-key signatures. These legacy algorithms and non-ETM MACs remain available only through the explicit `kexAlgorithms`, `hostKeyAlgorithms`, `encryptionAlgorithms`, and `macAlgorithms` settings in `SshClientConfig`. RSA user authentication normally requires the server to advertise `rsa-sha2-256` or `rsa-sha2-512` through `server-sig-algs`. Explicitly including `ssh-rsa` in the configured host-key algorithm wishlist also permits the legacy RSA/SHA-1 signature when advertised, or as the base-key algorithm when that extension is absent.
 
@@ -213,7 +213,7 @@ try {
 
 The library supports authentication with `sk-ssh-ed25519@openssh.com` and `sk-ecdsa-sha2-nistp256@openssh.com` keys. Callers provide their own FIDO2 stack and surface the resulting assertion through the library's helpers.
 
-See [docs/SK_AUTH.md](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/docs/SK_AUTH.md) for detailed implementation details and examples.
+See [docs/SK_AUTH.md](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/docs/SK_AUTH.md) for detailed implementation details and examples.
 
 ### SSH Agent Forwarding
 
@@ -282,13 +282,13 @@ Run integration tests with: `./gradlew :sshlib:test` (requires Docker).
 ## Documentation
 
 - 
-   [Changelog](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/CHANGELOG.md)
+   [Changelog](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/CHANGELOG.md)
 - 
-   [Supported algorithms](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/docs/ALGORITHMS.md)
+   [Supported algorithms](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/docs/ALGORITHMS.md)
 - 
-   [Security Key authentication](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/docs/SK_AUTH.md)
+   [Security Key authentication](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/docs/SK_AUTH.md)
 - 
-   [Integration testing](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/docs/agents/testing.md)
+   [Integration testing](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/docs/agents/testing.md)
 
 ## License
 
@@ -313,7 +313,7 @@ Copyright 2019-2026, [Kenny Root](https://github.com/kruton/)
 
 Changes since v0.5.1.
 
-[Compare source versions](https://github.com/connectbot/cbssh/compare/v0.5.1...871108ea46a717b39dca1600aa56b9753ebed9b9)
+[Compare source versions](https://github.com/connectbot/cbssh/compare/v0.5.1...5eeee75c9799062a1babb1c036056edc72c9cd2b)
 
 ### SSH
 
@@ -335,5 +335,5 @@ No public API signature changes.
 [0.3.1]: https://github.com/connectbot/cbssh/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/connectbot/cbssh/compare/v0.2.1...v0.3.0
 
-[View changelog](https://github.com/connectbot/cbssh/blob/871108ea46a717b39dca1600aa56b9753ebed9b9/CHANGELOG.md)
+[View changelog](https://github.com/connectbot/cbssh/blob/5eeee75c9799062a1babb1c036056edc72c9cd2b/CHANGELOG.md)
 <!-- END DOCS API CHANGES -->

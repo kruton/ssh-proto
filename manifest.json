@@ -3,13 +3,13 @@
   "versions": {
     "main": {
       "published": {
-        "commit": "871108ea46a717b39dca1600aa56b9753ebed9b9",
-        "config": "879108729a8d20980ff0cbba7af8d9bf4855fbb627f3d72bed5d00a438223e89",
+        "commit": "5eeee75c9799062a1babb1c036056edc72c9cd2b",
+        "config": "e5059390636da135587af38536d962ba191d04b915e0e9f47597832b0d94d212",
         "policy": 1
       },
       "attempt": {
-        "commit": "871108ea46a717b39dca1600aa56b9753ebed9b9",
-        "config": "879108729a8d20980ff0cbba7af8d9bf4855fbb627f3d72bed5d00a438223e89",
+        "commit": "5eeee75c9799062a1babb1c036056edc72c9cd2b",
+        "config": "e5059390636da135587af38536d962ba191d04b915e0e9f47597832b0d94d212",
         "policy": 1,
         "status": "success"
       }
@@ -17,12 +17,12 @@
     "v0.5.1": {
       "published": {
         "commit": "51ce1b5d308e8f4f3593c43fae95db492fcaac31",
-        "config": "879108729a8d20980ff0cbba7af8d9bf4855fbb627f3d72bed5d00a438223e89",
+        "config": "e5059390636da135587af38536d962ba191d04b915e0e9f47597832b0d94d212",
         "policy": 1
       },
       "attempt": {
         "commit": "51ce1b5d308e8f4f3593c43fae95db492fcaac31",
-        "config": "879108729a8d20980ff0cbba7af8d9bf4855fbb627f3d72bed5d00a438223e89",
+        "config": "e5059390636da135587af38536d962ba191d04b915e0e9f47597832b0d94d212",
         "policy": 1,
         "status": "success"
       }
@@ -30,12 +30,12 @@
     "v0.5.0": {
       "published": {
         "commit": "e84332aa870611f9f230d1908811fe4c71addc30",
-        "config": "879108729a8d20980ff0cbba7af8d9bf4855fbb627f3d72bed5d00a438223e89",
+        "config": "e5059390636da135587af38536d962ba191d04b915e0e9f47597832b0d94d212",
         "policy": 1
       },
       "attempt": {
         "commit": "e84332aa870611f9f230d1908811fe4c71addc30",
-        "config": "879108729a8d20980ff0cbba7af8d9bf4855fbb627f3d72bed5d00a438223e89",
+        "config": "e5059390636da135587af38536d962ba191d04b915e0e9f47597832b0d94d212",
         "policy": 1,
         "status": "success"
       }
