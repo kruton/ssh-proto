@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,13 @@
 
 package org.connectbot.sshlib.crypto
 
+import org.bouncycastle.crypto.kems.MLKEMGenerator
+import org.bouncycastle.crypto.params.MLKEMParameters
+import org.bouncycastle.crypto.params.MLKEMPublicKeyParameters
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.io.IOException
+import java.security.SecureRandom
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -25,7 +31,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
-class KyberKotlinMlKemProviderTest {
+internal class KyberKotlinMlKemProviderTest {
     private val provider = KyberKotlinMlKemProvider()
 
     @Test
@@ -80,4 +86,34 @@ class KyberKotlinMlKemProviderTest {
     }
 
     private fun ByteArray.toHex(): String = joinToString("") { "%02x".format(it) }
+
+    @ParameterizedTest
+    @EnumSource(MlKemParameterSet::class)
+    fun `both parameter sets interoperate with BC`(parameters: MlKemParameterSet) {
+        val kotlin = KyberKotlinMlKemProvider(parameters)
+        val keys = kotlin.generateKeyPair()
+        assertEquals(if (parameters == MlKemParameterSet.ML_KEM_768) 1184 else 1568, keys.publicKey.size)
+        assertEquals(if (parameters == MlKemParameterSet.ML_KEM_768) 2400 else 3168, keys.privateKey.size)
+        val bcParameters = if (parameters == MlKemParameterSet.ML_KEM_768) MLKEMParameters.ml_kem_768 else MLKEMParameters.ml_kem_1024
+        val encapsulated = MLKEMGenerator(SecureRandom()).generateEncapsulated(MLKEMPublicKeyParameters(bcParameters, keys.publicKey))
+        try {
+            assertContentEquals(encapsulated.secret, kotlin.decapsulate(keys.privateKey, encapsulated.encapsulation))
+        } finally {
+            keys.privateKey.fill(0)
+            encapsulated.destroy()
+        }
+    }
+
+    @Test
+    fun `parameter set mismatch is rejected rather than inferred from input length`() {
+        val large = KyberKotlinMlKemProvider(MlKemParameterSet.ML_KEM_1024)
+        val keys = large.generateKeyPair()
+        try {
+            val ciphertext = large.encapsulate(keys.publicKey).ciphertext
+            assertFailsWith<IOException> { provider.encapsulate(keys.publicKey) }
+            assertFailsWith<IOException> { provider.decapsulate(keys.privateKey, ciphertext) }
+        } finally {
+            keys.privateKey.fill(0)
+        }
+    }
 }

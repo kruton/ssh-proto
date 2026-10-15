@@ -54,6 +54,8 @@ PEM block.
 ## Key Exchange
 
 - `mlkem768x25519-sha256` ([RFC 10042](https://datatracker.ietf.org/doc/html/rfc10042#section-2.3.3))
+- `mlkem768nistp256-sha256` ([RFC 10042 section 2.3.1](https://www.rfc-editor.org/rfc/rfc10042.html#section-2.3.1))
+- `mlkem1024nistp384-sha384` ([RFC 10042 section 2.3.2](https://www.rfc-editor.org/rfc/rfc10042.html#section-2.3.2))
 - `sntrup761x25519-sha512` ([RFC 9941](https://www.rfc-editor.org/rfc/rfc9941.html))
 - `sntrup761x25519-sha512@openssh.com` (the interoperable OpenSSH alias from RFC 9941)
 - `curve25519-sha256` ([RFC 8731](https://tools.ietf.org/html/rfc8731))

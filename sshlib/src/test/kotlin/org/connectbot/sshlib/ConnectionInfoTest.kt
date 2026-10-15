@@ -44,6 +44,12 @@ class ConnectionInfoTest {
     }
 
     @Test
+    fun `isPostQuantumSecure is true for both ML-KEM NIST hybrids`() {
+        assertTrue(info("mlkem768nistp256-sha256").isPostQuantumSecure)
+        assertTrue(info("mlkem1024nistp384-sha384").isPostQuantumSecure)
+    }
+
+    @Test
     fun `isPostQuantumSecure is false for curve25519-sha256`() {
         assertFalse(info("curve25519-sha256").isPostQuantumSecure)
     }

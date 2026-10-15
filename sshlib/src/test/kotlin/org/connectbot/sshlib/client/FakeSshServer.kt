@@ -33,6 +33,7 @@ import org.connectbot.sshlib.crypto.EncryptionInstance
 import org.connectbot.sshlib.crypto.KeyDerivation
 import org.connectbot.sshlib.crypto.KyberKotlinMlKemProvider
 import org.connectbot.sshlib.crypto.MacEntry
+import org.connectbot.sshlib.crypto.NistHybridTestServer
 import org.connectbot.sshlib.crypto.SshPublicKeyEncoder
 import org.connectbot.sshlib.crypto.X25519ProviderFactory
 import org.connectbot.sshlib.crypto.encodeMpint
@@ -110,6 +111,9 @@ class FakeSshServer(
     var advertisePing: Boolean = false
     var advertiseExtInfo: Boolean = false
     var kexAlgorithms: String? = null
+
+    private val kexHashAlgorithm: String
+        get() = if (kexAlgorithms?.split(',')?.first() == "mlkem1024nistp384-sha384") "SHA-384" else "SHA-256"
     var corruptKexSignature: Boolean = false
     var transformKexServerPublic: (ByteArray) -> ByteArray = { it }
     var truncateKexReply: Boolean = false
@@ -439,10 +443,15 @@ class FakeSshServer(
         val serverPrivate = x25519.generatePrivateKey()
         val serverX25519Public = x25519.publicFromPrivate(serverPrivate)
 
-        val hybrid = kexAlgorithms?.split(',')?.first() == "mlkem768x25519-sha256"
+        val algorithm = kexAlgorithms?.split(',')?.first()
+        val isMlKemX25519 = algorithm == "mlkem768x25519-sha256"
         val serverPublic: ByteArray
         val sharedSecret: ByteArray
-        if (hybrid) {
+        if (algorithm == "mlkem768nistp256-sha256" || algorithm == "mlkem1024nistp384-sha384") {
+            val (reply, secret) = NistHybridTestServer.reply(clientPublic, algorithm == "mlkem1024nistp384-sha384")
+            serverPublic = transformKexServerPublic(reply)
+            sharedSecret = secret
+        } else if (isMlKemX25519) {
             check(clientPublic.size == 1216)
             val encapsulation = KyberKotlinMlKemProvider().encapsulate(clientPublic.copyOfRange(0, 1184))
             val classicalSecret = x25519.computeSharedSecret(serverPrivate, clientPublic.copyOfRange(1184, 1216))
@@ -492,7 +501,7 @@ class FakeSshServer(
         val exchangeHash = latestExchangeHash ?: return
         val sid = sessionId ?: return
 
-        val keyDerivation = KeyDerivation(sharedSecret, exchangeHash, sid, "SHA-256")
+        val keyDerivation = KeyDerivation(sharedSecret, exchangeHash, sid, kexHashAlgorithm)
         val cipherEntry = CipherEntry.fromSshName("aes128-ctr") ?: return
         val macEntry = MacEntry.fromSshName("hmac-sha2-256-etm@openssh.com") ?: return
 
@@ -539,7 +548,7 @@ class FakeSshServer(
         serverPublicKey: ByteArray,
         sharedSecret: ByteArray,
     ): ByteArray {
-        val md = MessageDigest.getInstance("SHA-256")
+        val md = MessageDigest.getInstance(kexHashAlgorithm)
         val buf = ByteArrayOutputStream()
 
         fun writeString(data: ByteArray) {
