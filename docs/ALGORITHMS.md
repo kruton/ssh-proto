@@ -29,6 +29,7 @@ base-key algorithm is used.
 
 ## Host Keys
 
+- `ssh-mldsa87-p384` ([SSH composite signatures draft](https://datatracker.ietf.org/doc/html/draft-ietf-sshm-composite-sigs-00)) — requires platform support
 - `ssh-mldsa44-ed25519` ([SSH composite signatures draft](https://datatracker.ietf.org/doc/draft-ietf-sshm-composite-sigs/00/)) — requires platform support
 - `ssh-mldsa-44` ([SSH ML-DSA draft](https://datatracker.ietf.org/doc/draft-sfluhrer-ssh-mldsa/08/)) — requires platform support, opt-in
 - `ssh-mldsa-65` ([SSH ML-DSA draft](https://datatracker.ietf.org/doc/draft-sfluhrer-ssh-mldsa/08/)) — requires platform support, opt-in
@@ -44,8 +45,11 @@ base-key algorithm is used.
 
 ML-DSA requires a capable installed JCA provider. On Android, call Google Play
 Services' `ProviderInstaller.installIfNeeded` before creating `SshClientConfig`
-to use its updated security provider. The composite is preferred automatically
+to use its updated security provider. Composite host keys are offered by default
 when available; pure ML-DSA host keys require an explicit `hostKeyAlgorithms` setting.
+
+For `ssh-mldsa87-p384` private keys, use PEM; OpenSSH private-key format is not
+supported.
 
 Pure ML-DSA does not have a defined OpenSSH private-key layout; use PKCS#8 PEM.
 ML-DSA PEM imports require an embedded public key or an appended `PUBLIC KEY`

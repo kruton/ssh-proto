@@ -30,9 +30,10 @@ import java.security.PublicKey
 internal class MldsaSignatureAlgorithm(private val parameter: MldsaAlgorithm) : SshSignatureAlgorithm {
     override fun verify(pubKey: SshPublicKey, sig: SshSignature, data: ByteArray): Boolean {
         if (pubKey.algorithmName() != parameter.sshName || sig.algorithmName() != parameter.sshName) return false
+        if (parameter == MldsaAlgorithm.MLDSA87_P384) return MldsaP384Codec.verify(pubKey, sig, data)
         val key = (pubKey.keyBlob() as? SshMldsaPublicKeyBlob)?.key() ?: return false
         val signature = (sig.signatureBlob() as? SshMldsaSignatureBlob)?.signature() ?: return false
-        if (key.size != parameter.publicKeySize || signature.size != parameter.signatureSize) return false
+        if (key.size != parameter.publicKeySize || signature.size != parameter.maxSignatureSize) return false
         val verifier = parameter.verifier(key)
         return try {
             verifier.update(data)
@@ -55,8 +56,9 @@ internal class MldsaSignatureAlgorithm(private val parameter: MldsaAlgorithm) : 
         } catch (e: RuntimeException) {
             throw SshException("${parameter.sshName} signing failed", e)
         }
-        if (raw.size != parameter.signatureSize) throw SshException("Invalid ${parameter.sshName} signature size: ${raw.size}")
-        val body = SshMldsaSignatureBlob(parameter.signatureSize.toLong()).apply {
+        if (parameter == MldsaAlgorithm.MLDSA87_P384) return MldsaP384Codec.encodeSignature(raw)
+        if (raw.size != parameter.maxSignatureSize) throw SshException("Invalid ${parameter.sshName} signature size: ${raw.size}")
+        val body = SshMldsaSignatureBlob(parameter.maxSignatureSize.toLong()).apply {
             setLenSignature(raw.size.toLong())
             setSignature(raw)
             _check()
@@ -72,6 +74,7 @@ internal class MldsaSignatureAlgorithm(private val parameter: MldsaAlgorithm) : 
         fun encodePublicKey(publicKey: PublicKey, keyType: String): ByteArray {
             val (parameter, raw) = MldsaAlgorithm.decodePublicKey(publicKey)
             if (parameter.sshName != keyType) throw SshException("ML-DSA key does not match $keyType")
+            if (parameter == MldsaAlgorithm.MLDSA87_P384) return MldsaP384Codec.encodePublicKey(raw)
             val body = SshMldsaPublicKeyBlob(parameter.publicKeySize.toLong()).apply {
                 setLenKey(raw.size.toLong())
                 setKey(raw)

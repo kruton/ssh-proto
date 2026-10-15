@@ -34,7 +34,7 @@ internal enum class MldsaAlgorithm(
     val sshName: String,
     val jcaName: String,
     val publicKeySize: Int,
-    val signatureSize: Int,
+    val maxSignatureSize: Int,
     val oid: ByteArray,
 ) {
     MLDSA44("ssh-mldsa-44", "ML-DSA-44", 1312, 2420, byteArrayOf(0x60, 0x86.toByte(), 0x48, 1, 0x65, 3, 4, 3, 17)),
@@ -47,7 +47,16 @@ internal enum class MldsaAlgorithm(
         2484,
         byteArrayOf(0x2b, 6, 1, 5, 5, 7, 6, 39),
     ),
+    MLDSA87_P384(
+        "ssh-mldsa87-p384",
+        "MLDSA87-ECDSA-P384-SHA512",
+        2689,
+        4731,
+        byteArrayOf(0x2b, 6, 1, 5, 5, 7, 6, 49),
+    ),
     ;
+
+    val isComposite: Boolean get() = this == MLDSA44_ED25519 || this == MLDSA87_P384
 
     // Android providers may expose only the generic service, with the parameter set taken from the key.
     private val serviceNames = if (jcaName.startsWith("ML-DSA-")) listOf(jcaName, "ML-DSA") else listOf(jcaName)
@@ -142,6 +151,14 @@ internal enum class MldsaAlgorithm(
                 0xaf.toByte(), 2, 0x1a, 0x68, 0xf7.toByte(), 7, 0x51, 0x1a,
             )
             ed25519.copyInto(rawKey, 1312)
+        }
+        if (this == MLDSA87_P384) {
+            // A valid public P-384 base point lets providers validate the entire composite key.
+            val x = java.math.BigInteger("AA87CA22BE8B05378EB1C71EF320AD746E1D3B628BA79B9859F741E082542A385502F25DBF55296C3A545E3872760AB7", 16)
+            val y = java.math.BigInteger("3617DE4A96262C6F5D9E98BF9292DC29F8F41DBD289A147CE9DA3113B5F0B8C00A60B1CE1D7E819D7A431D7C90EA0E5F", 16)
+            rawKey[2592] = 4
+            x.toByteArray().takeLast(48).toByteArray().copyInto(rawKey, 2593)
+            y.toByteArray().takeLast(48).toByteArray().copyInto(rawKey, 2641)
         }
         verifier(rawKey, providers)
         true
