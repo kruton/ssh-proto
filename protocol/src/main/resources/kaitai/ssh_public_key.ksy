@@ -3,6 +3,7 @@ meta:
   endian: be
   imports:
   - byte_string
+  - ssh_mldsa_public_key_blob
   - ecdsa_public_key_blob
   - ssh_dss_public_key_blob
   - ssh_ed25519_public_key_blob
@@ -36,4 +37,8 @@ seq:
       '"ssh-ed448"': ssh_ed448_public_key_blob
       '"sk-ssh-ed25519@openssh.com"': sk_ed25519_public_key_blob
       '"sk-ecdsa-sha2-nistp256@openssh.com"': sk_ecdsa_p256_public_key_blob
+      '"ssh-mldsa-44"': ssh_mldsa_public_key_blob(1312)
+      '"ssh-mldsa-65"': ssh_mldsa_public_key_blob(1952)
+      '"ssh-mldsa-87"': ssh_mldsa_public_key_blob(2592)
+      '"ssh-mldsa44-ed25519"': ssh_mldsa_public_key_blob(1344)
       _: byte_string

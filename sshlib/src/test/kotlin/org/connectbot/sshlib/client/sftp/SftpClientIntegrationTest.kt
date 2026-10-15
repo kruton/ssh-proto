@@ -57,7 +57,7 @@ class SftpClientIntegrationTest {
         // Tarball-name format expected by wget in the test Dockerfile
         // (`openssh-${OPENSSH_VERSION}.tar.gz`). The renovate annotation
         // there extracts this from the github tag `V_9_9_P2`.
-        private const val OPENSSH_VERSION = "9.9p2"
+        private const val OPENSSH_VERSION = "10.6p1"
         private const val DEBUG_CFLAGS = ""
 
         @Container
@@ -337,13 +337,13 @@ class SftpClientIntegrationTest {
     fun `should advertise the copy-data extension`() = runBlocking {
         val (client, sftp) = openSftp()
         try {
-            // OpenSSH added "copy-data" in 9.0; the test container runs 9.9p2, so a real
+            // OpenSSH added "copy-data" in 9.0; the test container runs 10.6p1, so a real
             // server should always advertise it here. This is the strongest signal that
             // VERSION extension-pair parsing (SftpClientImpl.create) works against real
             // wire bytes, not just the hand-built payloads in SftpClientImplTest.
             assertTrue(
                 "copy-data" in sftp.extensions,
-                "Expected OpenSSH 9.9p2 to advertise the copy-data extension, got: ${sftp.extensions}",
+                "Expected OpenSSH 10.6p1 to advertise the copy-data extension, got: ${sftp.extensions}",
             )
         } finally {
             sftp.close()

@@ -46,7 +46,9 @@ internal fun inferKeyType(publicKey: PublicKey): String = when (publicKey.algori
     "RSA" -> "ssh-rsa"
 
     else -> {
-        if (isEd25519Key(publicKey)) {
+        if (MldsaAlgorithm.isMldsaKey(publicKey)) {
+            MldsaAlgorithm.decodePublicKey(publicKey).first.sshName
+        } else if (isEd25519Key(publicKey)) {
             KEY_TYPE_ED25519
         } else {
             throw SshException("Unsupported key type: ${publicKey.algorithm}")

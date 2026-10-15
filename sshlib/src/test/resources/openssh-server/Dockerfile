@@ -1,7 +1,7 @@
 FROM alpine:edge
 
 # renovate: datasource=github-tags depName=openssh/openssh-portable extractVersion=^V_(?<major>\d+)_(?<minor>\d+)_P(?<patch>\d+)$ versioning=regex:^(?<major>\d+)\.(?<minor>\d+)p(?<patch>\d+)$
-ARG OPENSSH_VERSION=9.9p2
+ARG OPENSSH_VERSION=10.6p1
 # To enable KEX/PK debug logging, pass e.g.:
 #   --build-arg DEBUG_CFLAGS="-DDEBUG_KEX -DDEBUG_KEXECDH -DDEBUG_KEXDH -DDEBUG_PK"
 ARG DEBUG_CFLAGS=""

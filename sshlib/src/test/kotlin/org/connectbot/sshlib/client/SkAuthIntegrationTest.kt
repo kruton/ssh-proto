@@ -75,7 +75,7 @@ class SkAuthIntegrationTest {
         private val logConsumer = Slf4jLogConsumer(logger).withPrefix("DOCKER")
 
         private const val USERNAME = "testuser"
-        private const val OPENSSH_VERSION = "9.9p2"
+        private const val OPENSSH_VERSION = "10.6p1"
         private const val APPLICATION = "ssh:test"
 
         // Reuse the shared openssh-server Dockerfile (same as other integration tests).

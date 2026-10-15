@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ internal object SshPublicKeyEncoder {
     fun encode(keyPair: KeyPair, keyType: String): ByteArray = encode(keyPair.public, keyType)
 
     fun encode(publicKey: PublicKey, keyType: String): ByteArray = when {
+        MldsaAlgorithm.fromSshName(keyType) != null -> MldsaSignatureAlgorithm.encodePublicKey(publicKey, keyType)
         keyType == "ssh-ed25519" -> encodeEd25519(publicKey)
         keyType.startsWith("ecdsa-sha2-") -> encodeEcdsa(publicKey as ECPublicKey, keyType)
         keyType == "ssh-rsa" -> encodeRsa(publicKey as RSAPublicKey)

@@ -8,6 +8,8 @@ kstatemachine = "0.38.1"
 ktor = "3.6.0"
 slf4j = "2.0.20"
 tink = "1.23.0"
+conscrypt = "2.7.0"
+bouncycastle = "1.86"
 kyber = "2.1.0"
 # Keccak 2.3.0 requires Java 21; retain Java 17 compatibility.
 keccak = { strictly = "2.5.0" }
@@ -34,6 +36,8 @@ kstatemachine = { module = "io.github.nsk90:kstatemachine-jvm", version.ref = "k
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 tink = { module = "com.google.crypto.tink:tink", version.ref = "tink" }
+conscrypt-test = { module = "org.conscrypt:conscrypt-openjdk-uber", version.ref = "conscrypt" }
+bouncycastle-test = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 kyber = { module = "asia.hombre:kyber", version.ref = "kyber" }
 keccak = { module = "asia.hombre:keccak-jvm", version.ref = "keccak" }
 jbcrypt = { module = "org.connectbot:jbcrypt", version.ref = "jbcrypt" }

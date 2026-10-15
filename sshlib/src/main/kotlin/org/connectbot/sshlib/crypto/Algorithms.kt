@@ -17,6 +17,10 @@
 
 package org.connectbot.sshlib.crypto
 
+import org.connectbot.sshlib.SshException
+import java.security.Provider
+import java.security.Security
+
 private const val HASH_SHA256 = "SHA-256"
 private const val HASH_SHA512 = "SHA-512"
 private const val KEY_TYPE_SSH_RSA = "ssh-rsa"
@@ -292,6 +296,10 @@ internal enum class SignatureEntry(
     val sshName: String,
     internal val algorithm: SshSignatureAlgorithm,
 ) {
+    SSH_MLDSA44_ED25519("ssh-mldsa44-ed25519", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA44_ED25519)),
+    SSH_MLDSA44("ssh-mldsa-44", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA44)),
+    SSH_MLDSA65("ssh-mldsa-65", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA65)),
+    SSH_MLDSA87("ssh-mldsa-87", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA87)),
     SSH_ED25519("ssh-ed25519", Ed25519SignatureAlgorithm),
     SSH_ED448("ssh-ed448", Ed448SignatureAlgorithm),
     ECDSA_SHA2_NISTP256("ecdsa-sha2-nistp256", EcdsaSignatureAlgorithm),
@@ -303,9 +311,23 @@ internal enum class SignatureEntry(
     ;
 
     companion object {
-        val defaults: List<SignatureEntry> = entries.filter { it != SSH_RSA }
+        // Resolve providers when constructing configuration, rather than freezing availability at class load.
+        val defaults: List<SignatureEntry>
+            get() = entries.filter {
+                when (it) {
+                    SSH_RSA, SSH_MLDSA44, SSH_MLDSA65, SSH_MLDSA87 -> false
+                    SSH_MLDSA44_ED25519 -> MldsaAlgorithm.MLDSA44_ED25519.isAvailable()
+                    else -> true
+                }
+            }
 
-        val defaultString: String = defaults.joinToString(",") { it.sshName }
+        val defaultString: String get() = defaults.joinToString(",") { it.sshName }
+
+        fun validateHostAlgorithms(names: String, providers: List<Provider> = Security.getProviders().toList()) {
+            names.split(',').mapNotNull(MldsaAlgorithm::fromSshName).forEach {
+                if (!it.isAvailable(providers)) throw SshException("Host key algorithm ${it.sshName} is unavailable on this platform")
+            }
+        }
 
         fun fromSshName(name: String): SignatureEntry? = entries.firstOrNull { it.sshName == name }
 

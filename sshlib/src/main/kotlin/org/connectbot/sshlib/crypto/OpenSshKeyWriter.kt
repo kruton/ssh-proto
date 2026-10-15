@@ -18,6 +18,8 @@
 package org.connectbot.sshlib.crypto
 
 import org.connectbot.sshlib.SshException
+import org.connectbot.sshlib.protocol.OpensshMldsaEd25519PrivateKey
+import org.connectbot.sshlib.protocol.toByteArray
 import java.io.ByteArrayOutputStream
 import java.security.KeyPair
 import java.security.SecureRandom
@@ -104,6 +106,7 @@ internal object OpenSshKeyWriter {
         out.write(encodeUint32(checkInt))
 
         when {
+            keyType == "ssh-mldsa44-ed25519" -> writeMldsaEd25519Private(out, keyPair)
             keyType == "ssh-ed25519" -> writeEd25519Private(out, keyPair)
             keyType.startsWith("ecdsa-sha2-") -> writeEcdsaPrivate(out, keyPair, keyType)
             keyType == "ssh-rsa" -> writeRsaPrivate(out, keyPair)
@@ -122,6 +125,20 @@ internal object OpenSshKeyWriter {
         }
 
         return out.toByteArray()
+    }
+
+    private fun writeMldsaEd25519Private(out: ByteArrayOutputStream, keyPair: KeyPair) {
+        val rawPublic = MldsaAlgorithm.decodePublicKey(keyPair.public).second
+        val seeds = MldsaPrivateKeys.openSshSeeds(keyPair)
+        val fields = OpensshMldsaEd25519PrivateKey().apply {
+            setLenPublicKey(rawPublic.size.toLong())
+            setPublicKey(rawPublic)
+            setLenPrivateKey(seeds.size.toLong())
+            setPrivateKey(seeds)
+            _check()
+        }
+        out.write(encodeSshString("ssh-mldsa44-ed25519".toByteArray(Charsets.US_ASCII)))
+        out.write(fields.toByteArray())
     }
 
     private fun writeEd25519Private(out: ByteArrayOutputStream, keyPair: KeyPair) {
