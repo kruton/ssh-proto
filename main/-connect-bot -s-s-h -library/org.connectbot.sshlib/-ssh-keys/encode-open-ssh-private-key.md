@@ -5,7 +5,7 @@
 [jvm]\
 fun [encodeOpenSshPrivateKey](encode-open-ssh-private-key.md)(keyPair: [KeyPair](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/KeyPair.html), password: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)? = null): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)
 
-Encode a [KeyPair](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/KeyPair.html) to OpenSSH format (`BEGIN OPENSSH PRIVATE KEY`).
+Encode a [KeyPair](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/KeyPair.html) to OpenSSH format (`BEGIN OPENSSH PRIVATE KEY`). ML-DSA-44/Ed25519 composites require exportable seeds. Pure ML-DSA has no defined OpenSSH private-key layout; use [encodePemPrivateKey](encode-pem-private-key.md) instead.
 
 #### Return
 

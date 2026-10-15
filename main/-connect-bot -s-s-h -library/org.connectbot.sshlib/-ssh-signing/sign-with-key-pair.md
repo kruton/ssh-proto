@@ -18,5 +18,5 @@ jvm
 | | |
 |---|---|
 | algorithmName | SSH signature algorithm (e.g., &quot;ssh-ed25519&quot;, &quot;rsa-sha2-256&quot;) |
-| keyPair | JCA key pair containing the private key |
+| keyPair | JCA key pair containing the private key (including complete ML-DSA-44/Ed25519 composite key pairs) |
 | dataToSign | The data to sign (as provided by [AuthHandler.onSignatureRequest](../-auth-handler/on-signature-request.md)) |

@@ -9,6 +9,8 @@ Encode a [KeyPair](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/
 
 The SSH algorithm name is inferred from the key type (e.g., Ed25519 → &quot;ssh-ed25519&quot;, RSA → &quot;ssh-rsa&quot;). For RSA keys that need a specific signature algorithm like &quot;rsa-sha2-256&quot;, construct the [AuthPublicKey](../-auth-public-key/index.md) with the desired algorithm name using the returned blob.
 
+ML-DSA keys and complete ML-DSA-44/Ed25519 composite keys are supported when supplied by a capable platform provider. See [SshKeys](../-ssh-keys/index.md) for private-key import/export.
+
 #### Return
 
 The corresponding [AuthPublicKey](../-auth-public-key/index.md)

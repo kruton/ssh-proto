@@ -13,6 +13,8 @@ Encode a [KeyPair](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/
    EC keys are encoded as SEC1 (`BEGIN EC PRIVATE KEY`)
 - 
    Ed25519 keys are encoded as PKCS#8 (`BEGIN PRIVATE KEY`)
+- 
+   ML-DSA and composite keys use PKCS#8 with an embedded public key (RFC 5958)
 
 #### Return
 
@@ -25,7 +27,7 @@ jvm
 | | |
 |---|---|
 | keyPair | JCA key pair to encode |
-| password | Optional passphrase to encrypt the key. RSA and EC use legacy PEM AES-256-CBC encryption; Ed25519 uses PBES2 encrypted PKCS#8. |
+| password | Optional passphrase to encrypt the key. RSA and EC use legacy PEM AES-256-CBC encryption; Ed25519 and ML-DSA use PBES2 encrypted PKCS#8. |
 
 #### Throws
 

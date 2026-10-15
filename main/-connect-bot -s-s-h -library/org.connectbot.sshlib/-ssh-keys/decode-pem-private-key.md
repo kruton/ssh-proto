@@ -17,6 +17,12 @@ Supports RSA, ECDSA (nistp256/384/521), and Ed25519 keys in:
    PEM/SEC1 EC (`BEGIN EC PRIVATE KEY`)
 - 
    PKCS#8 (`BEGIN PRIVATE KEY`)
+- 
+   ML-DSA-44/Ed25519 composite keys in OpenSSH or PKCS#8 format
+- 
+   Pure ML-DSA keys in PKCS#8 format
+
+ML-DSA requires a capable installed provider. PKCS#8 must include the public key (RFC 5958), or be followed by a matching `BEGIN PUBLIC KEY` PEM block.
 
 #### Return
 
