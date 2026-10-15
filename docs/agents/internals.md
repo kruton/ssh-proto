@@ -13,6 +13,21 @@ All supported cryptographic algorithms are declared in enum registries. **Visibi
 
 **To add a new algorithm**: add an enum entry in `Algorithms.kt`. `SshConnection` and `SshClientConfig` consume the registries.
 
+## Host Key Updates
+
+- `HostKeyUpdateStateMachine` accepts one `hostkeys-00@openssh.com` advertisement
+  after authentication. Unknown, disabled, and unavailable algorithms are skipped.
+- The client requests proofs for all supported advertised keys, including ML-DSA
+  and composite keys. `HostKeyProof.kt` checks the entire ordered reply against the
+  initial session identifier and each exact key blob before invoking persistence.
+- Global request replies use a bounded FIFO shared with remote forwarding. A
+  cancelled or timed-out request retains its slot until its wire reply arrives.
+- Proof processing and `HostKeyVerifier.addKeys` / `removeKeys` run outside the
+  protocol owner. Updates time out after 30 seconds. Only the authenticated key
+  is retired when omitted; other previously stored keys are not enumerated.
+- Persistence is optional: read-only verifiers, including `KnownHostsVerifier`,
+  keep the default no-op update hooks.
+
 ## Code Generation Pipeline
 
 **Kaitai Struct Compiler**: Generates Java classes from `.ksy` protocol definitions.

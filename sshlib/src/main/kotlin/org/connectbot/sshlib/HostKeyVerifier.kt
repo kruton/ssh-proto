@@ -35,10 +35,19 @@ interface HostKeyVerifier {
      */
     suspend fun verify(key: PublicKey): Boolean
 
+    /**
+     * Persist the supported keys advertised by an authenticated server after every
+     * requested proof of private-key possession has been verified. Runs outside
+     * packet routing. Read-only verifiers may keep the default implementation.
+     */
     suspend fun addKeys(keys: List<PublicKey>) {
         // Optional persistence hook; read-only verifiers have nothing to store.
     }
 
+    /**
+     * Retire the authenticated key when omitted from the advertisement, after
+     * [addKeys] returns successfully. Other stored keys are not enumerated or removed.
+     */
     suspend fun removeKeys(keys: List<PublicKey>) {
         // Optional persistence hook; read-only verifiers have nothing to remove.
     }

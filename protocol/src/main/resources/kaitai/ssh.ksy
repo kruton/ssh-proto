@@ -33,6 +33,7 @@ meta:
   - global_request_cancel_tcpip_forward
   - global_request_hostkeys_00_openssh
   - global_request_hostkeys_prove_00_openssh
+  - global_request_response_hostkeys_prove_00_openssh
   - global_request_response
   - global_request_response_empty
   - global_request_response_tcpip_forward

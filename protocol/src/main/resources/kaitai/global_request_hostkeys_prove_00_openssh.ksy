@@ -5,6 +5,7 @@ meta:
   - byte_string
 doc-ref: openssh-PROTOCOL.txt
 seq:
-- id: signature
+- id: hostkeys
   type: byte_string
-  doc: Signature proving possession of private host keys
+  repeat: eos
+  doc: Public key blobs for which the client requests proof of private key possession.
