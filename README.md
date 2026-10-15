@@ -37,7 +37,7 @@ The library supports a wide range of post-quantum and other modern SSH algorithm
 
 - **Authentication**: `publickey` (including FIDO2/SK), `password`, `keyboard-interactive`
 - **Host Keys**: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2)
-- **Key Exchange**: ML-KEM hybrid, Curve25519, ECDH, DH groups 14/16/18,
+- **Key Exchange**: ML-KEM hybrid, SNTRUP761 hybrid, Curve25519, ECDH, DH groups 14/16/18,
   DH group-exchange
 - **Encryption**: ChaCha20-Poly1305, AES-GCM, AES-CTR
 - **MACs**: HMAC-SHA2 (including ETM variants)

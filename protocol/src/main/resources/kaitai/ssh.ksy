@@ -5,6 +5,7 @@ meta:
   license: CC0-1.0
   imports:
   - ssh_enums
+  - ssh_hybrid_kex_blob
   - channel_open_direct_streamlocal_openssh
   - channel_open_direct_tcpip
   - channel_open_forwarded_streamlocal_openssh

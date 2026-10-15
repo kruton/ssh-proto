@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ data class ConnectionInfo(
     /**
      * True if the key exchange algorithm is post-quantum secure.
      *
-     * Currently only `mlkem768x25519-sha256` qualifies.
+     * Includes ML-KEM/X25519 and SNTRUP761/X25519 hybrid exchanges.
      */
     val isPostQuantumSecure: Boolean
         get() = KexEntry.fromSshName(kexAlgorithm)?.isPostQuantum == true
