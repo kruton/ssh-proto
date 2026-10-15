@@ -26,6 +26,8 @@ plugins {
     `java-library`
 }
 
+apply(from = rootProject.file("gradle/publication-staging.gradle.kts"))
+
 val kaitaiInputDir = file("src/main/resources/kaitai")
 val kaitaiOutputDir = file("build/generated/kaitai")
 val kaitaiCompiler by configurations.creating

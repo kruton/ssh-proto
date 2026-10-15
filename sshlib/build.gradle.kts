@@ -31,6 +31,8 @@ plugins {
     `java-library`
 }
 
+apply(from = rootProject.file("gradle/publication-staging.gradle.kts"))
+
 dependencies {
     // Public API dependencies
     api(libs.kotlinx.coroutines.core)

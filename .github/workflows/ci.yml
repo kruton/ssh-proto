@@ -107,52 +107,32 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --dependency-verification strict build koverXmlReport --info -PjdkVersion=${{ matrix.java }}
 
-      - name: Read project version
-        id: project-version
-        if: matrix.java == '17'
-        run: |
-          version="$(sed -n 's/^version=//p' gradle.properties)"
-          echo "version=${version}" >> "${GITHUB_OUTPUT}"
-
-      - name: Verify release tag
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && matrix.java == '17'
-        run: |
-          test "$(git cat-file -t "${GITHUB_REF_NAME}")" = "tag"
-          git fetch origin \
-            "+refs/heads/main:refs/remotes/origin/main" \
-            "+refs/heads/release/*:refs/remotes/origin/release/*"
-          tag_commit="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
-          git branch -r --contains "${tag_commit}" | grep -E 'origin/(main|release/[0-9]+\.[0-9]+)$'
-
-      - name: Upload snapshot to Sonatype
-        if: >
-          github.event_name == 'push' &&
-          matrix.java == '17' &&
-          endsWith(steps.project-version.outputs.version, '-SNAPSHOT') &&
-          (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
-        run: |
-          ./gradlew publishToMavenCentral --no-configuration-cache -PmavenCentralUsername="${ORG_GRADLE_PROJECT_mavenCentralUsername}" -PmavenCentralPassword="${ORG_GRADLE_PROJECT_mavenCentralPassword}"
-        env:
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.MAVEN_GPG_KEYID }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
-
-      - name: Upload release to Sonatype
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && matrix.java == '17'
-        run: |
-          ./gradlew publishToMavenCentral --no-configuration-cache -PmavenCentralUsername="${ORG_GRADLE_PROJECT_mavenCentralUsername}" -PmavenCentralPassword="${ORG_GRADLE_PROJECT_mavenCentralPassword}"
-        env:
-          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.MAVEN_GPG_KEYID }}
-          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
-
       - name: Run SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: "${{ matrix.java == '25' && env.SONAR_TOKEN != '' }}"
         run: ./gradlew sonar -Dsonar.projectVersion=${{ github.sha }}
+
+  publication:
+    name: Attested Maven publication
+    needs: [vendored-sources, workflow-tests, build]
+    if: >-
+      github.repository == 'connectbot/cbssh' && github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/') ||
+       startsWith(github.ref, 'refs/tags/v'))
+    permissions:
+      contents: write
+      actions: read
+      id-token: write
+      attestations: write
+    uses: connectbot/actions/.github/workflows/publish-maven.yml@9b826116f0d49329fbe10985a5abdfa49562f0a0 # v0.2.0
+    with:
+      maven_group: org.connectbot.sshlib
+      modules: protocol,sshlib
+    secrets:
+      MAVEN_GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+      MAVEN_GPG_KEYID: ${{ secrets.MAVEN_GPG_KEYID }}
+      MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
