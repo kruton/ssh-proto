@@ -38,6 +38,11 @@ object SshKeys {
      * - PEM/PKCS#1 RSA (`BEGIN RSA PRIVATE KEY`)
      * - PEM/SEC1 EC (`BEGIN EC PRIVATE KEY`)
      * - PKCS#8 (`BEGIN PRIVATE KEY`)
+     * - ML-DSA-44/Ed25519 composite keys in OpenSSH or PKCS#8 format
+     * - Pure ML-DSA keys in PKCS#8 format
+     *
+     * ML-DSA requires a capable installed provider. PKCS#8 must include the public
+     * key (RFC 5958), or be followed by a matching `BEGIN PUBLIC KEY` PEM block.
      *
      * @param pem Private key contents as a string
      * @param password Passphrase for encrypted keys, or null if unencrypted
@@ -52,10 +57,11 @@ object SshKeys {
      * - RSA keys are encoded as PKCS#1 (`BEGIN RSA PRIVATE KEY`)
      * - EC keys are encoded as SEC1 (`BEGIN EC PRIVATE KEY`)
      * - Ed25519 keys are encoded as PKCS#8 (`BEGIN PRIVATE KEY`)
+     * - ML-DSA and composite keys use PKCS#8 with an embedded public key (RFC 5958)
      *
      * @param keyPair JCA key pair to encode
      * @param password Optional passphrase to encrypt the key. RSA and EC use legacy
-     *   PEM AES-256-CBC encryption; Ed25519 uses PBES2 encrypted PKCS#8.
+     *   PEM AES-256-CBC encryption; Ed25519 and ML-DSA use PBES2 encrypted PKCS#8.
      * @return PEM-encoded private key string
      * @throws SshException if the key type is unsupported
      */
@@ -63,6 +69,8 @@ object SshKeys {
 
     /**
      * Encode a [KeyPair] to OpenSSH format (`BEGIN OPENSSH PRIVATE KEY`).
+     * ML-DSA-44/Ed25519 composites require exportable seeds. Pure ML-DSA has no
+     * defined OpenSSH private-key layout; use [encodePemPrivateKey] instead.
      *
      * @param keyPair JCA key pair to encode
      * @param password Optional passphrase to encrypt the key (AES-256-CTR with bcrypt KDF)

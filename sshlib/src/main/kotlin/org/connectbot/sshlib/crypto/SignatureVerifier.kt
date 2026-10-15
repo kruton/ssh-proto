@@ -33,6 +33,7 @@ internal object SignatureVerifier {
     fun verify(serverHostKey: ByteArray, signatureData: ByteArray, exchangeHash: ByteArray, expectedAlgorithm: String): Boolean {
         val sig = SshSignature(ByteBufferKaitaiStream(signatureData))
         sig._read()
+        if (MldsaAlgorithm.fromSshName(sig.algorithmName()) != null && !sig._io().isEof) return false
 
         // RFC 8332 §3.2: reject if the algorithm in the signature blob doesn't match
         // what was negotiated. Prevents a server from downgrading e.g. rsa-sha2-256 → ssh-rsa.
@@ -42,6 +43,7 @@ internal object SignatureVerifier {
 
         val pubKey = SshPublicKey(ByteBufferKaitaiStream(serverHostKey))
         pubKey._read()
+        if (MldsaAlgorithm.fromSshName(pubKey.algorithmName()) != null && !pubKey._io().isEof) return false
 
         if (!isAlgorithmCompatibleWithKeyType(expectedAlgorithm, pubKey.algorithmName())) {
             return false
@@ -66,9 +68,11 @@ internal object SignatureVerifier {
     fun verifyWithKeyType(hostKey: ByteArray, signatureData: ByteArray, data: ByteArray): Boolean {
         val sig = SshSignature(ByteBufferKaitaiStream(signatureData))
         sig._read()
+        if (MldsaAlgorithm.fromSshName(sig.algorithmName()) != null && !sig._io().isEof) return false
 
         val pubKey = SshPublicKey(ByteBufferKaitaiStream(hostKey))
         pubKey._read()
+        if (MldsaAlgorithm.fromSshName(pubKey.algorithmName()) != null && !pubKey._io().isEof) return false
 
         val sigAlgorithm = sig.algorithmName()
         val keyType = pubKey.algorithmName()

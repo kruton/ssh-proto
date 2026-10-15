@@ -87,6 +87,10 @@ internal class DerWriter {
         writeTag(0xA0 or tag, content)
     }
 
+    fun primitiveContextTag(tag: Int, content: ByteArray) {
+        writeTag(0x80 or tag, content)
+    }
+
     private fun writeTag(tag: Int, content: ByteArray) {
         buffer.write(tag)
         writeLength(content.size)
@@ -197,6 +201,11 @@ internal class DerReader(private val data: ByteBuffer) {
         if (!data.hasRemaining()) return -1
         val tag = data.get(data.position()).toInt() and 0xFF
         return tag
+    }
+
+    fun readPrimitiveContextTag(tag: Int): ByteArray {
+        readExpectedTag(0x80 or tag, "primitive context tag [$tag]")
+        return readBytes(readLength(), "primitive context tag [$tag]")
     }
 
     fun <T> readContextTag(tag: Int, block: (DerReader) -> T): T {

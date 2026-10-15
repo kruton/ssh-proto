@@ -10,9 +10,9 @@ real SSH servers in Docker. All require Docker to be running.
 
 | Test class | Server | Docker resource dir | Port | Wait log pattern |
 |---|---|---|---|---|
-| `SshClientIntegrationTest` | OpenSSH 9.9p2 | `openssh-server/` | 22 | `Server listening` |
-| `PortForwardingIntegrationTest` | OpenSSH 9.9p2 | `openssh-server/` | 22 | `Server listening` |
-| `SftpClientIntegrationTest` | OpenSSH 9.9p2 | `openssh-server/` | 22 | `Server listening` |
+| `SshClientIntegrationTest` | OpenSSH 10.6p1 | `openssh-server/` | 22 | `Server listening` |
+| `PortForwardingIntegrationTest` | OpenSSH 10.6p1 | `openssh-server/` | 22 | `Server listening` |
+| `SftpClientIntegrationTest` | OpenSSH 10.6p1 | `openssh-server/` | 22 | `Server listening` |
 | `AsyncSshCompatibilityTest` | AsyncSSH (Python) | `asyncssh-server/` | 8022 | `LISTENER READY` |
 | `DropbearCompatibilityTest` | Dropbear | `dropbear-server/` | 22 | `Not backgrounding` |
 
@@ -28,6 +28,10 @@ are injected into the Docker build via `withFileFromClasspath`.
 5. Parameterize algorithm tests with `@ParameterizedTest` + `@MethodSource`.
 
 ## Known Compatibility Issues
+
+- **ML-DSA**: Conscrypt and Bouncy Castle are JVM test-only dependencies. Composite tests
+  temporarily register Conscrypt and remove it in `finally`; annotate such tests with
+  `@ResourceLock("JCA_PROVIDERS")`. Bouncy Castle independently checks component signatures.
 
 - **Dropbear + RSA pubkey auth**: Dropbear rejects RSA public key authentication. The `rsa_unencrypted` key is excluded from Dropbear pubkey tests.
 - **AsyncSSH + legacy algorithms**: AsyncSSH disables legacy algorithms by default. The server's `create_server()` call in `server.py` explicitly enables them (CBC ciphers, DH group1, hmac-sha1, etc.).

@@ -33,10 +33,10 @@ that runs in reaction to state changes.
 
 ## Algorithm Support
 
-The library supports a wide range of modern SSH algorithms, including:
+The library supports a wide range of post-quantum and other modern SSH algorithms, including:
 
 - **Authentication**: `publickey` (including FIDO2/SK), `password`, `keyboard-interactive`
-- **Host Keys**: Ed25519, Ed448, ECDSA, RSA (SHA-2)
+- **Host Keys**: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2)
 - **Key Exchange**: ML-KEM hybrid, Curve25519, ECDH, DH groups 14/16/18,
   DH group-exchange
 - **Encryption**: ChaCha20-Poly1305, AES-GCM, AES-CTR

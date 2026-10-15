@@ -48,7 +48,7 @@ import kotlin.test.assertTrue
 class SessionEnvironmentIntegrationTest {
     companion object {
         private fun server(internal: Boolean): GenericContainer<*> = GenericContainer(
-            ImageFromDockerfile("openssh-env-test-9.9p2-v1", false)
+            ImageFromDockerfile("openssh-env-test-10.6p1-v1", false)
                 .withFileFromClasspath(".", "openssh-server")
                 .withFileFromClasspath("test_rsa.pub", "keys/rsa_unencrypted.pub"),
         ).withExposedPorts(22)

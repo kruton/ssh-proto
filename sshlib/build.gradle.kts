@@ -52,6 +52,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.equalsverifier)
     testImplementation(libs.mockk)
+    testImplementation(libs.conscrypt.test)
+    testImplementation(libs.bouncycastle.test)
 
     // Integration test dependencies
     testImplementation(libs.junit.jupiter.api)
@@ -347,27 +349,40 @@ abstract class DokkaMarkdownPlugin : DokkaFormatPlugin(formatName = "markdown") 
 
 apply<DokkaMarkdownPlugin>()
 
+val documentationSourceRef = providers.gradleProperty("docsSourceCommit").orElse("main")
+val generateDocumentationOverview = tasks.register("generateDocumentationOverview") {
+    val readmeFile = rootProject.layout.projectDirectory.file("README.md")
+    val overview = layout.buildDirectory.file("documentation-overview.md")
+    inputs.file(readmeFile)
+    inputs.property("sourceRef", documentationSourceRef)
+    outputs.file(overview)
+
+    doLast {
+        val sourceRef = documentationSourceRef.get()
+        val readme = readmeFile.asFile.readText().replaceFirst(
+            "# ConnectBot SSH Client Library",
+            "# Module ConnectBot SSH Library",
+        )
+        val output = overview.get().asFile
+        output.parentFile.mkdirs()
+        output.writeText(
+            Regex("\\]\\(([^)]+)\\)").replace(readme) { match ->
+                val target = match.groupValues[1]
+                if (target.contains(":") || target.startsWith("#")) {
+                    match.value
+                } else {
+                    "](https://github.com/connectbot/cbssh/blob/$sourceRef/$target)"
+                }
+            },
+        )
+    }
+}
+
 dokka {
     moduleVersion.set(providers.gradleProperty("docsVersion").orElse(project.version.toString()))
-    val sourceRef = providers.gradleProperty("docsSourceCommit").orElse("main").get()
-    val overview = layout.buildDirectory.file("documentation-overview.md").get().asFile
-    overview.parentFile.mkdirs()
-    val readme = rootProject.file("README.md").readText().replaceFirst(
-        "# ConnectBot SSH Client Library",
-        "# Module ConnectBot SSH Library",
-    )
-    overview.writeText(
-        Regex("\\]\\(([^)]+)\\)").replace(readme) { match ->
-            val target = match.groupValues[1]
-            if (target.contains(":") || target.startsWith("#")) {
-                match.value
-            } else {
-                "](https://github.com/connectbot/cbssh/blob/$sourceRef/$target)"
-            }
-        },
-    )
+    val sourceRef = documentationSourceRef.get()
     dokkaSourceSets.configureEach {
-        includes.setFrom(overview)
+        includes.setFrom(generateDocumentationOverview)
         documentedVisibilities.set(setOf(VisibilityModifier.Public))
         perPackageOptions.configureEach {
             documentedVisibilities.set(setOf(VisibilityModifier.Public))

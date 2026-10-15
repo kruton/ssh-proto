@@ -29,6 +29,10 @@ base-key algorithm is used.
 
 ## Host Keys
 
+- `ssh-mldsa44-ed25519` ([SSH composite signatures draft](https://datatracker.ietf.org/doc/draft-ietf-sshm-composite-sigs/00/)) — requires platform support
+- `ssh-mldsa-44` ([SSH ML-DSA draft](https://datatracker.ietf.org/doc/draft-sfluhrer-ssh-mldsa/08/)) — requires platform support, opt-in
+- `ssh-mldsa-65` ([SSH ML-DSA draft](https://datatracker.ietf.org/doc/draft-sfluhrer-ssh-mldsa/08/)) — requires platform support, opt-in
+- `ssh-mldsa-87` ([SSH ML-DSA draft](https://datatracker.ietf.org/doc/draft-sfluhrer-ssh-mldsa/08/)) — requires platform support, opt-in
 - `ssh-ed25519` ([RFC 8709](https://tools.ietf.org/html/rfc8709))
 - `ssh-ed448` ([RFC 8709](https://tools.ietf.org/html/rfc8709))
 - `ecdsa-sha2-nistp256` ([RFC 5656](https://tools.ietf.org/html/rfc5656#section-3))
@@ -37,6 +41,15 @@ base-key algorithm is used.
 - `rsa-sha2-512` ([RFC 8332](https://tools.ietf.org/html/rfc8332#section-3))
 - `rsa-sha2-256` ([RFC 8332](https://tools.ietf.org/html/rfc8332#section-3))
 - `ssh-rsa` ([RFC 4253](https://tools.ietf.org/html/rfc4253#section-8.1)) — **legacy opt-in**
+
+ML-DSA requires a capable installed JCA provider. On Android, call Google Play
+Services' `ProviderInstaller.installIfNeeded` before creating `SshClientConfig`
+to use its updated security provider. The composite is preferred automatically
+when available; pure ML-DSA host keys require an explicit `hostKeyAlgorithms` setting.
+
+Pure ML-DSA does not have a defined OpenSSH private-key layout; use PKCS#8 PEM.
+ML-DSA PEM imports require an embedded public key or an appended `PUBLIC KEY`
+PEM block.
 
 ## Key Exchange
 

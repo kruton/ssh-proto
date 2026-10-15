@@ -28,6 +28,7 @@ import org.connectbot.sshlib.client.SessionBindVerifier
 import org.connectbot.sshlib.client.SignedDataComponents
 import org.connectbot.sshlib.client.buildAgentMessage
 import org.connectbot.sshlib.client.isConstraintSatisfied
+import org.connectbot.sshlib.crypto.withMldsaTestProvider
 import org.connectbot.sshlib.protocol.SshAgentIdentitiesAnswer
 import org.connectbot.sshlib.protocol.SshAgentMessage
 import org.connectbot.sshlib.protocol.SshAgentSignResponse
@@ -43,8 +44,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.parallel.ResourceLock
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
+import java.security.KeyPairGenerator
 import kotlin.test.assertFailsWith
 
 class AgentProtocolTest {
@@ -458,11 +461,12 @@ class AgentProtocolTest {
         hostKey: ByteArray,
         sessionId: ByteArray,
         isForwarding: Int,
+        signature: ByteArray = byteArrayOf(1, 2, 3),
     ): ByteArray {
         val bind = SshAgentcSessionBind()
         bind.setHostkey(createByteString(hostKey))
         bind.setSessionIdentifier(createByteString(sessionId))
-        bind.setSignature(createByteString(byteArrayOf(1, 2, 3)))
+        bind.setSignature(createByteString(signature))
         bind.setIsForwarding(isForwarding)
         bind._check()
 
@@ -476,6 +480,26 @@ class AgentProtocolTest {
 
     private val noopVerifier: SessionBindVerifier = SessionBindVerifier { _, _, _ -> true }
     private val rejectingVerifier: SessionBindVerifier = SessionBindVerifier { _, _, _ -> false }
+
+    @Test
+    @ResourceLock("JCA_PROVIDERS")
+    fun `session binding verifies composite host signatures`() = withMldsaTestProvider { provider ->
+        runTest {
+            val pair = KeyPairGenerator.getInstance("MLDSA44-Ed25519-SHA512", provider).generateKeyPair()
+            val hostKey = SshSigning.encodePublicKey(pair).publicKeyBlob
+            val sessionId = byteArrayOf(1, 2, 3, 4)
+            val signature = SshSigning.signWithKeyPair("ssh-mldsa44-ed25519", pair, sessionId)
+            val agent = object : AgentProvider {
+                override suspend fun getIdentities() = AgentResult.Success(emptyList<AgentIdentity>())
+                override suspend fun signData(context: AgentSigningContext) = AgentResult.Success(null)
+            }
+            fun handler() = AgentProtocolHandler(agent, AgentSessionInfo(ByteArray(0), ByteArray(0)))
+            val valid = handler().handleRequest(buildSessionBindRequest(hostKey, sessionId, 1, signature))
+            assertEquals(6, parseAgentMessage(valid).first)
+            val invalid = handler().handleRequest(buildSessionBindRequest(hostKey, sessionId + 0, 1, signature))
+            assertEquals(5, parseAgentMessage(invalid).first)
+        }
+    }
 
     @Test
     fun `handler rejects peer replay of trusted initial binding`() = runTest {

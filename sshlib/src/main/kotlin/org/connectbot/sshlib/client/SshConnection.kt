@@ -598,6 +598,7 @@ class SshConnection(
         pendingConnect = deferred
 
         return try {
+            SignatureEntry.validateHostAlgorithms(hostKeyAlgorithms)
             dispatchCommand("Connect") { connect() }
 
             // Version exchange — text protocol, handled inline

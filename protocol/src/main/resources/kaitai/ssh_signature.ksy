@@ -3,6 +3,7 @@ meta:
   endian: be
   imports:
   - byte_string
+  - ssh_mldsa_signature_blob
   - ecdsa_signature_blob
   - ssh_dss_signature_blob
   - ssh_ed25519_signature_blob
@@ -38,4 +39,8 @@ seq:
       '"ssh-ed448"': ssh_ed448_signature_blob
       '"sk-ssh-ed25519@openssh.com"': sk_ed25519_signature_blob
       '"sk-ecdsa-sha2-nistp256@openssh.com"': sk_ecdsa_p256_signature_blob
+      '"ssh-mldsa-44"': ssh_mldsa_signature_blob(2420)
+      '"ssh-mldsa-65"': ssh_mldsa_signature_blob(3309)
+      '"ssh-mldsa-87"': ssh_mldsa_signature_blob(4627)
+      '"ssh-mldsa44-ed25519"': ssh_mldsa_signature_blob(2484)
       _: byte_string

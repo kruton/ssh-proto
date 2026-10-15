@@ -17,6 +17,7 @@
 
 package org.connectbot.sshlib.client
 
+import io.kaitai.struct.ByteBufferKaitaiStream
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -36,8 +37,12 @@ import org.connectbot.sshlib.SessionExit
 import org.connectbot.sshlib.SshClient
 import org.connectbot.sshlib.SshClientConfig
 import org.connectbot.sshlib.SshException
+import org.connectbot.sshlib.SshKeys
 import org.connectbot.sshlib.SshSigning
 import org.connectbot.sshlib.blocking.BlockingSshClient
+import org.connectbot.sshlib.crypto.SignatureVerifier
+import org.connectbot.sshlib.crypto.withMldsaTestProvider
+import org.connectbot.sshlib.protocol.UserauthPublickeySignatureDataAny
 import org.connectbot.sshlib.transport.KtorTcpTransportFactory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -47,6 +52,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.parallel.ResourceLock
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.slf4j.LoggerFactory
@@ -56,8 +62,11 @@ import org.testcontainers.containers.wait.strategy.Wait
 import org.testcontainers.images.builder.ImageFromDockerfile
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.security.KeyPairGenerator
 import java.security.MessageDigest
+import java.util.Base64
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull as assertNotNullValue
 
 /**
  * Integration tests for SSH client using testcontainers with real SSH servers.
@@ -76,7 +85,7 @@ class SshClientIntegrationTest {
         // To test a different version, change this constant and the cached image will be rebuilt.
         // To enable KEX/PK debug logging, set DEBUG_CFLAGS to e.g.:
         //   "-DDEBUG_KEX -DDEBUG_KEXECDH -DDEBUG_KEXDH -DDEBUG_PK"
-        private const val OPENSSH_VERSION = "9.9p2"
+        private const val OPENSSH_VERSION = "10.6p1"
         private const val DEBUG_CFLAGS = ""
 
         private fun opensshImageName(): String {
@@ -159,6 +168,105 @@ class SshClientIntegrationTest {
 
     private val acceptAllVerifier = object : HostKeyVerifier {
         override suspend fun verify(key: PublicKey): Boolean = true
+    }
+
+    @Test
+    @ResourceLock("JCA_PROVIDERS")
+    fun `composite private keys import and export with OpenSSH ssh-keygen`() = withMldsaTestProvider { provider ->
+        val pair = KeyPairGenerator.getInstance("MLDSA44-Ed25519-SHA512", provider).generateKeyPair()
+        val publicKey = SshSigning.encodePublicKey(pair)
+        val expected = "${publicKey.algorithmName} ${Base64.getEncoder().encodeToString(publicKey.publicKeyBlob)}"
+        for (password in listOf(null, "test-passphrase")) {
+            val encoded = SshKeys.encodeOpenSshPrivateKey(pair, password)
+            val base64 = Base64.getEncoder().encodeToString(encoded.toByteArray())
+            val result = opensshContainer.execInContainer(
+                "sh",
+                "-c",
+                "printf '%s' '$base64' | base64 -d > /tmp/cbssh-export-key; " +
+                    "chmod 600 /tmp/cbssh-export-key; ssh-keygen -y -P '${password.orEmpty()}' -f /tmp/cbssh-export-key",
+            )
+            assertEquals(0, result.exitCode, result.stderr)
+            assertEquals(expected, result.stdout.trim())
+        }
+        val generated = opensshContainer.execInContainer(
+            "sh",
+            "-c",
+            "ssh-keygen -q -t mldsa44-ed25519 -N 'test-passphrase' -f /tmp/cbssh-import-key && cat /tmp/cbssh-import-key",
+        )
+        assertEquals(0, generated.exitCode, generated.stderr)
+        val imported = SshKeys.decodePemPrivateKey(generated.stdout, "test-passphrase")
+        val importedPublic = SshSigning.encodePublicKey(imported)
+        val reference = opensshContainer.execInContainer("cat", "/tmp/cbssh-import-key.pub")
+        assertEquals(
+            reference.stdout.trim().split(' ').take(2).joinToString(" "),
+            "${importedPublic.algorithmName} ${Base64.getEncoder().encodeToString(importedPublic.publicKeyBlob)}",
+        )
+        val message = "Imported OpenSSH composite key".toByteArray()
+        val signature = SshSigning.signWithKeyPair(importedPublic.algorithmName, imported, message)
+        assertTrue(SignatureVerifier.verifyWithKeyType(importedPublic.publicKeyBlob, signature, message))
+    }
+
+    @Test
+    @ResourceLock("JCA_PROVIDERS")
+    fun `composite host and client signatures interoperate with OpenSSH and ML-KEM rekey`() = withMldsaTestProvider { provider ->
+        val pair = KeyPairGenerator.getInstance("MLDSA44-Ed25519-SHA512", provider).generateKeyPair()
+        val key = SshSigning.encodePublicKey(pair)
+        val authorized = "${key.algorithmName} ${Base64.getEncoder().encodeToString(key.publicKeyBlob)} cbssh-mldsa-test"
+        val installed = opensshContainer.execInContainer(
+            "sh",
+            "-c",
+            "printf '%s\\n' '$authorized' >> /home/$USERNAME/.ssh/authorized_keys",
+        )
+        assertEquals(0, installed.exitCode, installed.stderr)
+        runBlocking {
+            var verified = 0
+            val client = SshClient(
+                SshClientConfig {
+                    host = opensshContainer.host
+                    port = opensshContainer.getMappedPort(22)
+                    hostKeyVerifier = object : HostKeyVerifier {
+                        override suspend fun verify(key: PublicKey): Boolean {
+                            assertEquals("ssh-mldsa44-ed25519", key.type)
+                            verified++
+                            return true
+                        }
+                    }
+                    hostKeyAlgorithms = "ssh-mldsa44-ed25519"
+                    kexAlgorithms = "mlkem768x25519-sha256"
+                    rekeyBytesLimit = 16_384L
+                    rekeyIntervalMs = Long.MAX_VALUE
+                },
+            )
+            try {
+                assertIs<ConnectResult.Success>(client.connect())
+                assertEquals("ssh-mldsa44-ed25519", client.connectionInfo?.serverHostKeyAlgorithm)
+                var signed = false
+                val handler = object : AuthHandler {
+                    override suspend fun onPublicKeysNeeded(): List<AuthPublicKey> = listOf(key)
+                    override suspend fun onSignatureRequest(key: AuthPublicKey, dataToSign: ByteArray): ByteArray {
+                        signed = true
+                        val signingData = UserauthPublickeySignatureDataAny(
+                            ByteBufferKaitaiStream(dataToSign),
+                        ).apply { _read() }
+                        assertEquals("publickey-hostbound-v00@openssh.com", signingData.methodName().value())
+                        return SshSigning.signWithKeyPair(key.algorithmName, pair, dataToSign)
+                    }
+                    override suspend fun onKeyboardInteractivePrompt(name: String, instruction: String, prompts: List<KeyboardInteractiveCallback.Prompt>): List<String>? = null
+                    override suspend fun onPasswordNeeded(): String? = null
+                }
+                assertIs<AuthResult.Success>(client.authenticate(USERNAME, handler))
+                assertTrue(signed)
+                val session = assertNotNullValue(client.openSession())
+                assertTrue(session.requestExec("dd if=/dev/zero bs=1024 count=64 2>/dev/null"))
+                var received = 0
+                withTimeout(30_000) { while (true) received += (session.read() ?: break).size }
+                assertEquals(65_536, received)
+                assertTrue(verified > 1, "Composite host key must be verified again during rekey")
+                session.close()
+            } finally {
+                client.disconnect()
+            }
+        }
     }
 
     @Test
@@ -881,7 +989,7 @@ class SshClientIntegrationTest {
         try {
             assertIs<ConnectResult.Success>(connection.connect())
             assertEquals(AuthResult.Success, client.authenticatePassword(USERNAME, PASSWORD))
-            val session = kotlin.test.assertNotNull(client.openSession())
+            val session = assertNotNullValue(client.openSession())
             assertTrue(session.requestExec("printf 'oops\\n' >&2; exit 3"))
             withTimeout(10_000) { connection.connectionScope.coroutineContext[Job]!!.join() }
             assertFalse(client.isAuthenticated)

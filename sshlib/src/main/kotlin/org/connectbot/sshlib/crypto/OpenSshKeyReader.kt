@@ -17,7 +17,9 @@
 
 package org.connectbot.sshlib.crypto
 
+import io.kaitai.struct.ByteBufferKaitaiStream
 import org.connectbot.sshlib.SshException
+import org.connectbot.sshlib.protocol.OpensshMldsaEd25519PrivateKey
 import org.connectbot.sshlib.protocol.readByteString
 import org.connectbot.sshlib.protocol.readMpintUnsigned
 import org.connectbot.sshlib.protocol.readString
@@ -59,7 +61,7 @@ internal object OpenSshKeyReader {
             throw SshException("Only one key supported, but encountered bundle of $numberOfKeys")
         }
 
-        buf.readByteString() // public key blob (discarded)
+        val publicKeyBlob = buf.readByteString()
 
         var privateSection = buf.readByteString()
 
@@ -95,6 +97,17 @@ internal object OpenSshKeyReader {
         val sigAlgorithm: String
 
         when {
+            keyType == "ssh-mldsa44-ed25519" -> {
+                val fields = OpensshMldsaEd25519PrivateKey(ByteBufferKaitaiStream(priv.slice())).apply { _read() }
+                priv.position(priv.position() + fields._io().pos().toInt())
+                keyPair = MldsaPrivateKeys.readOpenSsh(fields.publicKey(), fields.privateKey())
+                sigAlgorithm = keyType
+                if (!SshPublicKeyEncoder.encode(keyPair, keyType).contentEquals(publicKeyBlob)) {
+                    throw SshException("OpenSSH outer public key does not match private section")
+                }
+                if (buf.hasRemaining()) throw SshException("Trailing data after OpenSSH private key")
+            }
+
             keyType == "ssh-ed25519" -> {
                 priv.readByteString() // public key (64 bytes but we only need the seed)
                 val privateBytes = priv.readByteString() // 64 bytes: seed || public
