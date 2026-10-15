@@ -39,10 +39,13 @@ are injected into the Docker build via `withFileFromClasspath`.
 
 - **ML-KEM/NIST hybrids**: OpenSSH 10.6 supports `mlkem768nistp256-sha256` but not
   `mlkem1024nistp384-sha384`. Both are tested through authentication and rekey
-  against `NistHybridTestServer`, which uses independent BC ML-KEM and direct JCA
+  against `MlKemTestServer`, which uses independent BC ML-KEM and direct JCA
   ECDH. BC remains test-only. The P-256 variant also runs against real OpenSSH.
 - **Dropbear + custom options**: The `DropbearCompatibilityTest.authenticateWithOptions()` helper spins up a fresh container with custom `OPTIONS` env var (passed to `dropbear` CLI). Used for host key type tests with `-r <keypath>`.
 
+- **Pure ML-KEM**: Both opt-in variants are tested with independent BC
+  encapsulation, including authentication, encrypted channels after rekey,
+  malformed ciphertexts, fixed-width secret encoding, and cleanup.
 - **ML-DSA-87/P-384**: Conscrypt provides the production-style composite service
   in tests. Its signatures are checked independently with BC ML-DSA-87 and JCA
   SHA384withECDSA over the draft's message representative. Schemas cover the

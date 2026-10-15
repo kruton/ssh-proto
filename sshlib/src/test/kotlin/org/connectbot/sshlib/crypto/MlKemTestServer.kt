@@ -32,11 +32,21 @@ import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import javax.crypto.KeyAgreement
 
-internal data class NistHybridServerExchange(val reply: ByteArray, val sharedSecret: ByteArray)
+internal data class MlKemServerExchange(val reply: ByteArray, val sharedSecret: ByteArray)
 
 /** Independent RFC 10042 server combiner: BC ML-KEM and direct JCA ECDH, no client KEX code. */
-internal object NistHybridTestServer {
-    fun reply(clientInit: ByteArray, nist384: Boolean): NistHybridServerExchange {
+internal object MlKemTestServer {
+    fun pureReply(clientInit: ByteArray, mlKem1024: Boolean): MlKemServerExchange {
+        val kem = if (mlKem1024) MLKEMParameters.ml_kem_1024 else MLKEMParameters.ml_kem_768
+        val result = MLKEMGenerator(SecureRandom()).generateEncapsulated(MLKEMPublicKeyParameters(kem, clientInit))
+        return try {
+            MlKemServerExchange(result.encapsulation, ByteBuffer.allocate(4).putInt(32).array() + result.secret)
+        } finally {
+            result.destroy()
+        }
+    }
+
+    fun reply(clientInit: ByteArray, nist384: Boolean): MlKemServerExchange {
         val fieldSize = if (nist384) 48 else 32
         val pqSize = if (nist384) 1568 else 1184
         val curve = if (nist384) "secp384r1" else "secp256r1"
@@ -63,7 +73,7 @@ internal object NistHybridTestServer {
         try {
             val publicKey = byteArrayOf(4) + coordinate(pub.w.affineX, fieldSize) + coordinate(pub.w.affineY, fieldSize)
             val digest = MessageDigest.getInstance(hash).digest(encapsulated.secret + classical)
-            return NistHybridServerExchange(
+            return MlKemServerExchange(
                 encapsulated.encapsulation + publicKey,
                 ByteBuffer.allocate(4).putInt(digest.size).array() + digest,
             )
