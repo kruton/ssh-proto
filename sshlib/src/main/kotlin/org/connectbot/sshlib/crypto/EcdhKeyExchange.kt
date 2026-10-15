@@ -23,6 +23,7 @@ import java.security.AlgorithmParameters
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.ECPublicKey
+import java.security.spec.ECFieldFp
 import java.security.spec.ECGenParameterSpec
 import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
@@ -67,6 +68,7 @@ internal class EcdhKeyExchange(private val curveName: String) : KexAlgorithm {
      * @return Q_C as SEC1 uncompressed point (0x04 || x || y)
      */
     override fun generateClientKeys(): ByteArray {
+        zeroize()
         val kpg = KeyPairGenerator.getInstance("EC")
         kpg.initialize(ECGenParameterSpec(jcaCurveName))
         clientKeyPair = kpg.generateKeyPair()
@@ -83,6 +85,16 @@ internal class EcdhKeyExchange(private val curveName: String) : KexAlgorithm {
      * @return shared secret K as BigInteger byte array (positive, suitable for mpint encoding)
      */
     override fun computeSharedSecret(serverPublicKey: ByteArray): ByteArray {
+        val rawSecret = computeRawSharedSecret(serverPublicKey)
+        return try {
+            computeSharedSecretFromRaw(rawSecret)
+        } finally {
+            rawSecret.fill(0)
+        }
+    }
+
+    /** Fixed-width, unsigned, big-endian ECDH output for RFC 10042 hybrid KEX. */
+    internal fun computeRawSharedSecret(serverPublicKey: ByteArray): ByteArray {
         val kp = clientKeyPair
             ?: throw SshException("Client keys not generated; call generateClientKeys() first")
         try {
@@ -95,7 +107,13 @@ internal class EcdhKeyExchange(private val curveName: String) : KexAlgorithm {
             agreement.doPhase(serverPubKey, true)
             val rawSecret = agreement.generateSecret()
 
-            return computeSharedSecretFromRaw(rawSecret)
+            var nonZero = 0
+            for (byte in rawSecret) nonZero = nonZero or byte.toInt()
+            if (rawSecret.size != fieldSize || nonZero == 0) {
+                rawSecret.fill(0)
+                throw SshException("Invalid ECDH shared secret length or all-zero secret")
+            }
+            return rawSecret
         } catch (e: SshException) {
             throw e
         } catch (e: Exception) {
@@ -138,6 +156,12 @@ internal class EcdhKeyExchange(private val curveName: String) : KexAlgorithm {
         }
         val x = BigInteger(1, encoded, 1, fieldSize)
         val y = BigInteger(1, encoded, 1 + fieldSize, fieldSize)
+        val p = (ecParameterSpec.curve.field as ECFieldFp).p
+        if (x >= p || y >= p ||
+            y.multiply(y).mod(p) != x.multiply(x).multiply(x).add(ecParameterSpec.curve.a.multiply(x)).add(ecParameterSpec.curve.b).mod(p)
+        ) {
+            throw SshException("Invalid EC point: coordinates out of range or point not on curve")
+        }
         return ECPoint(x, y)
     }
 

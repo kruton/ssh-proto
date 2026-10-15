@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import asia.hombre.kyber.KyberCipherText
 import asia.hombre.kyber.KyberDecapsulationKey
 import asia.hombre.kyber.KyberEncapsulationKey
 import asia.hombre.kyber.KyberKeyGenerator
-import asia.hombre.kyber.KyberParameter
 import asia.hombre.kyber.interfaces.RandomProvider
 import java.io.IOException
 import java.security.SecureRandom
 
-internal class KyberKotlinMlKemProvider : MlKemProvider {
+internal class KyberKotlinMlKemProvider(
+    private val parameterSet: MlKemParameterSet = MlKemParameterSet.ML_KEM_768,
+) : MlKemProvider {
     private val randomProvider = object : RandomProvider {
         private val secureRandom = SecureRandom()
         override fun fillWithRandom(byteArray: ByteArray) {
@@ -36,7 +37,7 @@ internal class KyberKotlinMlKemProvider : MlKemProvider {
 
     override fun generateKeyPair(): MlKemKeyPair {
         try {
-            val keyPair = KyberKeyGenerator.generate(KyberParameter.ML_KEM_768, randomProvider)
+            val keyPair = KyberKeyGenerator.generate(parameterSet.kyberParameter, randomProvider)
             return MlKemKeyPair(
                 publicKey = keyPair.encapsulationKey.fullBytes,
                 privateKey = keyPair.decapsulationKey.fullBytes,
@@ -48,6 +49,9 @@ internal class KyberKotlinMlKemProvider : MlKemProvider {
 
     override fun encapsulate(publicKey: ByteArray): MlKemEncapsulationResult {
         try {
+            if (publicKey.size != parameterSet.publicKeySize) {
+                throw IOException("Invalid $parameterSet public key length: ${publicKey.size}")
+            }
             val encapsKey = KyberEncapsulationKey.fromBytes(publicKey)
             val result = encapsKey.encapsulate(randomProvider)
             return MlKemEncapsulationResult(
@@ -61,6 +65,9 @@ internal class KyberKotlinMlKemProvider : MlKemProvider {
 
     override fun decapsulate(privateKey: ByteArray, ciphertext: ByteArray): ByteArray {
         try {
+            if (privateKey.size != parameterSet.privateKeySize || ciphertext.size != parameterSet.ciphertextSize) {
+                throw IOException("Invalid $parameterSet private key or ciphertext length")
+            }
             val decapsKey = KyberDecapsulationKey.fromBytes(privateKey)
             val ct = KyberCipherText.fromBytes(ciphertext)
             return decapsKey.decapsulate(ct)

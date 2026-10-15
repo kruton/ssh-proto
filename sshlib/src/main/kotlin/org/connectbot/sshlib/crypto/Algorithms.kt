@@ -199,6 +199,20 @@ internal enum class KexEntry(
         true,
         { MlKemHybridKeyExchange() },
     ),
+    MLKEM768NISTP256_SHA256(
+        "mlkem768nistp256-sha256",
+        HASH_SHA256,
+        KexType.ECDH,
+        true,
+        { MlKemNistHybridKeyExchange(MlKemNistParameters.NISTP256) },
+    ),
+    MLKEM1024NISTP384_SHA384(
+        "mlkem1024nistp384-sha384",
+        "SHA-384",
+        KexType.ECDH,
+        true,
+        { MlKemNistHybridKeyExchange(MlKemNistParameters.NISTP384) },
+    ),
     SNTRUP761X25519_SHA512(
         "sntrup761x25519-sha512",
         HASH_SHA512,

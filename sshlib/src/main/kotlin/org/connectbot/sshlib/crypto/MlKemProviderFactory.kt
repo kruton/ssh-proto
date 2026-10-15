@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,5 +31,15 @@ internal object MlKemProviderFactory {
             logger.debug("Java KEM API not available, falling back to Kyber Kotlin")
             KyberKotlinMlKemProvider()
         }
+    }
+
+    // The bundled Kotlin provider supplies ML-KEM-1024 on Android and JVM 17.
+    private val provider1024: MlKemProvider by lazy {
+        KyberKotlinMlKemProvider(MlKemParameterSet.ML_KEM_1024)
+    }
+
+    fun forParameterSet(parameterSet: MlKemParameterSet): MlKemProvider = when (parameterSet) {
+        MlKemParameterSet.ML_KEM_768 -> provider
+        MlKemParameterSet.ML_KEM_1024 -> provider1024
     }
 }

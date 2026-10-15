@@ -35,7 +35,12 @@ are injected into the Docker build via `withFileFromClasspath`.
 
 - **Dropbear + RSA pubkey auth**: Dropbear rejects RSA public key authentication. The `rsa_unencrypted` key is excluded from Dropbear pubkey tests.
 - **AsyncSSH + legacy algorithms**: AsyncSSH disables legacy algorithms by default. The server's `create_server()` call in `server.py` explicitly enables them (CBC ciphers, DH group1, hmac-sha1, etc.).
-- **AsyncSSH + ML-KEM**: AsyncSSH requires the `liboqs` C library for post-quantum kex (`mlkem768x25519-sha256`). This is not installed in the test Docker image, so ML-KEM is only tested against Dropbear.
+- **AsyncSSH + ML-KEM**: AsyncSSH requires the `liboqs` C library for post-quantum kex (`mlkem768x25519-sha256`). This is not installed in the test Docker image, so that server does not exercise ML-KEM; Dropbear covers the X25519 hybrid.
+
+- **ML-KEM/NIST hybrids**: OpenSSH 10.6 supports `mlkem768nistp256-sha256` but not
+  `mlkem1024nistp384-sha384`. Both are tested through authentication and rekey
+  against `NistHybridTestServer`, which uses independent BC ML-KEM and direct JCA
+  ECDH. BC remains test-only. The P-256 variant also runs against real OpenSSH.
 - **Dropbear + custom options**: The `DropbearCompatibilityTest.authenticateWithOptions()` helper spins up a fresh container with custom `OPTIONS` env var (passed to `dropbear` CLI). Used for host key type tests with `-r <keypath>`.
 
 ## Test Keys

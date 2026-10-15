@@ -106,6 +106,8 @@ class SshClientIntegrationTest {
         )
             .withExposedPorts(22)
             .withLogConsumer(logConsumer)
+            // Some supported algorithms, including ML-KEM/P-256, are disabled by default.
+            .withCommand("/usr/sbin/sshd", "-D", "-e", "-o", "KexAlgorithms=+${kexAlgorithms().joinToString(",")}")
             .waitingFor(
                 Wait.forLogMessage(".*Server listening.*", 1),
             )
@@ -139,6 +141,7 @@ class SshClientIntegrationTest {
 
         @JvmStatic
         fun kexAlgorithms() = listOf(
+            "mlkem768nistp256-sha256",
             "sntrup761x25519-sha512",
             "sntrup761x25519-sha512@openssh.com",
             "ecdh-sha2-nistp256",
