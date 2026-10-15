@@ -13,6 +13,22 @@ permissions:
   contents: read
 
 jobs:
+  vendored-sources:
+    name: Vendored SNTRUP source provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test source verification
+        run: python3 -m unittest discover -s .github/scripts -p 'test_vendor_sntrup.py' -v
+
+      - name: Verify published upstream sources and extraction
+        run: python3 .github/scripts/vendor_sntrup.py --check
+
   workflow-tests:
     name: Workflow scripts
     runs-on: ubuntu-latest
@@ -34,12 +50,20 @@ jobs:
 
   build:
     name: Build and test
+    needs: vendored-sources
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       matrix:
         java: [17, 21, 25]
     steps:
+      - name: Require reviewed vendored sources
+        if: needs.vendored-sources.result != 'success'
+        run: |
+          echo 'Vendored SNTRUP provenance verification must pass before building or publishing.'
+          exit 1
+
       - name: Checkout (with history)
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

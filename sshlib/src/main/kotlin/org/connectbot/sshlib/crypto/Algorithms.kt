@@ -199,6 +199,20 @@ internal enum class KexEntry(
         true,
         { MlKemHybridKeyExchange() },
     ),
+    SNTRUP761X25519_SHA512(
+        "sntrup761x25519-sha512",
+        HASH_SHA512,
+        KexType.ECDH,
+        true,
+        { SntrupHybridKeyExchange() },
+    ),
+    SNTRUP761X25519_SHA512_OPENSSH(
+        "sntrup761x25519-sha512@openssh.com",
+        HASH_SHA512,
+        KexType.ECDH,
+        true,
+        { SntrupHybridKeyExchange() },
+    ),
     CURVE25519_SHA256(
         "curve25519-sha256",
         HASH_SHA256,

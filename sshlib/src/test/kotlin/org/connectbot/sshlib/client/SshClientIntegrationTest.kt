@@ -139,6 +139,8 @@ class SshClientIntegrationTest {
 
         @JvmStatic
         fun kexAlgorithms() = listOf(
+            "sntrup761x25519-sha512",
+            "sntrup761x25519-sha512@openssh.com",
             "ecdh-sha2-nistp256",
             "ecdh-sha2-nistp384",
             "ecdh-sha2-nistp521",
@@ -458,10 +460,12 @@ class SshClientIntegrationTest {
             this.hostKeyVerifier = acceptAllVerifier
             this.kexAlgorithms = "$algorithm,kex-strict-c-v00@openssh.com"
         }
-        val client = BlockingSshClient(config)
+        val asyncClient = SshClient(config)
+        val client = BlockingSshClient(asyncClient)
 
         try {
             client.connect()
+            assertEquals(algorithm, asyncClient.connectionInfo?.kexAlgorithm)
             client.authenticatePassword(USERNAME, PASSWORD)
 
             val session = client.openSession()

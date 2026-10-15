@@ -9,6 +9,14 @@
   "customManagers": [
     {
       "customType": "regex",
+      "managerFilePatterns": ["/^third_party/sntrup/upstream\\.json$/"],
+      "matchStrings": ["\"version\":\\s*\"(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "org.bouncycastle:bcprov-jdk18on",
+      "datasourceTemplate": "maven",
+      "versioningTemplate": "maven"
+    },
+    {
+      "customType": "regex",
       "managerFilePatterns": [
         "/(^|/)[Dd]ockerfile[^/]*$/"
       ],
@@ -16,6 +24,16 @@
         "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)(?: extractVersion=(?<extractVersion>[^\\s]+))?(?: versioning=(?<versioning>[^\\s]+))?\\nARG [A-Z0-9_]+_VERSION=(?<currentValue>[^\\s]+)"
       ],
       versioningTemplate: "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["org.bouncycastle:bcprov-jdk18on"],
+      "groupName": "Bouncy Castle and vendored SNTRUP sources",
+      "automerge": false,
+      "prBodyNotes": [
+        "The SNTRUP source check compares released upstream files and the reproducible extraction against recorded SHA-256 hashes. If upstream changed, review it against third_party/sntrup/upstream.json reviewedVersion, run python3 .github/scripts/vendor_sntrup.py --update, review the generated changes, and run the crypto tests. Do not accept new hashes without reviewing the upstream changes."
+      ]
     }
   ]
 }

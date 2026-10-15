@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,12 @@ class ConnectionInfoTest {
     @Test
     fun `isPostQuantumSecure is true for mlkem768x25519-sha256`() {
         assertTrue(info("mlkem768x25519-sha256").isPostQuantumSecure)
+    }
+
+    @Test
+    fun `isPostQuantumSecure is true for both SNTRUP761 names`() {
+        assertTrue(info("sntrup761x25519-sha512").isPostQuantumSecure)
+        assertTrue(info("sntrup761x25519-sha512@openssh.com").isPostQuantumSecure)
     }
 
     @Test

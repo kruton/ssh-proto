@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ internal interface KexAlgorithm {
      *
      * The returned bytes are the wire-encoded K, ready for use in the exchange
      * hash and key derivation. For classic DH/ECDH this is mpint encoding
-     * (uint32 length + positive integer bytes). For ML-KEM hybrid this is SSH
+     * (uint32 length + positive integer bytes). For hybrid KEX this is SSH
      * string encoding (uint32 length + raw hash bytes).
      */
     fun computeSharedSecret(serverPublicKey: ByteArray): ByteArray

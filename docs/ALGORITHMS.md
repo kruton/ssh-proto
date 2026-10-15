@@ -54,6 +54,8 @@ PEM block.
 ## Key Exchange
 
 - `mlkem768x25519-sha256` ([RFC 10042](https://datatracker.ietf.org/doc/html/rfc10042#section-2.3.3))
+- `sntrup761x25519-sha512` ([RFC 9941](https://www.rfc-editor.org/rfc/rfc9941.html))
+- `sntrup761x25519-sha512@openssh.com` (the interoperable OpenSSH alias from RFC 9941)
 - `curve25519-sha256` ([RFC 8731](https://tools.ietf.org/html/rfc8731))
 - `ecdh-sha2-nistp521` ([RFC 5656](https://tools.ietf.org/html/rfc5656#section-4))
 - `ecdh-sha2-nistp384` ([RFC 5656](https://tools.ietf.org/html/rfc5656#section-4))
@@ -66,9 +68,8 @@ PEM block.
 - `diffie-hellman-group-exchange-sha1` ([RFC 4419](https://tools.ietf.org/html/rfc4419)) — **legacy opt-in**
 - `diffie-hellman-group1-sha1` ([RFC 4253](https://tools.ietf.org/html/rfc4253#section-8.1)) — **legacy opt-in**
 
-ML-KEM uses the Java KEM API when an ML-KEM provider is available and falls back
-to the bundled Kotlin implementation otherwise. It is available on JVM 17 and
-does not require native JEP-496 support.
+ML-KEM and SNTRUP761 key exchanges are available on Android and JVM 17 without
+installing additional cryptographic providers.
 
 The default key exchange list also advertises `kex-strict-c-v00@openssh.com`
 (strict key exchange) and `ext-info-c` (extension negotiation). These are
