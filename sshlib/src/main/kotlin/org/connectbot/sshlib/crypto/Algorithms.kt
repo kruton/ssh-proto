@@ -325,6 +325,7 @@ internal enum class SignatureEntry(
     internal val algorithm: SshSignatureAlgorithm,
 ) {
     SSH_MLDSA44_ED25519("ssh-mldsa44-ed25519", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA44_ED25519)),
+    SSH_MLDSA87_P384("ssh-mldsa87-p384", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA87_P384)),
     SSH_MLDSA44("ssh-mldsa-44", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA44)),
     SSH_MLDSA65("ssh-mldsa-65", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA65)),
     SSH_MLDSA87("ssh-mldsa-87", MldsaSignatureAlgorithm(MldsaAlgorithm.MLDSA87)),
@@ -344,6 +345,7 @@ internal enum class SignatureEntry(
             get() = entries.filter {
                 when (it) {
                     SSH_RSA, SSH_MLDSA44, SSH_MLDSA65, SSH_MLDSA87 -> false
+                    SSH_MLDSA87_P384 -> MldsaAlgorithm.MLDSA87_P384.isAvailable()
                     SSH_MLDSA44_ED25519 -> MldsaAlgorithm.MLDSA44_ED25519.isAvailable()
                     else -> true
                 }

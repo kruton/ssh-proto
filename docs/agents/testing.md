@@ -43,6 +43,11 @@ are injected into the Docker build via `withFileFromClasspath`.
   ECDH. BC remains test-only. The P-256 variant also runs against real OpenSSH.
 - **Dropbear + custom options**: The `DropbearCompatibilityTest.authenticateWithOptions()` helper spins up a fresh container with custom `OPTIONS` env var (passed to `dropbear` CLI). Used for host key type tests with `-r <keypath>`.
 
+- **ML-DSA-87/P-384**: Conscrypt provides the production-style composite service
+  in tests. Its signatures are checked independently with BC ML-DSA-87 and JCA
+  SHA384withECDSA over the draft's message representative. Schemas cover the
+  nested SSH EC point and scalar encodings; PEM round trips cover both keys.
+
 ## Test Keys
 
 Test key pairs are in `sshlib/src/test/resources/keys/`. Available types: ed25519,

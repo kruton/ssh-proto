@@ -70,7 +70,7 @@ internal class MldsaSignatureAlgorithmTest {
     private val reference = BouncyCastleProvider()
 
     @ParameterizedTest
-    @EnumSource(MldsaAlgorithm::class)
+    @EnumSource(value = MldsaAlgorithm::class, names = ["MLDSA87_P384"], mode = EnumSource.Mode.EXCLUDE)
     fun `signatures interoperate with an independent implementation`(parameter: MldsaAlgorithm) = withMldsaTestProvider { provider ->
         val pair = KeyPairGenerator.getInstance(parameter.jcaName, provider).generateKeyPair()
         val key = SshSigning.encodePublicKey(pair)
@@ -83,7 +83,7 @@ internal class MldsaSignatureAlgorithmTest {
         assertFalse(SignatureVerifier.verify(key.publicKeyBlob, signature + 0, message, parameter.sshName))
         val parsed = SshSignature(ByteBufferKaitaiStream(signature)).apply { _read() }
         val raw = (parsed.signatureBlob() as SshMldsaSignatureBlob).signature()
-        assertEquals(parameter.signatureSize, raw.size)
+        assertEquals(parameter.maxSignatureSize, raw.size)
 
         if (parameter == MldsaAlgorithm.MLDSA44_ED25519) {
             val publicBytes = MldsaAlgorithm.decodePublicKey(pair.public).second
@@ -151,13 +151,13 @@ internal class MldsaSignatureAlgorithmTest {
     }
 
     @ParameterizedTest
-    @EnumSource(MldsaAlgorithm::class)
+    @EnumSource(value = MldsaAlgorithm::class, names = ["MLDSA87_P384"], mode = EnumSource.Mode.EXCLUDE)
     fun `schemas reject incorrect sizes and truncated payloads`(parameter: MldsaAlgorithm) = withMldsaTestProvider { provider ->
         val pair = KeyPairGenerator.getInstance(parameter.jcaName, provider).generateKeyPair()
         val key = SshSigning.encodePublicKey(pair)
         val signature = SshSigning.signWithKeyPair(parameter.sshName, pair, message)
         val prefix = encodeSshString(parameter.sshName.toByteArray())
-        for (size in listOf(0, parameter.signatureSize - 1, parameter.signatureSize + 1)) {
+        for (size in listOf(0, parameter.maxSignatureSize - 1, parameter.maxSignatureSize + 1)) {
             assertFailsWith<RuntimeException> {
                 SignatureVerifier.verify(key.publicKeyBlob, prefix + encodeSshString(ByteArray(size)), message, parameter.sshName)
             }
@@ -181,7 +181,7 @@ internal class MldsaSignatureAlgorithmTest {
             assertEquals(SignatureEntry.SSH_MLDSA44_ED25519, SignatureEntry.defaults.first())
             for (parameter in MldsaAlgorithm.entries) {
                 assertFalse(parameter.isAvailable(emptyList()))
-                if (parameter != MldsaAlgorithm.MLDSA44_ED25519) assertFalse(parameter.sshName in SignatureEntry.defaultString)
+                if (!parameter.isComposite) assertFalse(parameter.sshName in SignatureEntry.defaultString)
             }
         }
         assertEquals(before, Security.getProviders().map { it.name })
@@ -198,14 +198,14 @@ internal class MldsaSignatureAlgorithmTest {
         }
         val providers = listOf<Provider>(generic)
         assertFalse(MldsaAlgorithm.MLDSA44_ED25519.isAvailable(providers))
-        for (parameter in MldsaAlgorithm.entries.filter { it != MldsaAlgorithm.MLDSA44_ED25519 }) {
+        for (parameter in MldsaAlgorithm.entries.filter { !it.isComposite }) {
             assertTrue(parameter.isAvailable(providers))
             val pair = KeyPairGenerator.getInstance(parameter.jcaName, provider).generateKeyPair()
             val raw = MldsaAlgorithm.decodePublicKey(pair.public).second
             val signer = parameter.signer(pair.private, providers)
             signer.update(message)
             val signature = signer.sign()
-            assertEquals(parameter.signatureSize, signature.size)
+            assertEquals(parameter.maxSignatureSize, signature.size)
             val verifier = parameter.verifier(raw, providers)
             verifier.update(message)
             assertTrue(verifier.verify(signature))

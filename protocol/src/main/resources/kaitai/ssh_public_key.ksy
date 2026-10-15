@@ -2,6 +2,7 @@ meta:
   id: ssh_public_key
   endian: be
   imports:
+  - ssh_mldsa_p384_public_key_blob
   - byte_string
   - ssh_mldsa_public_key_blob
   - ecdsa_public_key_blob
@@ -41,4 +42,5 @@ seq:
       '"ssh-mldsa-65"': ssh_mldsa_public_key_blob(1952)
       '"ssh-mldsa-87"': ssh_mldsa_public_key_blob(2592)
       '"ssh-mldsa44-ed25519"': ssh_mldsa_public_key_blob(1344)
+      '"ssh-mldsa87-p384"': ssh_mldsa_p384_public_key_blob
       _: byte_string

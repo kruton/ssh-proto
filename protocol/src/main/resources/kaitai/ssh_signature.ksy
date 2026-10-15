@@ -2,6 +2,7 @@ meta:
   id: ssh_signature
   endian: be
   imports:
+  - ssh_mldsa_p384_signature_blob
   - byte_string
   - ssh_mldsa_signature_blob
   - ecdsa_signature_blob
@@ -43,4 +44,5 @@ seq:
       '"ssh-mldsa-65"': ssh_mldsa_signature_blob(3309)
       '"ssh-mldsa-87"': ssh_mldsa_signature_blob(4627)
       '"ssh-mldsa44-ed25519"': ssh_mldsa_signature_blob(2484)
+      '"ssh-mldsa87-p384"': ssh_mldsa_p384_signature_blob
       _: byte_string

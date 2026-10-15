@@ -57,6 +57,8 @@ meta:
   - ssh_ed25519_signature_blob
   - ssh_ed448_public_key_blob
   - ssh_ed448_signature_blob
+  - ssh_mldsa_p384_public_key_blob
+  - ssh_mldsa_p384_signature_blob
   - ssh_mldsa_public_key_blob
   - ssh_mldsa_signature_blob
   - openssh_mldsa_ed25519_private_key
