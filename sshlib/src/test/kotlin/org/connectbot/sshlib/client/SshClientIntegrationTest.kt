@@ -18,6 +18,7 @@
 package org.connectbot.sshlib.client
 
 import io.kaitai.struct.ByteBufferKaitaiStream
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -209,6 +210,63 @@ class SshClientIntegrationTest {
         val message = "Imported OpenSSH composite key".toByteArray()
         val signature = SshSigning.signWithKeyPair(importedPublic.algorithmName, imported, message)
         assertTrue(SignatureVerifier.verifyWithKeyType(importedPublic.publicKeyBlob, signature, message))
+    }
+
+    @Test
+    @ResourceLock("JCA_PROVIDERS")
+    fun `OpenSSH proves mixed host keys and bootstraps a pinned PQC connection`() = withMldsaTestProvider {
+        runBlocking {
+            val learned = CompletableDeferred<List<PublicKey>>()
+            var authenticatedKey: PublicKey? = null
+            val client = SshClient(
+                SshClientConfig {
+                    host = opensshContainer.host
+                    port = opensshContainer.getMappedPort(22)
+                    hostKeyAlgorithms = "ssh-ed25519,ssh-mldsa44-ed25519,rsa-sha2-512,ecdsa-sha2-nistp256"
+                    hostKeyVerifier = object : HostKeyVerifier {
+                        override suspend fun verify(key: PublicKey): Boolean {
+                            authenticatedKey = key
+                            return key.type == "ssh-ed25519"
+                        }
+                        override suspend fun addKeys(keys: List<PublicKey>) {
+                            learned.complete(keys.toList())
+                        }
+                        override suspend fun removeKeys(keys: List<PublicKey>) {
+                            kotlin.test.fail("Advertised authenticated key must be retained")
+                        }
+                    }
+                },
+            )
+            val pinned: List<PublicKey>
+            try {
+                assertIs<ConnectResult.Success>(client.connect())
+                assertIs<AuthResult.Success>(client.authenticatePassword(USERNAME, PASSWORD))
+                pinned = withTimeout(30_000) { learned.await() }
+                assertTrue(pinned.any { it.type == "ssh-mldsa44-ed25519" })
+                assertTrue(pinned.any { it.type == "ssh-rsa" })
+                assertTrue(pinned.contains(authenticatedKey))
+            } finally {
+                client.disconnect()
+            }
+
+            val pqcClient = SshClient(
+                SshClientConfig {
+                    host = opensshContainer.host
+                    port = opensshContainer.getMappedPort(22)
+                    hostKeyAlgorithms = "ssh-mldsa44-ed25519"
+                    hostKeyVerifier = object : HostKeyVerifier {
+                        override suspend fun verify(key: PublicKey): Boolean = key in pinned
+                    }
+                },
+            )
+            try {
+                assertIs<ConnectResult.Success>(pqcClient.connect())
+                assertEquals("ssh-mldsa44-ed25519", pqcClient.connectionInfo?.serverHostKeyAlgorithm)
+                assertEquals(AuthResult.Success, pqcClient.authenticatePassword(USERNAME, PASSWORD))
+            } finally {
+                pqcClient.disconnect()
+            }
+        }
     }
 
     @Test

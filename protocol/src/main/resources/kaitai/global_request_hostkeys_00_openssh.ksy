@@ -1,9 +1,11 @@
 meta:
   id: global_request_hostkeys_00_openssh
   endian: be
-  imports: []
+  imports:
+  - byte_string
 doc-ref: openssh-PROTOCOL.txt
 seq:
 - id: hostkeys
-  size-eos: true
-  doc: Concatenated sequence of all server host keys
+  type: byte_string
+  repeat: eos
+  doc: Server public key blobs, each in an SSH string, including unknown key types.

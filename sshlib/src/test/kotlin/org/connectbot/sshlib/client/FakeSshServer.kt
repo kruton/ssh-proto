@@ -31,6 +31,7 @@ import kotlinx.coroutines.sync.withLock
 import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimeKEMGenerator
 import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimeParameters
 import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimePublicKeyParameters
+import org.connectbot.sshlib.SshSigning
 import org.connectbot.sshlib.crypto.CipherEntry
 import org.connectbot.sshlib.crypto.EncryptionInstance
 import org.connectbot.sshlib.crypto.KeyDerivation
@@ -54,6 +55,7 @@ import org.connectbot.sshlib.protocol.SshMsgChannelSuccess
 import org.connectbot.sshlib.protocol.SshMsgChannelWindowAdjust
 import org.connectbot.sshlib.protocol.SshMsgDisconnect
 import org.connectbot.sshlib.protocol.SshMsgExtInfo
+import org.connectbot.sshlib.protocol.SshMsgGlobalRequest
 import org.connectbot.sshlib.protocol.SshMsgIgnore
 import org.connectbot.sshlib.protocol.SshMsgKexEcdhInit
 import org.connectbot.sshlib.protocol.SshMsgKexEcdhReply
@@ -139,6 +141,11 @@ class FakeSshServer(
     private val receivedChannelData = Channel<SshMsgChannelData>(Channel.UNLIMITED)
     private val receivedChannelWindowAdjusts = Channel<SshMsgChannelWindowAdjust>(Channel.UNLIMITED)
     private val receivedUnimplemented = Channel<SshMsgUnimplemented>(Channel.UNLIMITED)
+    private val receivedGlobalRequests = Channel<SshMsgGlobalRequest>(Channel.UNLIMITED)
+    suspend fun awaitGlobalRequest(): SshMsgGlobalRequest = receivedGlobalRequests.receive()
+    fun signHostKeyData(data: ByteArray): ByteArray = SshSigning.signWithKeyPair("ssh-ed25519", hostKeyPair, data)
+    val sessionIdentifier: ByteArray get() = requireNotNull(sessionId).copyOf()
+
     private val receivedClosingPackets = Channel<SshEnums.MessageType>(Channel.UNLIMITED)
 
     suspend fun awaitClosingPacket(): SshEnums.MessageType = receivedClosingPackets.receive()
@@ -261,6 +268,11 @@ class FakeSshServer(
                             val request = SshMsgUserauthRequest(ByteBufferKaitaiStream(bodyBytes))
                             request._read()
                             receivedUserauthRequests.trySend(request)
+                        }
+
+                        SshEnums.MessageType.SSH_MSG_GLOBAL_REQUEST -> {
+                            val request = SshMsgGlobalRequest(ByteBufferKaitaiStream(rawBytes.copyOfRange(1, rawBytes.size))).apply { _read() }
+                            receivedGlobalRequests.trySend(request)
                         }
 
                         SshEnums.MessageType.SSH_MSG_CHANNEL_OPEN -> {
@@ -967,10 +979,11 @@ class FakeSshServer(
         }
     }
 
-    suspend fun sendGlobalRequest(requestName: String, wantReply: Boolean) {
+    suspend fun sendGlobalRequest(requestName: String, wantReply: Boolean, data: ByteArray = byteArrayOf()) {
         val payload = ByteArrayOutputStream()
         payload.writeString(requestName.toByteArray(Charsets.US_ASCII))
         payload.write(if (wantReply) 1 else 0)
+        payload.write(data)
         writeMutex.withLock {
             serverIo.writePacket(SshEnums.MessageType.SSH_MSG_GLOBAL_REQUEST.id().toInt(), payload.toByteArray())
         }

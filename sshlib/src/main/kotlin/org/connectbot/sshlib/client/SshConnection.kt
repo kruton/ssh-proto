@@ -39,6 +39,7 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -63,11 +64,13 @@ import org.connectbot.sshlib.crypto.CipherEntry
 import org.connectbot.sshlib.crypto.CompressionEntry
 import org.connectbot.sshlib.crypto.DiffieHellmanGroupExchange
 import org.connectbot.sshlib.crypto.EncryptionInstance
+import org.connectbot.sshlib.crypto.HOSTKEYS_PROVE
 import org.connectbot.sshlib.crypto.KexAlgorithm
 import org.connectbot.sshlib.crypto.KexEntry
 import org.connectbot.sshlib.crypto.KexType
 import org.connectbot.sshlib.crypto.KeyDerivation
 import org.connectbot.sshlib.crypto.MacEntry
+import org.connectbot.sshlib.crypto.MldsaAlgorithm
 import org.connectbot.sshlib.crypto.PacketAead
 import org.connectbot.sshlib.crypto.PacketCipher
 import org.connectbot.sshlib.crypto.PacketCompressor
@@ -76,6 +79,7 @@ import org.connectbot.sshlib.crypto.SignatureEntry
 import org.connectbot.sshlib.crypto.SignatureVerifier
 import org.connectbot.sshlib.crypto.SshPrivateKey
 import org.connectbot.sshlib.crypto.SshPublicKeyEncoder
+import org.connectbot.sshlib.crypto.verifyHostKeyProofs
 import org.connectbot.sshlib.kaitaiParseFailureOrNull
 import org.connectbot.sshlib.protocol.AsciiString
 import org.connectbot.sshlib.protocol.ChannelOpenDirectTcpip
@@ -84,8 +88,11 @@ import org.connectbot.sshlib.protocol.ChannelOpenSession
 import org.connectbot.sshlib.protocol.ChannelRequestExitSignal
 import org.connectbot.sshlib.protocol.ChannelRequestExitStatus
 import org.connectbot.sshlib.protocol.GlobalRequestCancelTcpipForward
+import org.connectbot.sshlib.protocol.GlobalRequestHostkeys00Openssh
+import org.connectbot.sshlib.protocol.GlobalRequestHostkeysProve00Openssh
 import org.connectbot.sshlib.protocol.GlobalRequestResponseTcpipForward
 import org.connectbot.sshlib.protocol.GlobalRequestTcpipForward
+import org.connectbot.sshlib.protocol.HostKeyUpdateStateMachine
 import org.connectbot.sshlib.protocol.IdBanner
 import org.connectbot.sshlib.protocol.KexDhGexPayload
 import org.connectbot.sshlib.protocol.KexEcdhPayload
@@ -378,6 +385,7 @@ class SshConnection(
     private var sharedSecret: ByteArray? = null
     private var exchangeHash: ByteArray? = null
     private var sessionId: ByteArray? = null
+    private var initialHostKeyAlgorithm: String? = null
 
     private var negotiatedKex: String? = null
     private var negotiatedHostKeyAlgorithm: String? = null
@@ -470,7 +478,8 @@ class SshConnection(
     // Pending async operations - completed by callbacks
     private val pendingAuth = PendingValue<Boolean>()
     private val pendingChannelRequests = HashMap<Int, CompletableDeferred<Boolean>>()
-    private val pendingGlobalRequest = PendingValue<ByteArray?>()
+    private val pendingGlobalRequests = ArrayDeque<CompletableDeferred<ByteArray?>>()
+    private val hostKeyUpdates = HostKeyUpdateStateMachine()
 
     private class RemoteForwarderRegistration(
         val scope: CoroutineScope,
@@ -1538,7 +1547,10 @@ class SshConnection(
                 check(
                     stateMachine.hostKeyVerified {
                         serverHostKeyBlob = serverHostKey
-                        if (sessionId == null) sessionId = hash.copyOf()
+                        if (sessionId == null) {
+                            sessionId = hash.copyOf()
+                            initialHostKeyAlgorithm = negotiatedAlg
+                        }
                         clientKexInit?.fill(0)
                         clientKexInit = null
                         serverKexInit?.fill(0)
@@ -2249,9 +2261,82 @@ class SshConnection(
 
         logger.debug("Received global request: $requestName (want_reply=$wantReply)")
 
+        if (requestName == "hostkeys-00@openssh.com" && !wantReply) {
+            val fields = (msg.requestSpecificFields() as GlobalRequestHostkeys00Openssh).hostkeys()
+            if (fields.size > 128) return
+            val advertised = fields.map { it.data().copyOf() }
+            val sid = sessionId?.copyOf() ?: return
+            val authenticatedKey = serverHostKeyBlob?.copyOf() ?: return
+            val negotiated = initialHostKeyAlgorithm ?: return
+            hostKeyUpdates.receive {
+                connectionScope.launch {
+                    try {
+                        withTimeout(30_000) { updateHostKeys(advertised, sid, authenticatedKey, negotiated) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        logger.warn("Host key update failed", e)
+                    }
+                }
+            }
+            return
+        }
+
         if (wantReply) {
             logger.debug("Sending REQUEST_FAILURE for unhandled global request: $requestName")
             writePacket(SshEnums.MessageType.SSH_MSG_REQUEST_FAILURE.id().toInt())
+        }
+    }
+
+    /** Runs outside the protocol owner: verifier callbacks may suspend or perform disk I/O. */
+    private suspend fun updateHostKeys(advertised: List<ByteArray>, sid: ByteArray, authenticatedKey: ByteArray, negotiated: String) {
+        if (advertised.isEmpty() || advertised.size > 128) return
+        val allowed = hostKeyAlgorithms.split(',').toSet()
+        val unique = HashSet<PublicKey>()
+        val keys = advertised.mapNotNull { blob ->
+            val type = AsciiString(ByteBufferKaitaiStream(blob)).apply { _read() }.value()
+            val key = PublicKey(type, blob)
+            if (!unique.add(key)) throw SshException("Duplicate advertised host key")
+            val supported = if (key.type == "ssh-rsa") {
+                allowed.any { it == "rsa-sha2-256" || it == "rsa-sha2-512" }
+            } else {
+                key.type in allowed && SignatureEntry.fromSshName(key.type) != null &&
+                    (MldsaAlgorithm.fromSshName(key.type)?.isAvailable() != false)
+            }
+            key.takeIf { supported }
+        }
+        if (keys.isEmpty()) return
+        val data = GlobalRequestHostkeysProve00Openssh().apply {
+            setHostkeys(ArrayList(keys.map { createByteString(it.encoded) }))
+            _check()
+        }
+        val request = SshMsgGlobalRequest().apply {
+            setRequestName(createAsciiString(HOSTKEYS_PROVE))
+            setWantReply(1)
+            setRequestSpecificFields(data)
+            _check()
+        }
+        // repeat-eos Kaitai writers require an exactly sized stream.
+        val size = 4 + HOSTKEYS_PROVE.length + 1 + keys.sumOf { 4 + it.encoded.size }
+        val payload = request.toByteArray(size.toLong())
+        val deferred = CompletableDeferred<ByteArray?>()
+        protocolExecutor.run(ready = ::localCommandsReady) {
+            check(pendingGlobalRequests.size < 128) { "Too many pending global requests" }
+            pendingGlobalRequests.addLast(deferred)
+            writePacket(SshEnums.MessageType.SSH_MSG_GLOBAL_REQUEST.id().toInt(), payload)
+        }
+        val reply = deferred.await() ?: return
+        if (!verifyHostKeyProofs(keys, reply, sid, negotiated, allowed)) {
+            logger.warn("Server supplied invalid host key proofs")
+            return
+        }
+        currentCoroutineContext().ensureActive()
+        hostKeyVerifier.addKeys(keys)
+        currentCoroutineContext().ensureActive()
+        // Only retire the key we authenticated with; unknown or disabled key types are preserved.
+        if (advertised.none { it.contentEquals(authenticatedKey) }) {
+            val type = AsciiString(ByteBufferKaitaiStream(authenticatedKey)).apply { _read() }.value()
+            hostKeyVerifier.removeKeys(listOf(PublicKey(type, authenticatedKey)))
         }
     }
 
@@ -2352,18 +2437,16 @@ class SshConnection(
 
         val deferred = CompletableDeferred<ByteArray?>()
         protocolExecutor.run(ready = ::localCommandsReady) {
-            pendingGlobalRequest.setDirect(deferred)
+            check(pendingGlobalRequests.size < 128) { "Too many pending global requests" }
+            pendingGlobalRequests.addLast(deferred)
             writePacket(
                 SshEnums.MessageType.SSH_MSG_GLOBAL_REQUEST.id().toInt(),
                 msg.toByteArray(),
             )
         }
 
-        val responseData = try {
-            deferred.await()
-        } finally {
-            pendingGlobalRequest.clearIfSame(deferred)
-        } ?: return null
+        // Cancelled callers retain their FIFO slot until the peer replies.
+        val responseData = deferred.await() ?: return null
 
         // If port was 0, the response contains the assigned port
         return if (port == 0 && responseData.isNotEmpty()) {
@@ -2803,14 +2886,14 @@ class SshConnection(
                     SshEnums.MessageType.SSH_MSG_REQUEST_SUCCESS -> {
                         requireAccepted(stateMachine.authorizeAuthenticatedPacket(), msgType)
                         val rawBody = packet._raw_body()
-                        if (!pendingGlobalRequest.complete(rawBody)) {
+                        if (pendingGlobalRequests.removeFirstOrNull()?.also { it.complete(rawBody) } == null) {
                             throw ProtocolViolationException("Received SSH_MSG_REQUEST_SUCCESS with no pending global request")
                         }
                     }
 
                     SshEnums.MessageType.SSH_MSG_REQUEST_FAILURE -> {
                         requireAccepted(stateMachine.authorizeAuthenticatedPacket(), msgType)
-                        if (!pendingGlobalRequest.complete(null)) {
+                        if (pendingGlobalRequests.removeFirstOrNull()?.also { it.complete(null) } == null) {
                             throw ProtocolViolationException("Received SSH_MSG_REQUEST_FAILURE with no pending global request")
                         }
                     }
@@ -3158,7 +3241,8 @@ class SshConnection(
                         pendingAuth.completeExceptionally(loopError)
                         pendingChannelRequests.values.forEach { it.completeExceptionally(loopError) }
                         pendingChannelRequests.clear()
-                        pendingGlobalRequest.completeExceptionally(loopError)
+                        pendingGlobalRequests.forEach { it.completeExceptionally(loopError) }
+                        pendingGlobalRequests.clear()
 
                         for ((_, pending) in pendingPings) {
                             pending.deferred.complete(PingResult.Failure(loopError))
