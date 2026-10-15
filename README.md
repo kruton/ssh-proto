@@ -74,6 +74,10 @@ dependencies {
 
 ### Build
 
+Published artifacts from the attested build pipeline include SLSA provenance and
+SBOM attestations. See [verifying build provenance](docs/BUILD_PROVENANCE.md) for
+Maven/Gradle downloads, standard verification commands, and downstream build use.
+
 Building from source requires JDK 17 and a running Docker daemon for integration
 tests. The Gradle wrapper handles Gradle installation.
 

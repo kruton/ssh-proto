@@ -46,6 +46,12 @@ dependencies {
     kover(project(":sshlib"))
 }
 
+tasks.register("stageMavenPublication") {
+    group = "publishing"
+    description = "Stages both Maven modules for isolated attestation and publication"
+    dependsOn(":protocol:stageMavenPublication", ":sshlib:stageMavenPublication")
+}
+
 configure<ReleaseExtension> {
     tagTemplate.set("v\${version}")
     preTagCommitMessage.set("chore(release): ")
