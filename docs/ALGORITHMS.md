@@ -60,6 +60,8 @@ PEM block.
 - `mlkem768x25519-sha256` ([RFC 10042](https://datatracker.ietf.org/doc/html/rfc10042#section-2.3.3))
 - `mlkem768nistp256-sha256` ([RFC 10042 section 2.3.1](https://www.rfc-editor.org/rfc/rfc10042.html#section-2.3.1))
 - `mlkem1024nistp384-sha384` ([RFC 10042 section 2.3.2](https://www.rfc-editor.org/rfc/rfc10042.html#section-2.3.2))
+- `mlkem768-sha256` ([pure ML-KEM draft](https://datatracker.ietf.org/doc/html/draft-harrison-sshm-mlkem-02)) — **opt-in**
+- `mlkem1024-sha384` ([pure ML-KEM draft](https://datatracker.ietf.org/doc/html/draft-harrison-sshm-mlkem-02)) — **opt-in**
 - `sntrup761x25519-sha512` ([RFC 9941](https://www.rfc-editor.org/rfc/rfc9941.html))
 - `sntrup761x25519-sha512@openssh.com` (the interoperable OpenSSH alias from RFC 9941)
 - `curve25519-sha256` ([RFC 8731](https://tools.ietf.org/html/rfc8731))
@@ -75,7 +77,8 @@ PEM block.
 - `diffie-hellman-group1-sha1` ([RFC 4253](https://tools.ietf.org/html/rfc4253#section-8.1)) — **legacy opt-in**
 
 ML-KEM and SNTRUP761 key exchanges are available on Android and JVM 17 without
-installing additional cryptographic providers.
+installing additional cryptographic providers. Pure ML-KEM methods require
+explicit opt-in through `kexAlgorithms`.
 
 The default key exchange list also advertises `kex-strict-c-v00@openssh.com`
 (strict key exchange) and `ext-info-c` (extension negotiation). These are

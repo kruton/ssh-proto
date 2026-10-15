@@ -213,6 +213,8 @@ internal enum class KexEntry(
         true,
         { MlKemNistHybridKeyExchange(MlKemNistParameters.NISTP384) },
     ),
+    MLKEM768_SHA256("mlkem768-sha256", HASH_SHA256, KexType.ECDH, true, { MlKemKeyExchange(MlKemParameterSet.ML_KEM_768) }),
+    MLKEM1024_SHA384("mlkem1024-sha384", "SHA-384", KexType.ECDH, true, { MlKemKeyExchange(MlKemParameterSet.ML_KEM_1024) }),
     SNTRUP761X25519_SHA512(
         "sntrup761x25519-sha512",
         HASH_SHA512,
@@ -310,7 +312,7 @@ internal enum class KexEntry(
 
     companion object {
         val defaults: List<KexEntry> = entries.filter {
-            it !in setOf(DH_GROUP14_SHA1, DH_GROUP_EXCHANGE_SHA1, DH_GROUP1_SHA1)
+            it !in setOf(MLKEM768_SHA256, MLKEM1024_SHA384, DH_GROUP14_SHA1, DH_GROUP_EXCHANGE_SHA1, DH_GROUP1_SHA1)
         }
 
         val defaultString: String =

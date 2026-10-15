@@ -33,7 +33,7 @@ import org.connectbot.sshlib.crypto.EncryptionInstance
 import org.connectbot.sshlib.crypto.KeyDerivation
 import org.connectbot.sshlib.crypto.KyberKotlinMlKemProvider
 import org.connectbot.sshlib.crypto.MacEntry
-import org.connectbot.sshlib.crypto.NistHybridTestServer
+import org.connectbot.sshlib.crypto.MlKemTestServer
 import org.connectbot.sshlib.crypto.SshPublicKeyEncoder
 import org.connectbot.sshlib.crypto.X25519ProviderFactory
 import org.connectbot.sshlib.crypto.encodeMpint
@@ -113,7 +113,7 @@ class FakeSshServer(
     var kexAlgorithms: String? = null
 
     private val kexHashAlgorithm: String
-        get() = if (kexAlgorithms?.split(',')?.first() == "mlkem1024nistp384-sha384") "SHA-384" else "SHA-256"
+        get() = if (kexAlgorithms?.split(',')?.first() in setOf("mlkem1024nistp384-sha384", "mlkem1024-sha384")) "SHA-384" else "SHA-256"
     var corruptKexSignature: Boolean = false
     var transformKexServerPublic: (ByteArray) -> ByteArray = { it }
     var truncateKexReply: Boolean = false
@@ -447,8 +447,12 @@ class FakeSshServer(
         val isMlKemX25519 = algorithm == "mlkem768x25519-sha256"
         val serverPublic: ByteArray
         val sharedSecret: ByteArray
-        if (algorithm == "mlkem768nistp256-sha256" || algorithm == "mlkem1024nistp384-sha384") {
-            val (reply, secret) = NistHybridTestServer.reply(clientPublic, algorithm == "mlkem1024nistp384-sha384")
+        if (algorithm == "mlkem768-sha256" || algorithm == "mlkem1024-sha384") {
+            val (reply, secret) = MlKemTestServer.pureReply(clientPublic, algorithm == "mlkem1024-sha384")
+            serverPublic = transformKexServerPublic(reply)
+            sharedSecret = secret
+        } else if (algorithm == "mlkem768nistp256-sha256" || algorithm == "mlkem1024nistp384-sha384") {
+            val (reply, secret) = MlKemTestServer.reply(clientPublic, algorithm == "mlkem1024nistp384-sha384")
             serverPublic = transformKexServerPublic(reply)
             sharedSecret = secret
         } else if (isMlKemX25519) {

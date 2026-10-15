@@ -40,7 +40,7 @@ internal class MlKemNistHybridKeyExchangeTest {
             val clientInit = kex.generateClientKeys()
             val is384 = parameters == MlKemNistParameters.NISTP384
             assertEquals(if (is384) 1665 else 1249, clientInit.size)
-            val server = NistHybridTestServer.reply(clientInit, is384)
+            val server = MlKemTestServer.reply(clientInit, is384)
             assertEquals(if (is384) 1665 else 1153, server.reply.size)
             assertContentEquals(server.sharedSecret, kex.computeSharedSecret(server.reply))
             assertEquals(if (is384) "SHA-384" else "SHA-256", kex.hashAlgorithm)
