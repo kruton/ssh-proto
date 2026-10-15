@@ -7,4 +7,4 @@ val [isPostQuantumSecure](is-post-quantum-secure.md): [Boolean](https://kotlinla
 
 True if the key exchange algorithm is post-quantum secure.
 
-Currently only `mlkem768x25519-sha256` qualifies.
+Includes ML-KEM/X25519 and SNTRUP761/X25519 hybrid exchanges.
