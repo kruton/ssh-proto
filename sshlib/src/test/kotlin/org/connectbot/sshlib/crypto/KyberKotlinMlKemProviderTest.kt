@@ -17,13 +17,16 @@
 
 package org.connectbot.sshlib.crypto
 
+import org.bouncycastle.crypto.kems.MLKEMExtractor
 import org.bouncycastle.crypto.kems.MLKEMGenerator
 import org.bouncycastle.crypto.params.MLKEMParameters
+import org.bouncycastle.crypto.params.MLKEMPrivateKeyParameters
 import org.bouncycastle.crypto.params.MLKEMPublicKeyParameters
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.io.IOException
 import java.security.SecureRandom
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -101,6 +104,25 @@ internal class KyberKotlinMlKemProviderTest {
         } finally {
             keys.privateKey.fill(0)
             encapsulated.destroy()
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(MlKemParameterSet::class)
+    fun `arbitrary ciphertexts match BC implicit rejection`(parameters: MlKemParameterSet) {
+        val provider = KyberKotlinMlKemProvider(parameters)
+        val keys = provider.generateKeyPair()
+        val bcParameters = if (parameters == MlKemParameterSet.ML_KEM_768) MLKEMParameters.ml_kem_768 else MLKEMParameters.ml_kem_1024
+        val bc = MLKEMExtractor(MLKEMPrivateKeyParameters(bcParameters, keys.privateKey))
+        try {
+            val random = Random(203)
+            val inputs = listOf(ByteArray(parameters.ciphertextSize), ByteArray(parameters.ciphertextSize) { 0xff.toByte() }) +
+                List(32) { random.nextBytes(parameters.ciphertextSize) }
+            for (ciphertext in inputs) {
+                assertContentEquals(bc.extractSecret(ciphertext), provider.decapsulate(keys.privateKey, ciphertext))
+            }
+        } finally {
+            keys.privateKey.fill(0)
         }
     }
 

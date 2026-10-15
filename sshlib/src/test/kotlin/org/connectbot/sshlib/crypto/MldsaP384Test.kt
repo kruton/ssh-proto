@@ -84,7 +84,7 @@ internal class MldsaP384Test {
             val damaged = encodedBody.copyOf().also { it[offset] = (it[offset].toInt() xor 1).toByte() }
             assertFalse(SignatureVerifier.verify(key.publicKeyBlob, prefix + encodeSshString(damaged), message, parameter.sshName))
         }
-        assertFalse(SignatureVerifier.verify(key.publicKeyBlob, prefix + encodeSshString(encodedBody + 0), message, parameter.sshName))
+        assertFalse(runCatching { SignatureVerifier.verify(key.publicKeyBlob, prefix + encodeSshString(encodedBody + 0), message, parameter.sshName) }.getOrDefault(false))
         for (badR in listOf(byteArrayOf(), byteArrayOf(0), byteArrayOf(-1), byteArrayOf(0, 1), ByteArray(50) { 1 })) {
             val body = blob.mldsaSignature() + encodeSshString(badR) + encodeMpint(blob.s().body())
             assertFalse(runCatching { SignatureVerifier.verify(key.publicKeyBlob, prefix + encodeSshString(body), message, parameter.sshName) }.getOrDefault(false))

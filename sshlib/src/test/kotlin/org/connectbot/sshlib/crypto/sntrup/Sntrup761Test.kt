@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.security.SecureRandom
+import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -77,6 +78,28 @@ class Sntrup761Test {
             actualPrivate.clear()
         }
         assertTrue(actualPrivate.encoded.all { it == 0.toByte() })
+    }
+
+    @Test
+    fun `arbitrary fixed length ciphertexts match independent BC implicit rejection`() {
+        val generator = SNTRUPrimeKeyPairGenerator()
+        generator.init(SNTRUPrimeKeyGenerationParameters(random(8), SNTRUPrimeParameters.sntrup761))
+        val pair = generator.generateKeyPair()
+        val key = pair.getPrivate() as SNTRUPrimePrivateKeyParameters
+        val bcGenerator = BcKeyPairGenerator().apply { init(BcKeyGenerationParameters(random(8), BcParameters.sntrup761)) }
+        val bcKey = bcGenerator.generateKeyPair().getPrivate() as BcPrivateKey
+        try {
+            val extractor = SNTRUPrimeKEMExtractor(key)
+            val bc = BcExtractor(bcKey)
+            val random = Random(0x761)
+            val inputs = listOf(ByteArray(1039), ByteArray(1039) { 0xff.toByte() }, ByteArray(1039) { it.toByte() }) +
+                List(32) { random.nextBytes(1039) }
+            for (ciphertext in inputs) {
+                assertContentEquals(bc.extractSecret(ciphertext), extractor.extractSecret(ciphertext))
+            }
+        } finally {
+            key.clear()
+        }
     }
 
     @Test

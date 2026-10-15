@@ -28,6 +28,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimeKEMGenerator
+import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimeParameters
+import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimePublicKeyParameters
 import org.connectbot.sshlib.crypto.CipherEntry
 import org.connectbot.sshlib.crypto.EncryptionInstance
 import org.connectbot.sshlib.crypto.KeyDerivation
@@ -113,7 +116,11 @@ class FakeSshServer(
     var kexAlgorithms: String? = null
 
     private val kexHashAlgorithm: String
-        get() = if (kexAlgorithms?.split(',')?.first() in setOf("mlkem1024nistp384-sha384", "mlkem1024-sha384")) "SHA-384" else "SHA-256"
+        get() = when (kexAlgorithms?.split(',')?.first()) {
+            "mlkem1024nistp384-sha384", "mlkem1024-sha384" -> "SHA-384"
+            "sntrup761x25519-sha512", "sntrup761x25519-sha512@openssh.com" -> "SHA-512"
+            else -> "SHA-256"
+        }
     var corruptKexSignature: Boolean = false
     var transformKexServerPublic: (ByteArray) -> ByteArray = { it }
     var truncateKexReply: Boolean = false
@@ -447,7 +454,18 @@ class FakeSshServer(
         val isMlKemX25519 = algorithm == "mlkem768x25519-sha256"
         val serverPublic: ByteArray
         val sharedSecret: ByteArray
-        if (algorithm == "mlkem768-sha256" || algorithm == "mlkem1024-sha384") {
+        if (algorithm == "sntrup761x25519-sha512" || algorithm == "sntrup761x25519-sha512@openssh.com") {
+            check(clientPublic.size == 1190)
+            val publicKey = SNTRUPrimePublicKeyParameters(SNTRUPrimeParameters.sntrup761, clientPublic.copyOfRange(0, 1158))
+            val encapsulation = SNTRUPrimeKEMGenerator(SecureRandom()).generateEncapsulated(publicKey)
+            try {
+                val classicalSecret = x25519.computeSharedSecret(serverPrivate, clientPublic.copyOfRange(1158, 1190))
+                serverPublic = transformKexServerPublic(encapsulation.encapsulation + serverX25519Public)
+                sharedSecret = encodeSshString(MessageDigest.getInstance("SHA-512").digest(encapsulation.secret + classicalSecret))
+            } finally {
+                encapsulation.destroy()
+            }
+        } else if (algorithm == "mlkem768-sha256" || algorithm == "mlkem1024-sha384") {
             val (reply, secret) = MlKemTestServer.pureReply(clientPublic, algorithm == "mlkem1024-sha384")
             serverPublic = transformKexServerPublic(reply)
             sharedSecret = secret
