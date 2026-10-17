@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,13 +63,16 @@ class KtorTcpTransportTest {
         val transport = KtorTcpTransport("example.com", 22, resolver, factory)
 
         assertNull(transport.getLocalAddress())
+        assertNull(transport.remoteAddress)
         transport.connect()
 
         assertEquals(localAddress, transport.getLocalAddress())
+        assertEquals(InetSocketAddress(addr, 22), transport.remoteAddress)
 
         transport.close()
 
         assertNull(transport.getLocalAddress())
+        assertNull(transport.remoteAddress)
     }
 
     @Test
@@ -115,6 +118,7 @@ class KtorTcpTransportTest {
         assertEquals(2, factory.connectionAttempts.size)
         assertEquals(ipv6, factory.connectionAttempts[0])
         assertEquals(ipv4, factory.connectionAttempts[1])
+        assertEquals(InetSocketAddress(ipv4, 22), transport.remoteAddress)
         assertTrue(transport.isConnected)
     }
 
