@@ -33,8 +33,14 @@ package org.connectbot.sshlib {
   }
 
   public interface AgentProvider {
+    method public default suspend java.lang.Object? addIdentity(java.security.KeyPair keyPair, java.lang.String comment, boolean confirmUse, java.lang.Long? lifetimeSeconds, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<java.lang.Boolean>>);
     method public suspend java.lang.Object? getIdentities(kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<? extends java.util.List<org.connectbot.sshlib.AgentIdentity>>>);
+    method public default suspend java.lang.Object? isLocked(kotlin.coroutines.Continuation<? super java.lang.Boolean>);
+    method public default suspend java.lang.Object? lock(java.lang.String passphrase, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<java.lang.Boolean>>);
+    method public default suspend java.lang.Object? removeAllIdentities(kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<java.lang.Boolean>>);
+    method public default suspend java.lang.Object? removeIdentity(byte[] publicKeyBlob, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<java.lang.Boolean>>);
     method public suspend java.lang.Object? signData(org.connectbot.sshlib.AgentSigningContext context, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<byte[]?>>);
+    method public default suspend java.lang.Object? unlock(java.lang.String passphrase, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AgentResult<java.lang.Boolean>>);
   }
 
   public sealed exhaustive interface AgentResult<T> {

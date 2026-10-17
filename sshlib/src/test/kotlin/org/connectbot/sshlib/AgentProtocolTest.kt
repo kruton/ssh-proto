@@ -29,6 +29,7 @@ import org.connectbot.sshlib.client.SignedDataComponents
 import org.connectbot.sshlib.client.buildAgentMessage
 import org.connectbot.sshlib.client.isConstraintSatisfied
 import org.connectbot.sshlib.crypto.withMldsaTestProvider
+import org.connectbot.sshlib.protocol.SshAgentEnums.MessageType
 import org.connectbot.sshlib.protocol.SshAgentIdentitiesAnswer
 import org.connectbot.sshlib.protocol.SshAgentMessage
 import org.connectbot.sshlib.protocol.SshAgentSignResponse
@@ -85,7 +86,7 @@ class AgentProtocolTest {
         val message = SshAgentMessage(stream)
         message._read()
 
-        assertEquals(11, message.messageType())
+        assertEquals(MessageType.REQUEST_IDENTITIES, message.messageType())
         assertTrue(message.payload() is SshAgentcRequestIdentities)
     }
 
@@ -107,7 +108,7 @@ class AgentProtocolTest {
         val message = SshAgentMessage(stream)
         message._read()
 
-        assertEquals(13, message.messageType())
+        assertEquals(MessageType.SIGN_REQUEST, message.messageType())
         val payload = message.payload() as SshAgentcSignRequest
         assertArrayEquals(byteArrayOf(1, 2, 3, 4), payload.keyBlob().data())
         assertArrayEquals(byteArrayOf(5, 6, 7, 8), payload.data().data())
@@ -706,7 +707,7 @@ class BuildAgentMessageTest {
 
     @Test
     fun `empty payload encodes correctly`() {
-        val result = buildAgentMessage(5, ByteArray(0))
+        val result = buildAgentMessage(MessageType.FAILURE, ByteArray(0))
         val (msgType, payload) = parseMessage(result)
         assertEquals(5, msgType)
         assertArrayEquals(ByteArray(0), payload)
@@ -715,7 +716,7 @@ class BuildAgentMessageTest {
     @Test
     fun `small payload roundtrips`() {
         val data = byteArrayOf(1, 2, 3)
-        val result = buildAgentMessage(14, data)
+        val result = buildAgentMessage(MessageType.SIGN_RESPONSE, data)
         val (msgType, payload) = parseMessage(result)
         assertEquals(14, msgType)
         assertArrayEquals(data, payload)
@@ -724,7 +725,7 @@ class BuildAgentMessageTest {
     @Test
     fun `255-byte payload makes byte 2 of length non-zero`() {
         val data = ByteArray(255) { it.toByte() }
-        val result = buildAgentMessage(12, data)
+        val result = buildAgentMessage(MessageType.IDENTITIES_ANSWER, data)
         val (msgType, payload) = parseMessage(result)
         assertEquals(12, msgType)
         assertArrayEquals(data, payload)
@@ -734,7 +735,7 @@ class BuildAgentMessageTest {
     @Test
     fun `65535-byte payload makes byte 1 of length non-zero`() {
         val data = ByteArray(65535) { it.toByte() }
-        val result = buildAgentMessage(6, data)
+        val result = buildAgentMessage(MessageType.SUCCESS, data)
         val (msgType, payload) = parseMessage(result)
         assertEquals(6, msgType)
         assertArrayEquals(data, payload)
