@@ -70,6 +70,8 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           persist-credentials: false
+          # Sonar analyzes the PR head. Other matrix entries retain merge testing.
+          ref: ${{ github.event_name == 'pull_request' && matrix.java == '25' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
@@ -115,12 +117,22 @@ jobs:
           build/python-coverage/bin/python -m coverage run -m unittest discover -s .github/scripts -p 'test_vendor_sntrup.py' -v
           build/python-coverage/bin/python -m coverage xml
 
-      - name: Run SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: "${{ matrix.java == '25' && env.SONAR_TOKEN != '' }}"
-        run: ./gradlew sonar -Dsonar.projectVersion=${{ github.sha }}
+      - name: Stage isolated analysis inputs
+        if: matrix.java == '25'
+        run: ./gradlew --dependency-verification strict stageSonarInputs
+
+      - name: Upload isolated analysis inputs
+        if: >-
+          matrix.java == '25' &&
+          (github.event_name == 'pull_request' || github.event_name == 'schedule' ||
+           (github.event_name == 'push' && github.ref_type == 'branch' &&
+            (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))))
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sonar-inputs-${{ github.run_attempt }}
+          path: build/sonar-inputs/
+          if-no-files-found: error
+          retention-days: 7
 
   publication:
     name: Attested Maven publication

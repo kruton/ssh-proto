@@ -1,0 +1,20 @@
+name: SonarCloud
+on:
+  workflow_run:
+    workflows: [Continuous Integration]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+jobs:
+  sonar:
+    uses: connectbot/actions/.github/workflows/sonar-analysis.yml@efb8a52267a1d4ab147090af0f68cea3bffe144d
+    with:
+      producer_workflow: .github/workflows/ci.yml
+      artifact_prefix: sonar-inputs
+      config_path: .github/sonar.json
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -1,0 +1,40 @@
+{
+  "project_key": "connectbot_cbssh",
+  "organization": "connectbot",
+  "properties": {
+    "sonar.projectName": "ConnectBot SSH Library",
+    "sonar.sources": ".github,build.gradle.kts,protocol/build.gradle.kts,sshlib/build.gradle.kts,testapp/build.gradle.kts,settings.gradle.kts,protocol/src/main/kotlin,sshlib/src/main/java,sshlib/src/main/kotlin,testapp/src/main/kotlin",
+    "sonar.tests": "protocol/src/test/kotlin,sshlib/src/test/kotlin",
+    "sonar.exclusions": "**/build/generated/**",
+    "sonar.coverage.exclusions": "testapp/**",
+    "sonar.sourceEncoding": "UTF-8",
+    "sonar.java.source": "17",
+    "sonar.issue.ignore.multicriteria": "cognitiveComplexityConnection,cognitiveComplexitySftp,cognitiveComplexityTransport",
+    "sonar.issue.ignore.multicriteria.cognitiveComplexityConnection.ruleKey": "kotlin:S3776",
+    "sonar.issue.ignore.multicriteria.cognitiveComplexityConnection.resourceKey": "**/src/main/kotlin/org/connectbot/sshlib/client/SshConnection.kt",
+    "sonar.issue.ignore.multicriteria.cognitiveComplexitySftp.ruleKey": "kotlin:S3776",
+    "sonar.issue.ignore.multicriteria.cognitiveComplexitySftp.resourceKey": "**/src/main/kotlin/org/connectbot/sshlib/client/sftp/SftpDispatcher.kt",
+    "sonar.issue.ignore.multicriteria.cognitiveComplexityTransport.ruleKey": "kotlin:S3776",
+    "sonar.issue.ignore.multicriteria.cognitiveComplexityTransport.resourceKey": "**/src/main/kotlin/org/connectbot/sshlib/transport/KtorTcpTransport.kt"
+  },
+  "artifact_paths": {
+    "sonar.java.binaries": [
+      "classes/*/main"
+    ],
+    "sonar.java.test.binaries": [
+      "classes/*/test"
+    ],
+    "sonar.java.libraries": [
+      "libraries/*/main/*.jar"
+    ],
+    "sonar.java.test.libraries": [
+      "libraries/*/test/*.jar"
+    ],
+    "sonar.coverage.jacoco.xmlReportPaths": [
+      "reports/kover/report.xml"
+    ],
+    "sonar.python.coverage.reportPaths": [
+      "reports/python/coverage.xml"
+    ]
+  }
+}
