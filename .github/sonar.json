@@ -4,8 +4,8 @@
   "properties": {
     "sonar.projectName": "ConnectBot SSH Library",
     "sonar.sources": ".github,build.gradle.kts,protocol/build.gradle.kts,sshlib/build.gradle.kts,testapp/build.gradle.kts,settings.gradle.kts,protocol/src/main/kotlin,sshlib/src/main/java,sshlib/src/main/kotlin,testapp/src/main/kotlin",
-    "sonar.tests": "protocol/src/test/kotlin,sshlib/src/test/kotlin",
-    "sonar.exclusions": "**/build/generated/**",
+    "sonar.tests": "protocol/src/test/kotlin,sshlib/src/test/kotlin,.github/scripts/test_vendor_sntrup.py",
+    "sonar.exclusions": "**/build/generated/**,.github/scripts/test_vendor_sntrup.py",
     "sonar.coverage.exclusions": "testapp/**",
     "sonar.sourceEncoding": "UTF-8",
     "sonar.java.source": "17",
