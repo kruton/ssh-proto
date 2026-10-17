@@ -110,14 +110,29 @@
   <div class="breadcrumbs"><a href="../../../index.html">ConnectBot SSH Library</a><span class="delimiter">/</span><a href="../index.html">org.connectbot.sshlib</a><span class="delimiter">/</span><span class="current">AgentProvider</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Agent</span><wbr></wbr><span><span>Provider</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">AgentProvider</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/fc89094fae0606bbe76ea2391ab53373c3153d31/sshlib/src/main/kotlin/org/connectbot/sshlib/AgentProvider.kt#L76">source</a>)</span></span></div><p class="paragraph">Provider interface for SSH agent forwarding.</p><p class="paragraph">Implement this interface to handle agent requests from remote servers when agent forwarding is enabled. The library will call these methods when a remote server requests identities or signatures. Implementations should return <a href="../-agent-result/-failure/index.html">AgentResult.Failure</a> instead of throwing when a backend operation fails.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">AgentProvider</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/e8970a1b4fbaac36a6a769499f71bd51def981ad/sshlib/src/main/kotlin/org/connectbot/sshlib/AgentProvider.kt#L76">source</a>)</span></span></div><p class="paragraph">Provider interface for SSH agent forwarding.</p><p class="paragraph">Implement this interface to handle agent requests from remote servers when agent forwarding is enabled. The library will call these methods when a remote server requests identities or signatures. Implementations should return <a href="../-agent-result/-failure/index.html">AgentResult.Failure</a> instead of throwing when a backend operation fails.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="-596416977%2FFunctions%2F-1357994179" anchor-label="getIdentities" id="-596416977%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+        <div class="table"><a data-name="-1916652461%2FFunctions%2F-1357994179" anchor-label="addIdentity" id="-1916652461%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-identity.html"><span>add</span><wbr></wbr><span><span>Identity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1916652461%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="add-identity.html"><span class="token function">addIdentity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">keyPair<span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/security/KeyPair.html">KeyPair</a><span class="token punctuation">, </span></span><span class="parameter ">comment<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">confirmUse<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">lifetimeSeconds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Optional agent management operations. Providers deny mutations by default.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-596416977%2FFunctions%2F-1357994179" anchor-label="getIdentities" id="-596416977%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
           <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -128,6 +143,66 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="get-identities.html"><span class="token function">getIdentities</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-agent-identity/index.html">AgentIdentity</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Return the list of identities available for forwarding.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="439103205%2FFunctions%2F-1357994179" anchor-label="isLocked" id="439103205%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-locked.html"><span>is</span><wbr></wbr><span><span>Locked</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="439103205%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="is-locked.html"><span class="token function">isLocked</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Lock state is shared by all forwarded channels using this provider.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1148995414%2FFunctions%2F-1357994179" anchor-label="lock" id="1148995414%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lock.html"><span><span>lock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1148995414%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="lock.html"><span class="token function">lock</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">passphrase<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1564504408%2FFunctions%2F-1357994179" anchor-label="removeAllIdentities" id="-1564504408%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove-all-identities.html"><span>remove</span><wbr></wbr><span>All</span><wbr></wbr><span><span>Identities</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1564504408%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="remove-all-identities.html"><span class="token function">removeAllIdentities</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2100606771%2FFunctions%2F-1357994179" anchor-label="removeIdentity" id="2100606771%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove-identity.html"><span>remove</span><wbr></wbr><span><span>Identity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2100606771%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="remove-identity.html"><span class="token function">removeIdentity</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">publicKeyBlob<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -143,6 +218,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="sign-data.html"><span class="token function">signData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">context<span class="token operator">: </span><a href="../-agent-signing-context/index.html">AgentSigningContext</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Sign data with the specified key.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-657877585%2FFunctions%2F-1357994179" anchor-label="unlock" id="-657877585%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="unlock.html"><span><span>unlock</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-657877585%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="unlock.html"><span class="token function">unlock</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">passphrase<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-agent-result/index.html">AgentResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span></div></div></div>
                 </div>
               </div>
             </div>

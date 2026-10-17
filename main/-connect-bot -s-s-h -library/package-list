@@ -100,6 +100,7 @@ $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransport/connect/#/Point
 $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransport/getLocalAddress/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport/get-local-address.html
 $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransport/isConnected/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport/is-connected.html
 $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransport/read/#kotlin.Int/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport/read.html
+$dokka.location:org.connectbot.sshlib.transport/KtorTcpTransport/remoteAddress/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport/remote-address.html
 $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransport/write/#kotlin.ByteArray/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport/write.html
 $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransportFactory///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport-factory/index.html
 $dokka.location:org.connectbot.sshlib.transport/KtorTcpTransportFactory/KtorTcpTransportFactory/#kotlin.String#kotlin.Int#org.connectbot.sshlib.transport.IpVersion/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-ktor-tcp-transport-factory/-ktor-tcp-transport-factory.html
@@ -110,6 +111,7 @@ $dokka.location:org.connectbot.sshlib.transport/Transport///PointingToDeclaratio
 $dokka.location:org.connectbot.sshlib.transport/Transport/close/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport/close.html
 $dokka.location:org.connectbot.sshlib.transport/Transport/isConnected/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport/is-connected.html
 $dokka.location:org.connectbot.sshlib.transport/Transport/read/#kotlin.Int/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport/read.html
+$dokka.location:org.connectbot.sshlib.transport/Transport/remoteAddress/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport/remote-address.html
 $dokka.location:org.connectbot.sshlib.transport/Transport/write/#kotlin.ByteArray/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport/write.html
 $dokka.location:org.connectbot.sshlib.transport/TransportException///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport-exception/index.html
 $dokka.location:org.connectbot.sshlib.transport/TransportException/TransportException/#kotlin.String#kotlin.Throwable?/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/-transport-exception/-transport-exception.html
@@ -136,8 +138,14 @@ $dokka.location:org.connectbot.sshlib/AgentKeySpec/hashCode/#/PointingToDeclarat
 $dokka.location:org.connectbot.sshlib/AgentKeySpec/isCa/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-key-spec/is-ca.html
 $dokka.location:org.connectbot.sshlib/AgentKeySpec/keyBlob/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-key-spec/key-blob.html
 $dokka.location:org.connectbot.sshlib/AgentProvider///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/index.html
+$dokka.location:org.connectbot.sshlib/AgentProvider/addIdentity/#java.security.KeyPair#kotlin.String#kotlin.Boolean#kotlin.Long?/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/add-identity.html
 $dokka.location:org.connectbot.sshlib/AgentProvider/getIdentities/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/get-identities.html
+$dokka.location:org.connectbot.sshlib/AgentProvider/isLocked/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/is-locked.html
+$dokka.location:org.connectbot.sshlib/AgentProvider/lock/#kotlin.String/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/lock.html
+$dokka.location:org.connectbot.sshlib/AgentProvider/removeAllIdentities/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/remove-all-identities.html
+$dokka.location:org.connectbot.sshlib/AgentProvider/removeIdentity/#kotlin.ByteArray/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/remove-identity.html
 $dokka.location:org.connectbot.sshlib/AgentProvider/signData/#org.connectbot.sshlib.AgentSigningContext/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/sign-data.html
+$dokka.location:org.connectbot.sshlib/AgentProvider/unlock/#kotlin.String/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-provider/unlock.html
 $dokka.location:org.connectbot.sshlib/AgentResult.Failure///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-result/-failure/index.html
 $dokka.location:org.connectbot.sshlib/AgentResult.Failure/Failure/#kotlin.String#kotlin.Throwable?/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-result/-failure/-failure.html
 $dokka.location:org.connectbot.sshlib/AgentResult.Failure/cause/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-agent-result/-failure/cause.html
@@ -377,6 +385,7 @@ $dokka.location:org.connectbot.sshlib/SshClient/openDirectTcpipTransport/#kotlin
 $dokka.location:org.connectbot.sshlib/SshClient/openSession/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client/open-session.html
 $dokka.location:org.connectbot.sshlib/SshClient/openSftp/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client/open-sftp.html
 $dokka.location:org.connectbot.sshlib/SshClient/ping/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client/ping.html
+$dokka.location:org.connectbot.sshlib/SshClient/remoteAddress/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client/remote-address.html
 $dokka.location:org.connectbot.sshlib/SshClient/remotePortForward/#kotlin.String#kotlin.Int#kotlin.String#kotlin.Int/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client/remote-port-forward.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/index.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/Builder/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/-builder.html

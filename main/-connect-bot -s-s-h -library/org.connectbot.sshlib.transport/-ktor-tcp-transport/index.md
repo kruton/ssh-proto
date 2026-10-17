@@ -28,6 +28,7 @@ jvm
 | Name | Summary |
 |---|---|
 | [isConnected](is-connected.md) | [jvm]<br>open override val [isConnected](is-connected.md): [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html)<br>Check if the transport is still connected. |
+| [remoteAddress](remote-address.md) | [jvm]<br>@[Volatile](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-volatile/index.html)<br>open override var [remoteAddress](remote-address.md): [InetSocketAddress](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/net/InetSocketAddress.html)?<br>Actual connected network peer, or null for transports without a TCP endpoint. |
 
 ## Functions
 

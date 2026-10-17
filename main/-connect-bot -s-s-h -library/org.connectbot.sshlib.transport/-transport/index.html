@@ -110,7 +110,7 @@
   <div class="breadcrumbs"><a href="../../../index.html">ConnectBot SSH Library</a><span class="delimiter">/</span><a href="../index.html">org.connectbot.sshlib.transport</a><span class="delimiter">/</span><span class="current">Transport</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Transport</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">Transport</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/fc89094fae0606bbe76ea2391ab53373c3153d31/sshlib/src/main/kotlin/org/connectbot/sshlib/transport/Transport.kt#L32">source</a>)</span></span></div><p class="paragraph">Transport abstraction for SSH connections.</p><p class="paragraph">This interface allows SSH to work over any byte stream transport, not just TCP sockets. Implementations could include:</p><ul><li><p class="paragraph">TCP sockets (via Ktor or other libraries)</p></li><li><p class="paragraph">Unix domain sockets</p></li><li><p class="paragraph">Serial ports</p></li><li><p class="paragraph">Custom transport layers</p></li></ul><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-ktor-tcp-transport/index.html">KtorTcpTransport</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">Transport</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/e8970a1b4fbaac36a6a769499f71bd51def981ad/sshlib/src/main/kotlin/org/connectbot/sshlib/transport/Transport.kt#L32">source</a>)</span></span></div><p class="paragraph">Transport abstraction for SSH connections.</p><p class="paragraph">This interface allows SSH to work over any byte stream transport, not just TCP sockets. Implementations could include:</p><ul><li><p class="paragraph">TCP sockets (via Ktor or other libraries)</p></li><li><p class="paragraph">Unix domain sockets</p></li><li><p class="paragraph">Serial ports</p></li><li><p class="paragraph">Custom transport layers</p></li></ul><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-ktor-tcp-transport/index.html">KtorTcpTransport</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -128,6 +128,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="is-connected.html">isConnected</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Check if the transport is still connected.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="58713445%2FProperties%2F-1357994179" anchor-label="remoteAddress" id="58713445%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remote-address.html"><span>remote</span><wbr></wbr><span><span>Address</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="58713445%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="remote-address.html">remoteAddress</a><span class="token operator">: </span><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/net/InetSocketAddress.html">InetSocketAddress</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Actual connected network peer, or null for transports without a TCP endpoint.</p></div></div></div>
                 </div>
               </div>
             </div>
