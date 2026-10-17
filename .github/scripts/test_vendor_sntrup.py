@@ -14,6 +14,68 @@ import vendor_sntrup as vendor
 
 
 class ArchiveInputTest(unittest.TestCase):
+    def test_cli_rejects_unexpected_artifact_before_reading_archive(self):
+        with patch.object(vendor.sys, "argv", ["vendor_sntrup.py"]), \
+                patch.object(vendor, "MANIFEST") as manifest, \
+                patch.object(vendor, "read_archive") as download:
+            manifest.read_text.return_value = json.dumps({"artifact": "unexpected:artifact"})
+            with self.assertRaisesRegex(ValueError, "Unexpected upstream artifact"):
+                vendor.main()
+            download.assert_not_called()
+
+    def test_check_failure_reports_review_instructions_without_updating_manifest(self):
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as jar:
+            jar.writestr(vendor.LICENSE_ENTRY, b"license")
+        with patch.object(vendor.sys, "argv", ["vendor_sntrup.py", "--check"]), \
+                patch.object(vendor, "MANIFEST") as manifest, \
+                patch.object(vendor, "SOURCE_FILES", []), \
+                patch.object(vendor, "read_archive", return_value=archive.getvalue()), \
+                patch.object(vendor, "extract", return_value={}), \
+                patch.object(vendor, "verify", return_value=["UPSTREAM CHANGED: example"]), \
+                patch.object(vendor.sys, "stderr", io.StringIO()) as stderr:
+            manifest.read_text.return_value = json.dumps({
+                "artifact": "org.bouncycastle:bcprov-jdk18on", "version": "1.86",
+            })
+            self.assertEqual(1, vendor.main())
+            self.assertIn("UPSTREAM CHANGED: example", stderr.getvalue())
+            self.assertIn("Review upstream against reviewedVersion", stderr.getvalue())
+            manifest.write_text.assert_not_called()
+
+    def test_update_writes_extracted_sources_license_and_reproducible_manifest(self):
+        originals = {
+            vendor.NTRU + "Utils.java": b"package org.bouncycastle.pqc.crypto.ntruprime;\nclass Utils {\n}\n",
+            vendor.PREFIX + "crypto/Example.java": b"package org.bouncycastle.crypto;\npublic class Example {}\n",
+            vendor.LICENSE_ENTRY: b"upstream license",
+        }
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as jar:
+            for name, data in originals.items():
+                jar.writestr(name, data)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest_file = root / "upstream.json"
+            manifest_file.write_text(json.dumps({
+                "artifact": "org.bouncycastle:bcprov-jdk18on", "version": "1.86", "reviewedVersion": "1.85",
+            }))
+            output = root / "java"
+            license_file = root / "LICENSE.md"
+            destination = vendor.destination
+            with patch.object(vendor.sys, "argv", ["vendor_sntrup.py", "--update", "--archive-stdin"]), \
+                    patch.object(vendor.sys, "stdin") as stdin, \
+                    patch.object(vendor.sys, "stdout", io.StringIO()), \
+                    patch.object(vendor, "MANIFEST", manifest_file), \
+                    patch.object(vendor, "SOURCE_FILES", [name for name in originals if name != vendor.LICENSE_ENTRY]), \
+                    patch.object(vendor, "destination", side_effect=lambda name: destination(name, output, license_file)):
+                stdin.buffer.read.return_value = archive.getvalue()
+                self.assertEqual(0, vendor.main())
+            manifest = json.loads(manifest_file.read_text())
+            self.assertEqual("1.86", manifest["reviewedVersion"])
+            self.assertEqual(b"upstream license", license_file.read_bytes())
+            self.assertIn("class Example {}", (output / "Example.java").read_text())
+            self.assertNotIn("public class", (output / "Example.java").read_text())
+            self.assertEqual([], vendor.verify(manifest, originals, vendor.extract(originals), output, license_file))
+
     def test_download_uses_manifest_version_and_fixed_maven_url(self):
         with patch.object(vendor.urllib.request, "urlopen") as download:
             download.return_value.__enter__.return_value.read.return_value = b"archive"
@@ -128,6 +190,55 @@ class VerificationTest(unittest.TestCase):
 
 
 class ExtractionTest(unittest.TestCase):
+    def test_adapts_crypto_dependencies_and_adds_private_key_erasure(self):
+        originals = {
+            vendor.NTRU + "Utils.java": b"class Utils {\n}\n",
+            vendor.NTRU + "SNTRUPrimePrivateKeyParameters.java": b"""package org.bouncycastle.pqc.crypto.ntruprime;
+import org.bouncycastle.util.Arrays;
+public class SNTRUPrimePrivateKeyParameters {
+    Object a = Arrays.clone(f);
+    Object b = Arrays.copyOfRange(f, 0, 1);
+    boolean c = Arrays.constantTimeAreEqual(f, ginv);
+    Object random = CryptoServicesRegistrar.getSecureRandom();
+    Object supplied = CryptoServicesRegistrar.getSecureRandom(random);
+}
+""",
+            vendor.LICENSE_ENTRY: b"license",
+        }
+        result = vendor.extract(originals)
+        source = result[vendor.NTRU + "SNTRUPrimePrivateKeyParameters.java"].decode()
+        self.assertIn("f.clone()", source)
+        self.assertIn("java.util.Arrays.copyOfRange(f, 0, 1)", source)
+        self.assertIn("java.security.MessageDigest.isEqual(f, ginv)", source)
+        self.assertIn("new SecureRandom()", source)
+        self.assertIn("(random != null ? random : new SecureRandom())", source)
+        for field in ("f", "ginv", "pk", "rho", "hash"):
+            self.assertIn(f"java.util.Arrays.fill({field}, (byte)0);", source)
+        self.assertNotIn("org.bouncycastle", source)
+        self.assertEqual(b"license", result[vendor.LICENSE_ENTRY])
+
+    def test_unadapted_upstream_dependency_fails_extraction(self):
+        with self.assertRaisesRegex(ValueError, "Unadapted BC dependency"):
+            vendor.extract({
+                vendor.NTRU + "Utils.java": b"class Utils {\n}\n",
+                vendor.NTRU + "Caller.java": b"class Caller { Object value = CryptoServicesRegistrar.newMethod(); }",
+                vendor.LICENSE_ENTRY: b"license",
+            })
+
+    def test_overloaded_upstream_helper_fails_extraction(self):
+        with self.assertRaisesRegex(ValueError, "Upstream Utils now overloads helper"):
+            vendor.client_utils({vendor.NTRU + "Utils.java": """class Utils {
+    static int helper()
+    {
+        return 1;
+    }
+    static int helper(int value)
+    {
+        return value;
+    }
+}
+"""})
+
     def test_small_polynomial_adaptation_requires_each_upstream_shift_once(self):
         shifts = [f"        x += (byte)(sp[spIndex++] + 1) << {shift};" for shift in (2, 4, 6)]
         for body in ("\n".join(shifts), "\n".join(shifts[:-1]), "\n".join(shifts + shifts[:1])):
@@ -152,7 +263,7 @@ class ExtractionTest(unittest.TestCase):
             vendor.NTRU + "Utils.java": """class Utils {
     protected static int outer()
     {
-        return inner();
+        return inner() + inner();
     }
     private static int inner()
     {

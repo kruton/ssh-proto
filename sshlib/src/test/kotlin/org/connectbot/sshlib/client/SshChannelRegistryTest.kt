@@ -25,6 +25,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.connectbot.sshlib.protocol.SshChannelState
 import org.connectbot.sshlib.protocol.SshChannelStateMachine
+import org.connectbot.sshlib.protocol.SshMsgChannelOpenConfirmation
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -134,6 +135,122 @@ class SshChannelRegistryTest {
         every { localChannelNumber } returns local
         every { remoteChannelNumber } returns remote
         every { isOpen } returns true
+    }
+
+    @Test
+    fun `binding rejects stale duplicate and already bound entries without changing indexes`() {
+        val registry = SshChannelRegistry()
+        registry.registerPendingSession(1, CompletableDeferred(), SshChannelStateMachine(SshChannelState.OPENING))
+        registry.registerPendingSession(2, CompletableDeferred(), SshChannelStateMachine(SshChannelState.OPENING))
+        val first = registry.findPendingSession(1)!!
+        val second = registry.findPendingSession(2)!!
+        registry.bindRemoteRecipient(first, 10)
+
+        assertFailsWith<IllegalStateException> { registry.bindRemoteRecipient(first, 11) }
+        assertFailsWith<IllegalStateException> { registry.bindRemoteRecipient(second, 10) }
+        assertEquals(10, first.remoteChannelNumber)
+        assertNull(second.remoteChannelNumber)
+        registry.unregister(2)
+        assertFailsWith<IllegalStateException> { registry.bindRemoteRecipient(second, 20) }
+        assertNull(registry.findByRemoteRecipient(20))
+        registry.promote(first, sessionChannel(1, 10))
+        assertEquals(1, registry.findByRemoteRecipient(10)?.localChannelNumber)
+    }
+
+    @Test
+    fun `promotion rejects changed recipients and removed entries`() {
+        val registry = SshChannelRegistry()
+        registry.registerPendingSession(1, CompletableDeferred(), SshChannelStateMachine(SshChannelState.OPENING))
+        val pending = registry.findPendingSession(1)!!
+        registry.bindRemoteRecipient(pending, 10)
+        assertFailsWith<IllegalStateException> { registry.promote(pending, sessionChannel(2, 10)) }
+        assertFailsWith<IllegalStateException> { registry.promote(pending, sessionChannel(1, 11)) }
+        assertSame(pending, registry.findPendingSession(1))
+        registry.unregister(1)
+        assertFailsWith<IllegalStateException> { registry.promote(pending, sessionChannel(1, 10)) }
+        assertTrue(registry.snapshot().isEmpty())
+    }
+
+    @Test
+    fun `pending removal requires matching deferred and channel kind`() {
+        val registry = SshChannelRegistry()
+        val sessionReply = CompletableDeferred<SshMsgChannelOpenConfirmation?>()
+        val forwardingReply = CompletableDeferred<ForwardingChannel?>()
+        registry.registerPendingSession(1, sessionReply, SshChannelStateMachine(SshChannelState.OPENING))
+        registry.registerPendingForwarding(2, forwardingReply, 32768, 65536, SshChannelStateMachine(SshChannelState.OPENING))
+        val session = registry.findPendingSession(1)!!
+        val forwarding = registry.findPendingForwarding(2)!!
+        registry.bindRemoteRecipient(session, 10)
+        registry.bindRemoteRecipient(forwarding, 20)
+
+        assertNull(registry.removePendingSessionIf(1, CompletableDeferred()))
+        assertNull(registry.removePendingForwardingIf(2, CompletableDeferred()))
+        assertNull(registry.removePendingSessionIf(2, sessionReply))
+        assertNull(registry.removePendingForwardingIf(1, forwardingReply))
+        assertNull(registry.removePendingSessionIf(3, sessionReply))
+        assertNull(registry.removePendingForwardingIf(3, forwardingReply))
+        assertEquals(2, registry.snapshot().size)
+        assertSame(session, registry.removePendingSessionIf(1, sessionReply))
+        assertSame(forwarding, registry.removePendingForwardingIf(2, forwardingReply))
+        assertTrue(registry.snapshot().isEmpty())
+        assertNull(registry.findByRemoteRecipient(10))
+        assertNull(registry.findByRemoteRecipient(20))
+        assertNull(registry.unregister(1))
+    }
+
+    @Test
+    fun `forwarding promotion retains recipients and reflects channel liveness`() {
+        val registry = SshChannelRegistry()
+        registry.registerPendingForwarding(1, CompletableDeferred(), 32768, 65536, SshChannelStateMachine(SshChannelState.OPENING))
+        val pending = registry.findPendingForwarding(1)!!
+        registry.bindRemoteRecipient(pending, 10)
+        assertNull(registry.findByRemoteRecipient(10))
+        assertTrue(registry.establishedSnapshot().isEmpty())
+        val channel = forwardingChannel(1, 10)
+        registry.promote(pending, channel)
+        val established = registry.establishedSnapshot().single()
+        assertEquals(SshChannelRegistry.Kind.FORWARDING, established.kind)
+        assertTrue(established.isOpen)
+        every { channel.isOpen } returns false
+        assertEquals(false, established.isOpen)
+        assertSame(established, registry.findByRemoteRecipient(10))
+    }
+
+    @Test
+    fun `disconnect continues after channel failure and closes every kind exactly once`() = runTest {
+        val registry = SshChannelRegistry()
+        val session = sessionChannel(1, 10)
+        val forwarding = forwardingChannel(2, 20)
+        val agent = mockk<AgentChannel> {
+            every { localChannelNumber } returns 3
+            every { remoteChannelNumber } returns 30
+            every { isOpen } returns true
+        }
+        val failure = IllegalStateException("session cleanup failed")
+        coEvery { session.onDisconnected() } throws failure
+        coEvery { forwarding.onDisconnected() } returns Unit
+        coEvery { agent.onDisconnected() } returns Unit
+        registry.register(session)
+        registry.register(forwarding)
+        registry.register(agent)
+        assertTrue(registry.establishedSnapshot().all { it.isOpen })
+        assertEquals(SshChannelRegistry.Kind.AGENT, registry.findByLocalRecipient(3)?.kind)
+        val reply = CompletableDeferred<SshMsgChannelOpenConfirmation?>()
+        registry.registerPendingSession(4, reply, SshChannelStateMachine(SshChannelState.OPENING))
+        val pending = registry.findPendingSession(4)!!
+        val cause = IllegalStateException("transport closed")
+
+        registry.disconnectAll(cause)
+        registry.disconnectAll(cause)
+
+        assertEquals(listOf(failure), cause.suppressed.toList())
+        assertEquals(cause.message, assertFailsWith<IllegalStateException> { reply.await() }.message)
+        coVerify(exactly = 1) { session.onDisconnected() }
+        coVerify(exactly = 1) { forwarding.onDisconnected() }
+        coVerify(exactly = 1) { agent.onDisconnected() }
+        assertTrue(registry.snapshot().isEmpty())
+        assertFailsWith<IllegalStateException> { registry.bindRemoteRecipient(pending, 40) }
+        assertFailsWith<IllegalStateException> { registry.promote(pending, sessionChannel(4, 40)) }
     }
 
     private fun forwardingChannel(local: Int, remote: Int) = mockk<ForwardingChannel> {

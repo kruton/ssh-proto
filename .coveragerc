@@ -1,0 +1,9 @@
+[run]
+branch = True
+relative_files = True
+source = .github/scripts
+omit = */test_*.py
+data_file = build/.coverage
+
+[xml]
+output = build/reports/python/coverage.xml

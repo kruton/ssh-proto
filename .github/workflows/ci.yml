@@ -107,6 +107,14 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --dependency-verification strict build koverXmlReport --info -PjdkVersion=${{ matrix.java }}
 
+      - name: Measure Python source-verification coverage
+        if: matrix.java == '25'
+        run: |
+          python3 -m venv build/python-coverage
+          build/python-coverage/bin/pip install -r .github/scripts/requirements-coverage.txt
+          build/python-coverage/bin/python -m coverage run -m unittest discover -s .github/scripts -p 'test_vendor_sntrup.py' -v
+          build/python-coverage/bin/python -m coverage xml
+
       - name: Run SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
