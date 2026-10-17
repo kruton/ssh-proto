@@ -27,10 +27,15 @@ import org.connectbot.sshlib.AgentResult
 import org.connectbot.sshlib.AgentSigningContext
 import org.connectbot.sshlib.DestinationConstraint
 import org.connectbot.sshlib.crypto.SignatureVerifier
+import org.connectbot.sshlib.protocol.SshAgentEnums.ConstraintKind
+import org.connectbot.sshlib.protocol.SshAgentEnums.MessageType
 import org.connectbot.sshlib.protocol.SshAgentIdentitiesAnswer
 import org.connectbot.sshlib.protocol.SshAgentMessage
 import org.connectbot.sshlib.protocol.SshAgentSignResponse
+import org.connectbot.sshlib.protocol.SshAgentcAddIdentity
 import org.connectbot.sshlib.protocol.SshAgentcExtension
+import org.connectbot.sshlib.protocol.SshAgentcLock
+import org.connectbot.sshlib.protocol.SshAgentcRemoveIdentity
 import org.connectbot.sshlib.protocol.SshAgentcSessionBind
 import org.connectbot.sshlib.protocol.SshAgentcSignRequest
 import org.connectbot.sshlib.protocol.UserauthPublickeySignatureDataAny
@@ -110,15 +115,11 @@ internal data class SignedDataComponents(
     }
 }
 
-internal fun buildAgentMessage(messageType: Int, payload: ByteArray): ByteArray {
-    val totalLength = 1L + payload.size
-    val stream = ByteBufferKaitaiStream(4 + totalLength)
-    stream.writeU4be(totalLength)
-    stream.writeU1(messageType)
-    stream.writeBytes(payload)
-    stream.seek(0)
-    return stream.readBytesFull()
-}
+internal fun buildAgentMessage(messageType: MessageType, payload: ByteArray): ByteArray = SshAgentMessage().apply {
+    setLength(1L + payload.size)
+    setMessageType(messageType)
+    setPayload(payload)
+}.toByteArray(initialCapacity = 5L + payload.size)
 
 internal fun isConstraintSatisfied(
     constraints: List<DestinationConstraint>,
@@ -184,14 +185,6 @@ internal class AgentProtocolHandler(
     companion object {
         private val logger = LoggerFactory.getLogger(AgentProtocolHandler::class.java)
 
-        const val SSH_AGENTC_REQUEST_IDENTITIES: Int = 11
-        const val SSH_AGENT_IDENTITIES_ANSWER: Int = 12
-        const val SSH_AGENTC_SIGN_REQUEST: Int = 13
-        const val SSH_AGENT_SIGN_RESPONSE: Int = 14
-        const val SSH_AGENT_FAILURE: Int = 5
-        const val SSH_AGENTC_EXTENSION: Int = 27
-        const val SSH_AGENT_SUCCESS: Int = 6
-
         private const val MAX_BINDINGS = 16
         private const val SERVICE_CONNECTION = "ssh-connection"
         private const val METHOD_PUBLICKEY = "publickey"
@@ -230,12 +223,33 @@ internal class AgentProtocolHandler(
         val messageType = message.messageType()
         logger.debug("Agent message type: $messageType")
 
+        if (provider.isLocked() && messageType != MessageType.UNLOCK && messageType != MessageType.REQUEST_IDENTITIES) return createFailureResponse()
         when (messageType) {
-            SSH_AGENTC_REQUEST_IDENTITIES -> handleRequestIdentities()
+            MessageType.ADD_IDENTITY, MessageType.ADD_ID_CONSTRAINED -> handleAddIdentity(message)
 
-            SSH_AGENTC_SIGN_REQUEST -> handleSignRequest(message)
+            MessageType.REMOVE_IDENTITY -> {
+                val payload = message.payload() as SshAgentcRemoveIdentity
+                require(payload._io().isEof)
+                managementResponse(provider.removeIdentity(payload.keyBlob().data()))
+            }
 
-            SSH_AGENTC_EXTENSION -> handleExtension(message)
+            MessageType.REMOVE_ALL_IDENTITIES -> {
+                require(message._raw_payload().isEmpty())
+                managementResponse(provider.removeAllIdentities())
+            }
+
+            MessageType.LOCK, MessageType.UNLOCK -> {
+                val payload = message.payload() as SshAgentcLock
+                require(payload._io().isEof)
+                val passphrase = String(payload.passphrase().data(), Charsets.UTF_8)
+                managementResponse(if (messageType == MessageType.LOCK) provider.lock(passphrase) else provider.unlock(passphrase))
+            }
+
+            MessageType.REQUEST_IDENTITIES -> handleRequestIdentities()
+
+            MessageType.SIGN_REQUEST -> handleSignRequest(message)
+
+            MessageType.EXTENSION -> handleExtension(message)
 
             else -> {
                 logger.warn("Unknown agent message type: $messageType")
@@ -249,10 +263,28 @@ internal class AgentProtocolHandler(
         createFailureResponse()
     }
 
+    private suspend fun handleAddIdentity(message: SshAgentMessage): ByteArray {
+        val payload = message.payload() as SshAgentcAddIdentity
+        require(message.messageType() == MessageType.ADD_ID_CONSTRAINED || payload.constraints().isEmpty())
+        val lifetimes = payload.constraints().filter { it.kind() == ConstraintKind.LIFETIME }
+        require(lifetimes.size <= 1)
+        val lifetime = lifetimes.singleOrNull()?.lifetime()
+        return managementResponse(
+            provider.addIdentity(
+                decodeAgentIdentity(payload),
+                String(payload.comment().data(), Charsets.UTF_8),
+                payload.constraints().any { it.kind() == ConstraintKind.CONFIRM },
+                lifetime,
+            ),
+        )
+    }
+
+    private fun managementResponse(result: AgentResult<Boolean>): ByteArray = if (result is AgentResult.Success && result.value) createSuccessResponse() else createFailureResponse()
+
     private suspend fun handleRequestIdentities(): ByteArray {
         logger.debug("Handling REQUEST_IDENTITIES")
 
-        val allIdentities = when (val result = getProviderIdentities()) {
+        val allIdentities = when (val result = if (provider.isLocked()) AgentResult.Success(emptyList()) else getProviderIdentities()) {
             is AgentResult.Success -> result.value
 
             is AgentResult.Failure -> {
@@ -279,7 +311,7 @@ internal class AgentProtocolHandler(
         response.setIdentities(identityList)
         response._check()
 
-        return buildAgentMessage(SSH_AGENT_IDENTITIES_ANSWER, response.toByteArray())
+        return buildAgentMessage(MessageType.IDENTITIES_ANSWER, response.toByteArray())
     }
 
     private fun filterVisibleIdentities(identities: List<AgentIdentity>): List<AgentIdentity> {
@@ -386,7 +418,7 @@ internal class AgentProtocolHandler(
             val response = SshAgentSignResponse()
             response.setSignature(createByteString(signature))
             response._check()
-            buildAgentMessage(SSH_AGENT_SIGN_RESPONSE, response.toByteArray())
+            buildAgentMessage(MessageType.SIGN_RESPONSE, response.toByteArray())
         } else {
             logger.info("Provider denied signing request")
             createFailureResponse()
@@ -582,9 +614,9 @@ internal class AgentProtocolHandler(
         logger.warn("Agent provider failed to $operation: ${failure.message}", failure.cause)
     }
 
-    private fun createFailureResponse(): ByteArray = buildAgentMessage(SSH_AGENT_FAILURE, ByteArray(0))
+    private fun createFailureResponse(): ByteArray = buildAgentMessage(MessageType.FAILURE, ByteArray(0))
 
-    private fun createSuccessResponse(): ByteArray = buildAgentMessage(SSH_AGENT_SUCCESS, ByteArray(0))
+    private fun createSuccessResponse(): ByteArray = buildAgentMessage(MessageType.SUCCESS, ByteArray(0))
 }
 
 internal data class AgentSessionInfo(
