@@ -496,6 +496,7 @@ class SshConnection(
 
     @Volatile private var currentAuthMethod: AuthMethod? = null
     private val triedPublicKeys: MutableSet<AuthPublicKey> = Collections.synchronizedSet(mutableSetOf())
+    private val completedPublicKeys: MutableSet<AuthPublicKey> = Collections.synchronizedSet(mutableSetOf())
 
     private var packetLoopJob: Job? = null
 
@@ -969,52 +970,56 @@ class SshConnection(
             allowedAuthentications = noneResult.allowedMethods
         }
 
-        val allowedMethods = allowedAuthentications!!
-        handler.onAuthMethodsAvailable(allowedMethods)
-
-        // Step 2: Public key phase
-        if ("publickey" in allowedMethods) {
-            val keys = handler.onPublicKeysNeeded()
-            for (key in keys) {
-                if (key in triedPublicKeys) continue
-                val probeResult = probePublicKey(username, key, handler, channel)
-                if (probeResult is InternalAuthResult.Success) return PublicAuthResult.Success
-                if (probeResult is InternalAuthResult.PkOk) {
-                    triedPublicKeys.add(key)
-                    val signResult = signPublicKey(username, key, handler, channel)
-                    if (signResult) return PublicAuthResult.Success
-                } else {
-                    triedPublicKeys.add(key)
-                }
-                if (probeResult is InternalAuthResult.Failure) {
-                    allowedAuthentications = probeResult.allowedMethods
-                }
-                // InternalAuthResult.Failure → try next key
+        var keys: List<AuthPublicKey>? = null
+        val attemptedMethods = mutableSetOf<AuthMethod>()
+        while (true) {
+            val allowedMethods = allowedAuthentications.orEmpty()
+            handler.onAuthMethodsAvailable(allowedMethods)
+            val candidate = if ("publickey" in allowedMethods) {
+                if (keys == null) keys = handler.onPublicKeysNeeded()
+                keys.firstOrNull { it !in triedPublicKeys && it !in completedPublicKeys }
+            } else {
+                null
             }
-        }
-
-        for (method in selectPasswordMethods(allowedMethods, preferPasswordAuth)) {
-            when (method) {
-                is AuthMethod.KeyboardInteractive -> {
-                    val kbdResult = doKeyboardInteractive(username, handler, channel)
-                    if (kbdResult) return PublicAuthResult.Success
+            val result = if (candidate != null) {
+                triedPublicKeys.add(candidate)
+                when (val probe = probePublicKey(username, candidate, handler, channel)) {
+                    is InternalAuthResult.PkOk -> signPublicKey(username, candidate, handler, channel)
+                    else -> probe
                 }
+            } else {
+                val method = selectPasswordMethods(allowedMethods, preferPasswordAuth)
+                    .firstOrNull { it !in attemptedMethods }
+                    ?: return PublicAuthResult.Failure(allowedMethods)
+                attemptedMethods.add(method)
+                when (method) {
+                    is AuthMethod.KeyboardInteractive -> doKeyboardInteractive(username, handler, channel)
 
-                is AuthMethod.Password -> {
-                    val password = handler.onPasswordNeeded() ?: return PublicAuthResult.Failure(allowedAuthentications ?: emptySet())
-                    val passResult = doPasswordAuth(username, password, handler, channel)
-                    if (passResult) return PublicAuthResult.Success
-                }
+                    is AuthMethod.Password -> {
+                        val password = handler.onPasswordNeeded() ?: continue
+                        doPasswordAuth(username, password, handler, channel)
+                    }
 
-                is AuthMethod.PublicKey,
-                is AuthMethod.Unknown,
-                -> {
-                    logger.warn("Skipping unexpected auth method: ${AuthMethod.toSshName(method)}")
+                    else -> continue
                 }
             }
-        }
+            when (result) {
+                is InternalAuthResult.Success -> return PublicAuthResult.Success
 
-        return PublicAuthResult.Failure(allowedAuthentications ?: emptySet())
+                is InternalAuthResult.Failure -> {
+                    allowedAuthentications = result.allowedMethods
+                    if (result.partialSuccess) {
+                        // Previously rejected keys can become valid for the next factor,
+                        // but a successful key must never be used twice.
+                        candidate?.let { completedPublicKeys.add(it) }
+                        triedPublicKeys.clear()
+                        attemptedMethods.clear()
+                    }
+                }
+
+                else -> Unit
+            }
+        }
     }
 
     private suspend fun probePublicKey(
@@ -1046,12 +1051,12 @@ class SshConnection(
         key: AuthPublicKey,
         handler: AuthHandler,
         channel: Channel<InternalAuthResult>,
-    ): Boolean {
+    ): InternalAuthResult? {
         val sid = sessionId ?: throw SshException(ERROR_SESSION_ID_NOT_ESTABLISHED)
         val hostBoundKeyBlob = serverHostKeyBlob.takeIf { serverAdvertisesHostBound }
 
         val effectiveAlgorithmName = if (keyBlobAlgorithmName(key.publicKeyBlob) == KEY_TYPE_SSH_RSA) {
-            negotiateRsaAlgorithm() ?: return false
+            negotiateRsaAlgorithm() ?: return null
         } else {
             key.algorithmName
         }
@@ -1063,7 +1068,7 @@ class SshConnection(
         }
 
         val signingKey = if (effectiveAlgorithmName != key.algorithmName) key.copy(algorithmName = effectiveAlgorithmName) else key
-        val signature = handler.onSignatureRequest(signingKey, signatureData) ?: return false
+        val signature = handler.onSignatureRequest(signingKey, signatureData) ?: return null
 
         if (hostBoundKeyBlob != null) {
             sendAuthRequest(username, METHOD_PUBLICKEY_HOSTBOUND) {
@@ -1090,18 +1095,14 @@ class SshConnection(
             }
         }
 
-        val response = receiveAuthResult(channel, handler)
-        return when (response) {
-            is InternalAuthResult.Success -> true
-            else -> false
-        }
+        return receiveAuthResult(channel, handler)
     }
 
     private suspend fun doKeyboardInteractive(
         username: String,
         handler: AuthHandler,
         channel: Channel<InternalAuthResult>,
-    ): Boolean {
+    ): InternalAuthResult? {
         sendAuthRequest(username, "keyboard-interactive") {
             val kbdInteractive = UserauthRequestKeyboardInteractive().apply {
                 setLanguageTag(createByteString(ByteArray(0)))
@@ -1117,11 +1118,10 @@ class SshConnection(
                     handler.onBanner(result.message)
                 }
 
-                is InternalAuthResult.Success -> return true
+                is InternalAuthResult.Success -> return result
 
                 is InternalAuthResult.Failure -> {
-                    allowedAuthentications = result.allowedMethods
-                    return false
+                    return result
                 }
 
                 is InternalAuthResult.InfoRequest -> {
@@ -1129,7 +1129,7 @@ class SshConnection(
                         result.name,
                         result.instruction,
                         result.prompts,
-                    ) ?: return false
+                    ) ?: return null
 
                     val responseMsg = SshMsgUserauthInfoResponse().apply {
                         setNumResponses(responses.size.toLong())
@@ -1149,7 +1149,7 @@ class SshConnection(
 
                 is InternalAuthResult.PkOk -> {
                     // Unexpected during keyboard-interactive
-                    return false
+                    return null
                 }
             }
         }
@@ -1160,7 +1160,7 @@ class SshConnection(
         password: String,
         handler: AuthHandler,
         channel: Channel<InternalAuthResult>,
-    ): Boolean {
+    ): InternalAuthResult? {
         sendAuthRequest(username, "password") {
             val passAuth = UserauthRequestPassword().apply {
                 setChangePassword(0)
@@ -1170,17 +1170,7 @@ class SshConnection(
             setMethodSpecificFields(passAuth)
         }
 
-        val response = receiveAuthResult(channel, handler)
-        return when (val result = response) {
-            is InternalAuthResult.Success -> true
-
-            is InternalAuthResult.Failure -> {
-                allowedAuthentications = result.allowedMethods
-                false
-            }
-
-            else -> false
-        }
+        return receiveAuthResult(channel, handler)
     }
 
     private suspend fun receiveAuthResult(

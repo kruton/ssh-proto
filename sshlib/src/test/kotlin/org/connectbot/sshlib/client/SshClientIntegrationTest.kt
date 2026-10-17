@@ -56,6 +56,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.parallel.ResourceLock
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.output.Slf4jLogConsumer
@@ -656,6 +657,46 @@ class SshClientIntegrationTest {
             assertFalse(client.isAuthenticated, "Client should not be authenticated")
         } finally {
             client.disconnect()
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["publickey,password", "publickey,keyboard-interactive", "publickey,publickey"])
+    fun `authentication follows OpenSSH multi-factor methods`(methods: String): Unit = runBlocking {
+        val server: GenericContainer<*> = GenericContainer(opensshContainer.dockerImageName)
+            .withExposedPorts(22)
+            .withCommand("/usr/sbin/sshd", "-D", "-e", "-o", "AuthenticationMethods=$methods")
+            .waitingFor(Wait.forLogMessage(".*Server listening.*", 1))
+        server.use {
+            it.start()
+            val client = SshClient(
+                SshClientConfig {
+                    host = it.host
+                    port = it.getMappedPort(22)
+                    hostKeyVerifier = acceptAllVerifier
+                },
+            )
+            val materials = listOf(readTestKey(), readRsaTestKey())
+            val keys = materials.map { pem -> SshSigning.encodePublicKey(SshKeys.decodePemPrivateKey(pem)) }
+            val handler = object : AuthHandler {
+                override suspend fun onPublicKeysNeeded() = if (methods == "publickey,publickey") keys else keys.take(1)
+                override suspend fun onSignatureRequest(key: AuthPublicKey, dataToSign: ByteArray): ByteArray {
+                    val index = keys.indexOfFirst { candidate -> candidate.publicKeyBlob.contentEquals(key.publicKeyBlob) }
+                    return SshSigning.sign(key.algorithmName, materials[index], null, dataToSign)
+                }
+                override suspend fun onKeyboardInteractivePrompt(
+                    name: String,
+                    instruction: String,
+                    prompts: List<KeyboardInteractiveCallback.Prompt>,
+                ) = prompts.map { PASSWORD }
+                override suspend fun onPasswordNeeded() = PASSWORD
+            }
+            try {
+                assertIs<ConnectResult.Success>(client.connect())
+                assertIs<AuthResult.Success>(withTimeout(15_000) { client.authenticate(USERNAME, handler) })
+            } finally {
+                client.disconnect()
+            }
         }
     }
 
