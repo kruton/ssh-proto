@@ -43,9 +43,7 @@ def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def read_archive(version, archive=None):
-    if archive:
-        return Path(archive).read_bytes()
+def read_archive(version):
     if not re.fullmatch(r"\d+(?:\.\d+)+", version):
         raise ValueError("Expected a numeric Maven release version")
     url = ("https://repo.maven.apache.org/maven2/org/bouncycastle/bcprov-jdk18on/"
@@ -83,11 +81,12 @@ def client_utils(sources):
     for name in roots:
         visit(name)
     # Spell out Java's compound-assignment narrowing without changing the arithmetic.
-    # Keep the casts on the shifted operands too, matching upstream for every byte value.
+    # Mask shifted operands to avoid sign extension. Final byte narrowing preserves
+    # upstream's result modulo 256, including for coefficients outside -1, 0, 1.
     if "getEncodedSmallPolynomial" in needed:
         for shift in (2, 4, 6):
             original = f"x += (byte)(sp[spIndex++] + 1) << {shift};"
-            explicit = f"x = (byte)(x + ((byte)(sp[spIndex++] + 1) << {shift}));"
+            explicit = f"x = (byte)(x + (((sp[spIndex++] + 1) & 0xff) << {shift}));"
             body = methods["getEncodedSmallPolynomial"]
             if body.count(original) != 1:
                 raise ValueError("Upstream small-polynomial encoding changed; review the narrowing casts")
@@ -173,16 +172,17 @@ def verify(manifest, originals, generated, output=OUTPUT, license_file=LICENSE):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="verify without modifying files (default)")
     mode.add_argument("--update", action="store_true", help="regenerate sources and accept hashes for review")
-    parser.add_argument("--archive", type=Path, help="use a local BC sources JAR instead of downloading")
+    parser.add_argument("--archive-stdin", action="store_true", help="read a BC sources JAR from stdin instead of downloading")
     args = parser.parse_args()
     manifest = json.loads(MANIFEST.read_text())
     if manifest["artifact"] != "org.bouncycastle:bcprov-jdk18on":
         raise ValueError("Unexpected upstream artifact")
-    with zipfile.ZipFile(io.BytesIO(read_archive(manifest["version"], args.archive))) as archive:
+    archive_bytes = sys.stdin.buffer.read() if args.archive_stdin else read_archive(manifest["version"])
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
         originals = {name: archive.read(name) for name in SOURCE_FILES + [LICENSE_ENTRY]}
     generated = extract(originals)
     if args.update:

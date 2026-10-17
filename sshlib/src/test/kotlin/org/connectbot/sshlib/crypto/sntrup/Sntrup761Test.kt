@@ -37,6 +37,52 @@ import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimePrivateKeyParameters as B
 import org.bouncycastle.pqc.crypto.ntruprime.SNTRUPrimePublicKeyParameters as BcPublicKey
 
 class Sntrup761Test {
+    @Test
+    fun `small polynomial encoding preserves upstream byte arithmetic`() {
+        fun upstreamEncoding(coefficients: ByteArray): ByteArray {
+            val encoded = ByteArray(coefficients.size / 4 + 1)
+            for (group in 0 until coefficients.size / 4) {
+                val offset = group * 4
+                var x = (coefficients[offset] + 1).toByte()
+                for (position in 1..3) {
+                    x = (x + ((coefficients[offset + position] + 1).toByte().toInt() shl (position * 2))).toByte()
+                }
+                encoded[group] = x
+            }
+            encoded[encoded.lastIndex] = (coefficients.last() + 1).toByte()
+            return encoded
+        }
+
+        fun checkEncoding(coefficients: ByteArray) {
+            val actual = ByteArray(coefficients.size / 4 + 1)
+            Utils.getEncodedSmallPolynomial(actual, coefficients, coefficients.size)
+            assertContentEquals(upstreamEncoding(coefficients), actual)
+        }
+
+        // Exercise every accumulator and shifted byte, plus the trailing coefficient.
+        for (accumulator in -128..127) {
+            for (coefficient in -128..127) {
+                for (position in 1..3) {
+                    val coefficients = ByteArray(5) { (-1).toByte() }
+                    coefficients[0] = accumulator.toByte()
+                    coefficients[position] = coefficient.toByte()
+                    coefficients[4] = coefficient.toByte()
+                    checkEncoding(coefficients)
+                }
+            }
+        }
+        // Cover every valid four-coefficient combination and the SNTRUP761 tail.
+        for (combination in 0 until 81) {
+            var remaining = combination
+            val coefficients = ByteArray(761) { (it % 3 - 1).toByte() }
+            for (position in 0..3) {
+                coefficients[position] = (remaining % 3 - 1).toByte()
+                remaining /= 3
+            }
+            checkEncoding(coefficients)
+        }
+    }
+
     private fun random(seed: Int) = SecureRandom.getInstance("SHA1PRNG").apply {
         setSeed(byteArrayOf(seed.toByte()))
     }
