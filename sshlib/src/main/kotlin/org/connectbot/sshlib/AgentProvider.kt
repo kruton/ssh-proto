@@ -95,6 +95,20 @@ interface AgentProvider {
      * or [AgentResult.Failure] if the provider could not process the request
      */
     suspend fun signData(context: AgentSigningContext): AgentResult<ByteArray?>
+
+    /** Optional agent management operations. Providers deny mutations by default. */
+    suspend fun addIdentity(keyPair: java.security.KeyPair, comment: String, confirmUse: Boolean, lifetimeSeconds: Long?): AgentResult<Boolean> = AgentResult.Success(false)
+
+    suspend fun removeIdentity(publicKeyBlob: ByteArray): AgentResult<Boolean> = AgentResult.Success(false)
+
+    suspend fun removeAllIdentities(): AgentResult<Boolean> = AgentResult.Success(false)
+
+    /** Lock state is shared by all forwarded channels using this provider. */
+    suspend fun isLocked(): Boolean = false
+
+    suspend fun lock(passphrase: String): AgentResult<Boolean> = AgentResult.Success(false)
+
+    suspend fun unlock(passphrase: String): AgentResult<Boolean> = AgentResult.Success(false)
 }
 
 /**

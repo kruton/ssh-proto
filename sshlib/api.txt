@@ -602,9 +602,11 @@ package org.connectbot.sshlib {
     method public suspend java.lang.Object? openSftp(kotlin.coroutines.Continuation<? super org.connectbot.sshlib.SftpResult<? extends org.connectbot.sshlib.SftpClient>>);
     method public suspend java.lang.Object? ping(kotlin.coroutines.Continuation<? super org.connectbot.sshlib.PingResult>);
     method public suspend java.lang.Object? remotePortForward(java.lang.String remoteBindAddress, int remoteBindPort, java.lang.String localHost, int localPort, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.PortForwarder?>);
+    method @InaccessibleFromKotlin public java.net.InetSocketAddress? getRemoteAddress();
     property public org.connectbot.sshlib.ConnectionInfo? connectionInfo;
     property public kotlinx.coroutines.flow.SharedFlow<java.lang.Throwable?> disconnectedFlow;
     property public boolean isAuthenticated;
+    property public java.net.InetSocketAddress? remoteAddress;
     field public static final org.connectbot.sshlib.SshClient.Companion Companion;
   }
 
@@ -948,6 +950,7 @@ package org.connectbot.sshlib.transport {
     method public suspend java.lang.Object? read(int count, kotlin.coroutines.Continuation<? super byte[]>);
     method public suspend java.lang.Object? write(byte[] data, kotlin.coroutines.Continuation<? super kotlin.Unit>);
     property public boolean isConnected;
+    property public java.net.InetSocketAddress? remoteAddress;
   }
 
   public final class KtorTcpTransportFactory implements org.connectbot.sshlib.transport.TransportFactory {
@@ -964,7 +967,9 @@ package org.connectbot.sshlib.transport {
     method @InaccessibleFromKotlin public boolean isConnected();
     method public suspend java.lang.Object? read(int count, kotlin.coroutines.Continuation<? super byte[]>);
     method public suspend java.lang.Object? write(byte[] data, kotlin.coroutines.Continuation<? super kotlin.Unit>);
+    method @InaccessibleFromKotlin public default java.net.InetSocketAddress? getRemoteAddress();
     property public abstract boolean isConnected;
+    property public default java.net.InetSocketAddress? remoteAddress;
   }
 
   public final class TransportException extends org.connectbot.sshlib.SshException {

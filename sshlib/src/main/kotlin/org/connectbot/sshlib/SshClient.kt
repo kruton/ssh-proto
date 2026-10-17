@@ -417,6 +417,10 @@ class SshClient private constructor(
     val connectionInfo: ConnectionInfo?
         get() = connection?.connectionInfo
 
+    /** Actual connected network peer; null for jump-host channels and disconnected clients. */
+    val remoteAddress: java.net.InetSocketAddress?
+        get() = transport?.remoteAddress
+
     /**
      * Open a session channel (RFC 4254 section 6.1).
      *

@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import kotlinx.coroutines.supervisorScope
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.Collections
 
 /**
@@ -63,6 +64,10 @@ class KtorTcpTransport internal constructor(
     )
 
     private var socket: TransportSocket? = null
+
+    @Volatile
+    override var remoteAddress: java.net.InetSocketAddress? = null
+        private set
     private var readChannel: ByteReadChannel? = null
     private var writeChannel: ByteWriteChannel? = null
     private var selectorManager: SelectorManager? = null
@@ -136,7 +141,9 @@ class KtorTcpTransport internal constructor(
                 }
             }
 
-            socket = connectHappyEyeballs(factory, addresses)
+            val winner = connectHappyEyeballs(factory, addresses)
+            socket = winner.first
+            remoteAddress = InetSocketAddress(winner.second, port)
 
             readChannel = socket!!.openReadChannel()
             writeChannel = socket!!.openWriteChannel(autoFlush = false)
@@ -155,8 +162,8 @@ class KtorTcpTransport internal constructor(
     private suspend fun connectHappyEyeballs(
         factory: TcpSocketFactory,
         addresses: List<InetAddress>,
-    ): TransportSocket = supervisorScope {
-        val resultChannel = Channel<TransportSocket>(capacity = 1)
+    ): Pair<TransportSocket, InetAddress> = supervisorScope {
+        val resultChannel = Channel<Pair<TransportSocket, InetAddress>>(capacity = 1)
         val failures = Collections.synchronizedList(mutableListOf<Throwable>())
         val attempts = Collections.synchronizedList(mutableListOf<Job>())
 
@@ -174,7 +181,7 @@ class KtorTcpTransport internal constructor(
                     try {
                         val s = factory.connect(address, port)
 
-                        if (resultChannel.trySend(s).isSuccess) {
+                        if (resultChannel.trySend(s to address).isSuccess) {
                             // Winner
                         } else {
                             // Lost the race
@@ -244,6 +251,7 @@ class KtorTcpTransport internal constructor(
             writeChannel = null
             readChannel = null
             socket = null
+            remoteAddress = null
             selectorManager = null
         }
     }
