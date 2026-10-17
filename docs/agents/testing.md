@@ -20,6 +20,35 @@ Java 25 matches the CI analysis job and exercises native ML-KEM support; Java 17
 those runtime-dependent tests. The Python XML report is written to
 `build/reports/python/coverage.xml`; `.coveragerc` keeps source paths relative for CI.
 
+### Pull request quality gate
+
+The repository ruleset requires `SonarCloud Code Analysis` from the SonarQube Cloud
+GitHub App for `main` and release branches. The `SonarCloud` workflow runs after CI
+and waits up to five minutes for the gate. Gate failures and timeouts fail analysis.
+
+Java 25 PR builds test the exact PR head and upload bytecode, dependency JARs,
+Kover XML, and Python coverage using `stageSonarInputs`. The Java 17 and 21 jobs
+retain merge-commit testing. Builds receive no `SONAR_TOKEN`, including builds of
+in-repository PRs. Fork PRs use the same automated process once GitHub permits their
+CI run; no maintainer-created branch is needed.
+
+A reusable workflow in `connectbot/actions` validates the producer run and current
+PR head, fetches source independently, and scans on a fresh runner. Only the
+standalone scanner receives `SONAR_TOKEN`; it never executes the PR's build scripts.
+Analysis settings come from `.github/sonar.json` on the default-branch revision
+running the consumer, not from the PR. Settings changes take effect after merging.
+The existing Gradle `sonar` task remains available for local trusted analysis.
+
+Missing/invalid artifacts fail validation. Closed PRs, superseded attempts, and
+outdated heads skip without creating a passing Sonar check. Re-run all CI jobs to regenerate
+expired artifacts or retry an interrupted scan. The consumer workflow must exist
+on the default branch before `workflow_run` can trigger it. Keep the App's check
+required: the consumer workflow's own GitHub check is on the default-branch context.
+
+Default/release branch pushes and scheduled default-branch builds also use this
+isolated scan to refresh comparison baselines. Coverage reports are build outputs,
+not independent proof of the tests a contributor ran.
+
 ## Test Servers
 
 Integration tests live in `sshlib/src/test/.../client/` and use **Testcontainers** to spin up
