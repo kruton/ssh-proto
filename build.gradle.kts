@@ -76,6 +76,8 @@ subprojects {
     pluginManager.withPlugin("java") {
         val sourceSets = extensions.getByType<SourceSetContainer>()
         val stageModule = tasks.register<Sync>("stageSonarModuleInputs") {
+            group = "verification"
+            description = "Stages module bytecode and dependency JARs for isolated SonarCloud analysis"
             into(layout.buildDirectory.dir("sonar-inputs"))
             for (sourceSetName in listOf("main", "test")) {
                 val sources = sourceSets.named(sourceSetName)
