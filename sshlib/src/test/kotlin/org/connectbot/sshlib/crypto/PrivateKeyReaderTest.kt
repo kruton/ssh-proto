@@ -19,6 +19,8 @@ package org.connectbot.sshlib.crypto
 
 import org.connectbot.sshlib.SshException
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -229,6 +231,103 @@ class PrivateKeyReaderTest {
         assertFailsWith<SshException> {
             PrivateKeyReader.read(readKey("ed25519_encrypted"), "wrongpass")
         }
+    }
+
+    @Test
+    fun `PEM reader rejects missing markers and empty key data`() {
+        for ((text, message) in listOf(
+            "not a key" to "Invalid PEM: no recognized BEGIN marker found",
+            "-----BEGIN RSA PRIVATE KEY-----" to "Invalid PEM: no data",
+            pem("RSA PRIVATE KEY", byteArrayOf()) to "Invalid PEM: no data",
+        )) {
+            assertEquals(message, assertFailsWith<SshException> { PemKeyReader.read(text, null) }.message)
+        }
+    }
+
+    @Test
+    fun `legacy PEM encryption requires a password and complete cipher metadata`() {
+        val body = "-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\n"
+        val tail = "\nAQ==\n-----END RSA PRIVATE KEY-----"
+        assertEquals(
+            "PEM is encrypted, but no passphrase was specified",
+            assertFailsWith<SshException> { PemKeyReader.read(body + tail, null) }.message,
+        )
+        assertEquals(
+            "Broken PEM: no DEK-Info but encryption enabled",
+            assertFailsWith<SshException> { PemKeyReader.read(body + tail, "password") }.message,
+        )
+        assertEquals(
+            "Broken PEM: DEK-Info is incomplete",
+            assertFailsWith<SshException> { PemKeyReader.read(body + "DEK-Info: AES-128-CBC\n" + tail, "password") }.message,
+        )
+    }
+
+    @Test
+    fun `non-encryption PEM headers preserve an unencrypted key`() {
+        val original = readKey("rsa_pem_unencrypted.pem")
+        val expected = PemKeyReader.read(original, null)
+        for (procType in listOf("4", "4,PLAIN", "4,ENCRYPTED,extra")) {
+            val text = "preamble\n" + original.replace(
+                "-----BEGIN RSA PRIVATE KEY-----",
+                "-----BEGIN RSA PRIVATE KEY-----\nComment: retained key\nProc-Type: $procType",
+            )
+            assertFalse(PemKeyReader.isEncrypted(text))
+            val actual = PemKeyReader.read(text, null)
+            assertContentEquals(expected.jcaKeyPair.public.encoded, actual.jcaKeyPair.public.encoded)
+            assertContentEquals(expected.jcaKeyPair.private.encoded, actual.jcaKeyPair.private.encoded)
+        }
+    }
+
+    @Test
+    fun `legacy keys reject unsupported structure versions`() {
+        val rsa = encodeDer { sequence { integer(BigInteger.TWO) } }
+        val ec = encodeDer { sequence { integer(BigInteger.ZERO) } }
+        assertEquals(
+            "Wrong version (2) in RSA PRIVATE KEY",
+            assertFailsWith<SshException> { PemKeyReader.readPkcs1Rsa(rsa) }.message,
+        )
+        assertEquals(
+            "Wrong version (0) in EC PRIVATE KEY",
+            assertFailsWith<SshException> { PemKeyReader.readSec1Ec(ec) }.message,
+        )
+    }
+
+    @Test
+    fun `SEC1 keys require curve and public point metadata`() {
+        val noCurve = encodeDer {
+            sequence {
+                integer(BigInteger.ONE)
+                octetString(byteArrayOf(1))
+                contextTag(2) { nullValue() }
+            }
+        }
+        val noPublic = encodeDer {
+            sequence {
+                integer(BigInteger.ONE)
+                octetString(byteArrayOf(1))
+                contextTag(0) { objectIdentifier(PemKeyReader.SECP256R1_OID) }
+            }
+        }
+        assertEquals("EC key missing curve OID", assertFailsWith<SshException> { PemKeyReader.readSec1Ec(noCurve) }.message)
+        assertEquals("EC key missing public key", assertFailsWith<SshException> { PemKeyReader.readSec1Ec(noPublic) }.message)
+        assertEquals("Unknown EC curve OID", assertFailsWith<SshException> { PemKeyReader.oidToCurve(byteArrayOf(42, 3)) }.message)
+    }
+
+    @Test
+    fun `PKCS8 reader rejects unsupported algorithm and unterminated companion key`() {
+        val unsupported = encodeDer {
+            sequence {
+                integer(BigInteger.ZERO)
+                sequence { objectIdentifier(byteArrayOf(42, 3)) }
+                octetString(byteArrayOf(1))
+            }
+        }
+        assertEquals(
+            "Unable to parse PKCS#8 key: unsupported algorithm",
+            assertFailsWith<SshException> { PemKeyReader.read(pem("PRIVATE KEY", unsupported), null) }.message,
+        )
+        val text = readKey("ed25519_pkcs8.pem") + "\n-----BEGIN PUBLIC KEY-----\nAQ=="
+        assertEquals("Unterminated PUBLIC KEY PEM block", assertFailsWith<SshException> { PemKeyReader.read(text, null) }.message)
     }
 
     private fun pem(type: String, der: ByteArray): String = buildString {

@@ -3,6 +3,23 @@
 This file covers integration test servers, how to add new ones, known compatibility quirks,
 and the test key inventory for agents working on tests.
 
+## SonarCloud Coverage
+
+CI imports both JVM Kover coverage and Python coverage for the SNTRUP vendoring script.
+Reproduce the reports locally before running `./gradlew sonar`:
+
+```sh
+./gradlew build koverXmlReport -PjdkVersion=25
+python3 -m venv build/python-coverage
+build/python-coverage/bin/pip install -r .github/scripts/requirements-coverage.txt
+build/python-coverage/bin/python -m coverage run -m unittest discover -s .github/scripts -p 'test_vendor_sntrup.py' -v
+build/python-coverage/bin/python -m coverage xml
+```
+
+Java 25 matches the CI analysis job and exercises native ML-KEM support; Java 17 skips
+those runtime-dependent tests. The Python XML report is written to
+`build/reports/python/coverage.xml`; `.coveragerc` keeps source paths relative for CI.
+
 ## Test Servers
 
 Integration tests live in `sshlib/src/test/.../client/` and use **Testcontainers** to spin up
