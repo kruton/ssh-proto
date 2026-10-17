@@ -14,8 +14,9 @@ different because the extraction intentionally:
 - Uses JDK SHA-512, array utilities, constant-time digest comparison, and SecureRandom
   instead of BC's implementations and global registrar.
 - Adds private-key clearing for the connection's KEX lifecycle.
-- Makes byte narrowing explicit in the small-polynomial encoder, preserving Java's
-  compound-assignment semantics.
+- Masks shifted operands as unsigned bytes and makes final byte narrowing explicit
+  in the small-polynomial encoder, preserving Java's compound-assignment result
+  modulo 256 for every input byte.
 
 The polynomial arithmetic is retained from upstream. The original license is shipped
 as `META-INF/LICENSE-sntrup.md` in the library JAR.
@@ -52,6 +53,12 @@ and refreshes both sets of hashes and `reviewedVersion`. Inspect the generated c
 and run the interoperability tests before merging. If upstream changes structure, adapt
 the extraction script and review its generated output; do not just replace hashes.
 
-For offline checks, either command accepts `--archive /path/to/bcprov-sources.jar`.
+For offline use, pass the archive on standard input (replacing the former `--archive PATH` option):
+
+```sh
+python3 .github/scripts/vendor_sntrup.py --check --archive-stdin < /path/to/bcprov-sources.jar
+python3 .github/scripts/vendor_sntrup.py --update --archive-stdin < /path/to/bcprov-sources.jar
+```
+
 The archive must correspond to the manifest version. Do not edit generated Java files
 directly: make local adaptations in the script so regeneration remains reproducible.

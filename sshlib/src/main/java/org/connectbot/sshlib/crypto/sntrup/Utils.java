@@ -302,9 +302,9 @@ class Utils
         for (int i = 0; i < p / 4; i++)
         {
             x = (byte)(sp[spIndex++] + 1);
-            x = (byte)(x + ((byte)(sp[spIndex++] + 1) << 2));
-            x = (byte)(x + ((byte)(sp[spIndex++] + 1) << 4));
-            x = (byte)(x + ((byte)(sp[spIndex++] + 1) << 6));
+            x = (byte)(x + (((sp[spIndex++] + 1) & 0xff) << 2));
+            x = (byte)(x + (((sp[spIndex++] + 1) & 0xff) << 4));
+            x = (byte)(x + (((sp[spIndex++] + 1) & 0xff) << 6));
             encSP[encSPIndex++] = x;
         }
         encSP[encSPIndex] = (byte)(sp[spIndex] + 1);

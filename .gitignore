@@ -118,3 +118,6 @@ gradle/verification-keyring.keys.bak
 # Python documentation tools
 __pycache__/
 *.pyc
+
+# Local credentials
+.env
