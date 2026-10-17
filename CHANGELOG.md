@@ -1,6 +1,50 @@
 # Changelog
 
-## Unreleased
+## [0.6.0][0.6.0]
+
+Changes for library users since `0.5.1`.
+
+### Added
+
+- Added ML-KEM-768/P-256 and ML-KEM-1024/P-384 hybrid key exchanges,
+  plus SNTRUP761/X25519 key exchange under both standard and OpenSSH names.
+- Added opt-in pure ML-KEM key exchanges: `mlkem768-sha256` and
+  `mlkem1024-sha384`.
+- Added platform-backed ML-DSA-44/65/87 and ML-DSA-44/Ed25519 signatures
+  for host verification, public-key authentication, and agent session binding,
+  plus ML-DSA-87/P-384 composite host keys. Composite host algorithms are
+  enabled by default when supported by an installed provider; pure ML-DSA
+  host algorithms remain opt-in.
+- Added private-key import and export for supported post-quantum keys,
+  including encrypted OpenSSH and PKCS#8 PEM formats.
+- Added OpenSSH host-key rotation support with proof verification, including
+  post-quantum signatures.
+- Exposed the connected peer address through `SshClient.remoteAddress` and
+  the transport API.
+- Added optional `AgentProvider` operations for adding and removing identities,
+  confirmation and lifetime constraints, and agent locking and unlocking.
+
+### Changed
+
+- Published Maven artifacts now include SLSA provenance.
+
+### Fixed
+
+- Fixed multi-factor authentication to follow updated server authentication
+  methods after partial success, retry keys for subsequent factors, and avoid
+  reusing a key that already completed a factor.
+
+## [0.5.1][0.5.1]
+
+Changes for library users since `0.5.0`.
+
+### Added
+
+- Added `SshClientConfig.keepAliveIntervalMs` for SSH ignore-message heartbeats
+  (thanks [@JDis03](https://github.com/JDis03)).
+- Added session environment-variable requests.
+- Added the SFTP `copy-data` extension for server-side file copies
+  (thanks [@JDis03](https://github.com/JDis03)).
 
 ### Fixed
 
@@ -8,6 +52,10 @@
   remote channel close, including exec stderr and buffered SFTP responses (#317).
 - Released retained delivery workers and buffers on explicit session close or client disconnect,
   including when the network has already shut down.
+- Contained background transport and chaff-write failures during shutdown and
+  discarded in-flight channel data after local close
+  (thanks [@ptgamr](https://github.com/ptgamr)).
+- Enforced RFC 10042 hybrid key-exchange validation.
 
 ## [0.5.0][0.5.0]
 
@@ -168,6 +216,8 @@ Changes for library users since `0.2.1`.
 - Limited zlib decompression output per packet to reduce decompression-bomb
   denial-of-service risk.
 
+[0.6.0]: https://github.com/connectbot/cbssh/compare/v0.5.1...v0.6.0
+[0.5.1]: https://github.com/connectbot/cbssh/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/connectbot/cbssh/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/connectbot/cbssh/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/connectbot/cbssh/compare/v0.4.0...v0.4.1
