@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   sonar:
-    uses: connectbot/actions/.github/workflows/sonar-analysis.yml@e6d13d33632c888bfaaeb213d955b2318929278d
+    uses: connectbot/actions/.github/workflows/sonar-analysis.yml@465af86d6d58b2845c990ea68f2d7a102907cba7
     with:
       producer_workflow: .github/workflows/ci.yml
       artifact_prefix: sonar-inputs
