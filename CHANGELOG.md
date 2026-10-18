@@ -1,8 +1,15 @@
 # Changelog
 
-## Unreleased
+## [0.6.1][0.6.1]
 
 Changes for library users since `0.6.0`.
+
+### Fixed
+
+- Fixed connections to older SSH servers that terminate identification banners
+  with LF instead of CRLF, including legacy OpenSSH servers.
+- Tightened identification-banner validation to reject malformed banners and
+  enforce the 255-byte limit including the line ending.
 
 ## [0.6.0][0.6.0]
 
@@ -220,6 +227,7 @@ Changes for library users since `0.2.1`.
 - Limited zlib decompression output per packet to reduce decompression-bomb
   denial-of-service risk.
 
+[0.6.1]: https://github.com/connectbot/cbssh/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/connectbot/cbssh/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/connectbot/cbssh/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/connectbot/cbssh/compare/v0.4.2...v0.5.0
