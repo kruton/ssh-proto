@@ -27,7 +27,9 @@ import org.connectbot.sshlib.crypto.HmacSha256
 import org.connectbot.sshlib.crypto.PacketAead
 import org.connectbot.sshlib.protocol.SshEnums
 import org.connectbot.sshlib.protocol.SshMsgChannelData
+import org.connectbot.sshlib.protocol.SshMsgKexinit
 import org.connectbot.sshlib.protocol.createByteString
+import org.connectbot.sshlib.protocol.createNameList
 import org.connectbot.sshlib.protocol.toByteArray
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,6 +37,8 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.nio.ByteBuffer
 import java.security.SecureRandom
 import kotlin.test.assertFailsWith
@@ -181,6 +185,104 @@ class PacketIOTest {
         // IdBanner._read uses readBytesTerm(10, false, true, true)
         // This includes \r if present before \n
         assertEquals(bannerLine + "\r", parsedBanner.protoVersion())
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["\n", "\r\n", "\r\r\n"])
+    fun `legacy banner preserves the following KEXINIT packet`(ending: String) = runBlocking {
+        val kex = SshMsgKexinit().apply {
+            setCookie(ByteArray(16))
+            setKexAlgorithms(createNameList("diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1"))
+            setServerHostKeyAlgorithms(createNameList("ssh-rsa"))
+            setEncryptionAlgorithmsClientToServer(createNameList("aes128-cbc,aes192-cbc,aes256-cbc,3des-cbc"))
+            setEncryptionAlgorithmsServerToClient(createNameList("aes128-cbc,aes192-cbc,aes256-cbc,3des-cbc"))
+            setMacAlgorithmsClientToServer(createNameList("hmac-sha1,hmac-sha1-96,hmac-md5"))
+            setMacAlgorithmsServerToClient(createNameList("hmac-sha1,hmac-sha1-96,hmac-md5"))
+            setCompressionAlgorithmsClientToServer(createNameList("none"))
+            setCompressionAlgorithmsServerToClient(createNameList("none"))
+            setLanguagesClientToServer(createNameList(""))
+            setLanguagesServerToClient(createNameList(""))
+            setFirstKexPacketFollows(0)
+            setReserved(0)
+            _check()
+        }
+        val encoded = ByteArrayTransport()
+        PacketIO(encoded, TrackingSecureRandom()).writePacket(20, kex.toByteArray())
+        val packet = encoded.getWrittenData()
+        assertTrue(packet.size > 255)
+        val banner = "SSH-2.0-OpenSSH_3.7.1p2$ending"
+        val transport = ByteArrayTransport(banner.toByteArray(Charsets.US_ASCII) + packet)
+        val io = PacketIO(transport)
+
+        assertEquals("2.0-OpenSSH_3.7.1p2" + ending.removeSuffix("\n"), io.readBanner().protoVersion())
+        assertEquals(packet.size, transport.bytesRemaining)
+        val received = io.readPacket()
+        assertEquals(SshEnums.MessageType.SSH_MSG_KEXINIT, received.messageType())
+        assertArrayEquals(kex.toByteArray(), (received.body() as SshMsgKexinit).toByteArray())
+        assertTrue(transport.isInputExhausted)
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "2.0-OpenSSH_3.7.1p2",
+            "2.0-OpenSSH_5.0",
+            "1.99-OpenSSH_5.3",
+            "2.0-OpenSSH_7.4",
+            "2.0-OpenSSH_10.6",
+            "2.0-dropbear_2026.91",
+            "2.0-UnknownServer",
+            "2.0-FutureServer_99.0 vendor comment",
+        ],
+    )
+    fun `LF and CRLF banners preserve the next packet regardless of server version`(version: String) = runBlocking {
+        val following = byteArrayOf(0, 0, 1, 0)
+        for (ending in listOf("\n", "\r\n", "\r\r\n")) {
+            val transport = ByteArrayTransport("SSH-$version$ending".toByteArray(Charsets.US_ASCII) + following)
+            assertEquals(version + ending.removeSuffix("\n"), PacketIO(transport).readBanner().protoVersion())
+            assertArrayEquals(following, transport.read(following.size))
+            assertTrue(transport.isInputExhausted)
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+        strings = [
+            "SSH-2.0-Test\u0000\n",
+            "SSH-2.0-Test\u0000\r\n",
+            "SSH-2.0-Test\rX\n",
+            "SSH-2.0-Test\r\rX\r\n",
+            "SSH-2.0-Test\r\u0000\n",
+        ],
+    )
+    fun `readBanner rejects NUL and ordinary characters after CR`(wire: String) = runBlocking {
+        val error = assertFailsWith<TransportException> { PacketIO(ByteArrayTransport(wire.toByteArray())).readBanner() }
+        assertEquals("Malformed SSH identification", error.message)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["\n", "\r\n"])
+    fun `banner length limit includes its terminator`(ending: String) = runBlocking {
+        val prefix = "SSH-2.0-OpenSSH_3.7.1p2 "
+        val maximum = prefix + "x".repeat(255 - prefix.length - ending.length) + ending
+        assertEquals(maximum.substring(4).removeSuffix("\n"), PacketIO(ByteArrayTransport(maximum.toByteArray())).readBanner().protoVersion())
+        val tooLong = maximum.dropLast(ending.length) + "x" + ending
+        val error = assertFailsWith<TransportException> { PacketIO(ByteArrayTransport(tooLong.toByteArray())).readBanner() }
+        assertEquals("Banner too long", error.message)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["SSH-2.0-OpenSSH_3.7.1p2", "SSH-2.0-OpenSSH_3.7.1p2\r", "", "\n", "BAD-2.0-Test\r\n"])
+    fun `readBanner rejects truncated or malformed input`(wire: String) = runBlocking {
+        val error = assertFailsWith<TransportException> { PacketIO(ByteArrayTransport(wire.toByteArray())).readBanner() }
+        assertTrue(error.message.orEmpty().isNotEmpty())
+    }
+
+    @Test
+    fun `writeBanner keeps the standard CRLF ending`() = runBlocking {
+        val transport = ByteArrayTransport()
+        PacketIO(transport).writeBanner("SSH-2.0-TestClient")
+        assertArrayEquals("SSH-2.0-TestClient\r\n".toByteArray(Charsets.US_ASCII), transport.getWrittenData())
     }
 
     @Test

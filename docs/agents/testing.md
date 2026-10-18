@@ -61,6 +61,7 @@ real SSH servers in Docker. All require Docker to be running.
 | `SftpClientIntegrationTest` | OpenSSH 10.6p1 | `openssh-server/` | 22 | `Server listening` |
 | `AsyncSshCompatibilityTest` | AsyncSSH (Python) | `asyncssh-server/` | 8022 | `LISTENER READY` |
 | `DropbearCompatibilityTest` | Dropbear | `dropbear-server/` | 22 | `Not backgrounding` |
+| `LegacyOpenSshCompatibilityTest` | OpenSSH 3.7.1p2, 5.0p1, 5.3p1, 7.4p1 | `legacy-openssh-server/` | 22 | `Server listening` |
 
 All servers use credentials `testuser` / `testpass`. Public keys from `resources/keys/*.pub`
 are injected into the Docker build via `withFileFromClasspath`.

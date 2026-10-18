@@ -1,0 +1,8 @@
+Port 22
+HostKey /etc/ssh/ssh_host_rsa_key
+PidFile /tmp/sshd.pid
+PasswordAuthentication yes
+PermitRootLogin no
+UsePrivilegeSeparation no
+PrintMotd no
+LogLevel DEBUG

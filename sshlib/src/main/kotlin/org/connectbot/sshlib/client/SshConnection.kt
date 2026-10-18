@@ -1214,8 +1214,8 @@ class SshConnection(
     }
 
     private fun receiveVersion(banner: IdBanner) {
-        // protoVersion() includes everything after "SSH-" up to and including \r\n
-        // For exchange hash, we need "SSH-" + version without the CR-LF
+        // Kaitai excludes LF but retains CR when present. Preserve the identification
+        // text (including 1.99) for the exchange hash, excluding only its line ending.
         val versionWithCrlf = banner.protoVersion()
         val versionClean = versionWithCrlf.trimEnd('\r', '\n')
         serverVersion = "SSH-$versionClean"
