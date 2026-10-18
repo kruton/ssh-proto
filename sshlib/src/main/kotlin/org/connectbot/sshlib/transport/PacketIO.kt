@@ -731,30 +731,35 @@ internal class PacketIO(
      */
     suspend fun readBanner(): IdBanner {
         val bannerBytes = ByteArrayOutputStream()
+        var expectLf = false
 
-        // Read until we get \r\n (RFC 4253 section 4.2)
+        // Try to be compatible with non-standard servers: LF or CRLF.
+        // After CR, only further CRs and the terminating LF are permitted.
         while (true) {
             val byte = transport.read(1)[0]
             bannerBytes.write(byte.toInt())
 
-            if (bannerBytes.size() >= 2) {
-                val bytes = bannerBytes.toByteArray()
-                if (bytes[bytes.size - 2] == '\r'.code.toByte() &&
-                    bytes[bytes.size - 1] == '\n'.code.toByte()
-                ) {
-                    break
-                }
-            }
-
-            // Prevent infinite loop on malformed banner
+            // RFC 4253 section 4.2 includes the terminator in the 255-byte limit.
             if (bannerBytes.size() > 255) {
                 throw TransportException("Banner too long")
             }
+            if (byte == '\n'.code.toByte()) break
+            if (byte == '\r'.code.toByte()) {
+                expectLf = true
+            } else if (byte == 0.toByte() || expectLf) {
+                throw TransportException("Malformed SSH identification")
+            }
         }
 
-        val stream = ByteBufferKaitaiStream(bannerBytes.toByteArray())
+        val bytes = bannerBytes.toByteArray()
+        val stream = ByteBufferKaitaiStream(bytes)
         val banner = IdBanner(stream)
-        banner._read()
+        try {
+            banner._read()
+        } catch (e: RuntimeException) {
+            val parseFailure = e.kaitaiParseFailureOrNull() ?: throw e
+            throw TransportException("Malformed SSH identification", parseFailure)
+        }
         return banner
     }
 
