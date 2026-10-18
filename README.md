@@ -2,6 +2,7 @@
 
 [![Continuous Integration](https://img.shields.io/github/actions/workflow/status/connectbot/cbssh/ci.yml?branch=main&label=CI)](https://github.com/connectbot/cbssh/actions/workflows/ci.yml?query=branch%3Amain)
 [![Maven Central](https://img.shields.io/maven-central/v/org.connectbot.sshlib/sshlib?label=Maven%20Central&color=blue)](https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib)
+[![SLSA v1 Build Level 3](https://img.shields.io/badge/SLSA%20v1-Build%20Level%203-blue)](https://slsa.dev/spec/v1.0/levels#build-l3-hardened-builds)
 [![License](https://img.shields.io/github/license/connectbot/cbssh?label=License&color=blue)](LICENSE)
 [![Quality Gate Status](https://img.shields.io/sonar/quality_gate/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Quality%20Gate)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)
 [![Coverage](https://img.shields.io/sonar/coverage/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Coverage)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)
