@@ -49,3 +49,10 @@ jvm
 | | |
 |---|---|
 | [SshException](../../org.connectbot.sshlib/-ssh-exception/index.md) | if authentication fails or an error occurs |
+
+[jvm]\
+fun [authenticatePublicKey](authenticate-public-key.md)(username: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), privateKeyData: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), certificate: [SshCertificate](../../org.connectbot.sshlib/-ssh-certificate/index.md), passphrase: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)? = null)
+
+fun [authenticatePublicKey](authenticate-public-key.md)(username: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), privateKeyData: [ByteArray](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html), certificate: [SshCertificate](../../org.connectbot.sshlib/-ssh-certificate/index.md), passphrase: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)? = null)
+
+Authenticate with a local private key and its OpenSSH user certificate.

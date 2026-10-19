@@ -3,7 +3,7 @@
 # ConnectBot SSH Library
 
 [jvm]\
-[[Continuous Integration](https://img.shields.io/github/actions/workflow/status/connectbot/cbssh/ci.yml?branch=main&label=CI)](https://github.com/connectbot/cbssh/actions/workflows/ci.yml?query=branch%3Amain)[[Maven Central](https://img.shields.io/maven-central/v/org.connectbot.sshlib/sshlib?label=Maven%20Central&color=blue)](https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib)[[SLSA v1 Build Level 3](https://img.shields.io/badge/SLSA%20v1-Build%20Level%203-blue)](https://slsa.dev/spec/v1.0/levels#build-l3-hardened-builds)[[License](https://img.shields.io/github/license/connectbot/cbssh?label=License&color=blue)](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/LICENSE)[[Quality Gate Status](https://img.shields.io/sonar/quality_gate/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Quality%20Gate)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)[[Coverage](https://img.shields.io/sonar/coverage/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Coverage)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)
+[[Continuous Integration](https://img.shields.io/github/actions/workflow/status/connectbot/cbssh/ci.yml?branch=main&label=CI)](https://github.com/connectbot/cbssh/actions/workflows/ci.yml?query=branch%3Amain)[[Maven Central](https://img.shields.io/maven-central/v/org.connectbot.sshlib/sshlib?label=Maven%20Central&color=blue)](https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib)[[SLSA v1 Build Level 3](https://img.shields.io/badge/SLSA%20v1-Build%20Level%203-blue)](https://slsa.dev/spec/v1.0/levels#build-l3-hardened-builds)[[License](https://img.shields.io/github/license/connectbot/cbssh?label=License&color=blue)](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/LICENSE)[[Quality Gate Status](https://img.shields.io/sonar/quality_gate/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Quality%20Gate)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)[[Coverage](https://img.shields.io/sonar/coverage/connectbot_cbssh?server=https%3A%2F%2Fsonarcloud.io&label=Coverage)](https://sonarcloud.io/summary/overall?id=connectbot_cbssh)
 
 ConnectBot SSH is a Kotlin client library for SSH connections, authentication, interactive shells, command execution, SFTP, and port forwarding. It uses coroutines, declarative protocol definitions, and explicit state machines.
 
@@ -33,9 +33,9 @@ The protocol parsing uses declarative Kaitai Struct specifications that auto-gen
 The library supports a wide range of post-quantum and other modern SSH algorithms, including:
 
 - 
-   **Authentication**: `publickey` (including FIDO2/SK), `password`, `keyboard-interactive`
+   **Authentication**: `publickey` (including OpenSSH certificates and FIDO2/SK), `password`, `keyboard-interactive`
 - 
-   **Host Keys**: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2)
+   **Host Keys**: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2), OpenSSH host certificates
 - 
    **Key Exchange**: ML-KEM hybrid, SNTRUP761 hybrid, Curve25519, ECDH, DH groups 14/16/18,   DH group-exchange
 - 
@@ -43,7 +43,7 @@ The library supports a wide range of post-quantum and other modern SSH algorithm
 - 
    **MACs**: HMAC-SHA2 (including ETM variants)
 
-For a complete list of supported algorithms and their respective RFCs, see [docs/ALGORITHMS.md](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/docs/ALGORITHMS.md).
+For a complete list of supported algorithms and their respective RFCs, see [docs/ALGORITHMS.md](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/ALGORITHMS.md).
 
 The defaults offer only encrypt-then-MAC (ETM) HMAC-SHA2 variants and exclude SHA-1 key exchange and MACs, CBC/3DES ciphers, and `ssh-rsa` host-key signatures. These legacy algorithms and non-ETM MACs remain available only through the explicit `kexAlgorithms`, `hostKeyAlgorithms`, `encryptionAlgorithms`, and `macAlgorithms` settings in `SshClientConfig`. RSA user authentication normally requires the server to advertise `rsa-sha2-256` or `rsa-sha2-512` through `server-sig-algs`. Explicitly including `ssh-rsa` in the configured host-key algorithm wishlist also permits the legacy RSA/SHA-1 signature when advertised, or as the base-key algorithm when that extension is absent.
 
@@ -65,7 +65,7 @@ dependencies {
 
 ### Build
 
-Published artifacts from the attested build pipeline include SLSA provenance and SBOM attestations. See [verifying build provenance](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/docs/BUILD_PROVENANCE.md) for Maven/Gradle downloads, standard verification commands, and downstream build use.
+Published artifacts from the attested build pipeline include SLSA provenance and SBOM attestations. See [verifying build provenance](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/BUILD_PROVENANCE.md) for Maven/Gradle downloads, standard verification commands, and downstream build use.
 
 Building from source requires JDK 17 and a running Docker daemon for integration tests. The Gradle wrapper handles Gradle installation.
 
@@ -211,11 +211,17 @@ try {
 }
 ```
 
+### OpenSSH Certificate Authentication
+
+The library supports OpenSSH user and host certificates, CA trust, and KRL revocation checks.
+
+See [docs/SSH_CERTIFICATES.md](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/SSH_CERTIFICATES.md) for configuration and authentication examples.
+
 ### FIDO2 / Security Key Authentication
 
 The library supports authentication with `sk-ssh-ed25519@openssh.com` and `sk-ecdsa-sha2-nistp256@openssh.com` keys. Callers provide their own FIDO2 stack and surface the resulting assertion through the library's helpers.
 
-See [docs/SK_AUTH.md](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/docs/SK_AUTH.md) for detailed implementation details and examples.
+See [docs/SK_AUTH.md](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/SK_AUTH.md) for detailed implementation details and examples.
 
 ### SSH Agent Forwarding
 
@@ -284,13 +290,13 @@ Run integration tests with: `./gradlew :sshlib:test` (requires Docker).
 ## Documentation
 
 - 
-   [Changelog](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/CHANGELOG.md)
+   [Changelog](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/CHANGELOG.md)
 - 
-   [Supported algorithms](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/docs/ALGORITHMS.md)
+   [Supported algorithms](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/ALGORITHMS.md)
 - 
-   [Security Key authentication](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/docs/SK_AUTH.md)
+   [Security Key authentication](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/SK_AUTH.md)
 - 
-   [Integration testing](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/docs/agents/testing.md)
+   [Integration testing](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/docs/agents/testing.md)
 
 ## License
 
@@ -315,11 +321,111 @@ Copyright 2019-2026, [Kenny Root](https://github.com/kruton/)
 
 Changes since v0.6.1.
 
-[Compare source versions](https://github.com/connectbot/cbssh/compare/v0.6.1...29c5e9fe31462ec50c41e7950765c8441504aa96)
+[Compare source versions](https://github.com/connectbot/cbssh/compare/v0.6.1...640914b122710f2e04bda4fb6903752141e40ac0)
 
 ### SSH
 
-No public API signature changes.
+#### org.connectbot.sshlib.CertificateAuthorityVerifier
+
+- Added: [constructor(hostname: String, trustedAuthorities: List<PublicKey>, revocations: SshKeyRevocationList? = null)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/-certificate-authority-verifier.html)
+
+- Added: [open suspend override fun verify(key: PublicKey): Boolean](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/verify.html)
+
+- Added: [class CertificateAuthorityVerifier constructor(hostname: String, trustedAuthorities: List<PublicKey>, revocations: SshKeyRevocationList? = null) : HostKeyVerifier](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/index.html)
+
+#### org.connectbot.sshlib.KnownHostsVerifier
+
+- Changed: [constructor(file: File, hostname: String, port: Int = 22)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/-known-hosts-verifier.html)
+
+- Changed: [constructor(file: File, hostname: String, port: Int, revocations: SshKeyRevocationList)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/-known-hosts-verifier.html)
+
+- Changed: [constructor(file: File, hostname: String, revocations: SshKeyRevocationList)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/-known-hosts-verifier.html)
+
+#### org.connectbot.sshlib.SshCertificate
+
+- Added: [fun toAuthPublicKey(): AuthPublicKey](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/to-auth-public-key.html)
+
+- Added: [object Companion](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/index.html)
+
+- Added: [val algorithmName: String](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/algorithm-name.html)
+
+- Added: [val criticalOptions: Map<String, ByteArray>](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/critical-options.html)
+
+- Added: [val encoded: ByteArray](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/encoded.html)
+
+- Added: [val extensions: Map<String, ByteArray>](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/extensions.html)
+
+- Added: [val keyId: String](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/key-id.html)
+
+- Added: [val principals: List<String>](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/principals.html)
+
+- Added: [val publicKey: PublicKey](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/public-key.html)
+
+- Added: [val serial: ULong](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/serial.html)
+
+- Added: [val signatureKey: PublicKey](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/signature-key.html)
+
+- Added: [val type: SshCertificate.Type](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/type.html)
+
+- Added: [val validAfter: ULong](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/valid-after.html)
+
+- Added: [val validBefore: ULong](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/valid-before.html)
+
+- Added: [class SshCertificate](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/index.html)
+
+#### org.connectbot.sshlib.SshCertificate.Companion
+
+- Added: [fun decode(encoded: ByteArray): SshCertificate](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/decode.html)
+
+- Added: [fun decode(text: String): SshCertificate](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/decode.html)
+
+- Added: [object Companion](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/index.html)
+
+#### org.connectbot.sshlib.SshCertificate.Type
+
+- Added: [HOST](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/-h-o-s-t/index.html)
+
+- Added: [USER](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/-u-s-e-r/index.html)
+
+- Added: [enum Type : Enum<SshCertificate.Type> ](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/index.html)
+
+#### org.connectbot.sshlib.SshClient
+
+- Changed: [suspend fun authenticatePublicKey(username: String, privateKeyData: ByteArray, certificate: SshCertificate, passphrase: String? = null): AuthResult](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html)
+
+- Changed: [suspend fun authenticatePublicKey(username: String, privateKeyData: ByteArray, passphrase: String? = null): AuthResult](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html)
+
+- Changed: [suspend fun authenticatePublicKey(username: String, privateKeyData: String, certificate: SshCertificate, passphrase: String? = null): AuthResult](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html)
+
+- Changed: [suspend fun authenticatePublicKey(username: String, privateKeyData: String, passphrase: String? = null): AuthResult](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html)
+
+#### org.connectbot.sshlib.SshClientConfig.Builder
+
+- Added: [fun enableCertificateHostKeys(enabled: Boolean = true): SshClientConfig.Builder](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/-builder/enable-certificate-host-keys.html)
+
+#### org.connectbot.sshlib.SshKeyRevocationList
+
+- Added: [fun isRevoked(key: PublicKey): Boolean](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/is-revoked.html)
+
+- Added: [object Companion](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/index.html)
+
+- Added: [class SshKeyRevocationList](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/index.html)
+
+#### org.connectbot.sshlib.SshKeyRevocationList.Companion
+
+- Added: [fun decode(encoded: ByteArray): SshKeyRevocationList](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/decode.html)
+
+- Added: [object Companion](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/index.html)
+
+#### org.connectbot.sshlib.blocking.BlockingSshClient
+
+- Changed: [fun authenticatePublicKey(username: String, privateKeyData: ByteArray, certificate: SshCertificate, passphrase: String? = null)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html)
+
+- Changed: [fun authenticatePublicKey(username: String, privateKeyData: ByteArray, passphrase: String? = null)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html)
+
+- Changed: [fun authenticatePublicKey(username: String, privateKeyData: String, certificate: SshCertificate, passphrase: String? = null)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html)
+
+- Changed: [fun authenticatePublicKey(username: String, privateKeyData: String, passphrase: String? = null)](-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html)
 
 ### Release notes
 
@@ -335,5 +441,5 @@ Changes for library users since `0.6.1`.
 [0.3.1]: https://github.com/connectbot/cbssh/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/connectbot/cbssh/compare/v0.2.1...v0.3.0
 
-[View changelog](https://github.com/connectbot/cbssh/blob/29c5e9fe31462ec50c41e7950765c8441504aa96/CHANGELOG.md)
+[View changelog](https://github.com/connectbot/cbssh/blob/640914b122710f2e04bda4fb6903752141e40ac0/CHANGELOG.md)
 <!-- END DOCS API CHANGES -->

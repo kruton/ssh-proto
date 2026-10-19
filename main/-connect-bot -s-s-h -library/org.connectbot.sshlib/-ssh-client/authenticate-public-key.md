@@ -43,3 +43,10 @@ jvm
 | username | SSH username |
 | privateKeyData | Private key file contents as a string |
 | passphrase | Passphrase for encrypted keys, or null |
+
+[jvm]\
+suspend fun [authenticatePublicKey](authenticate-public-key.md)(username: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), privateKeyData: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), certificate: [SshCertificate](../-ssh-certificate/index.md), passphrase: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)? = null): [AuthResult](../-auth-result/index.md)
+
+suspend fun [authenticatePublicKey](authenticate-public-key.md)(username: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), privateKeyData: [ByteArray](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html), certificate: [SshCertificate](../-ssh-certificate/index.md), passphrase: [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)? = null): [AuthResult](../-auth-result/index.md)
+
+Authenticate with a local private key and its OpenSSH user certificate.

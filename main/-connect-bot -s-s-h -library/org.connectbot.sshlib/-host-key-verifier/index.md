@@ -12,6 +12,7 @@ Implementations of this interface determine whether a server's host key is trust
 
 | |
 |---|
+| [CertificateAuthorityVerifier](../-certificate-authority-verifier/index.md) |
 | [KnownHostsVerifier](../-known-hosts-verifier/index.md) |
 
 ## Functions

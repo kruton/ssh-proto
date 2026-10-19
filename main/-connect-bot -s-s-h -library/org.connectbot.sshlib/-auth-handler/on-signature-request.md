@@ -16,4 +16,6 @@ Use cases:
 - 
    **SSH agent**: forward [dataToSign](on-signature-request.md) to your agent and return its response.
 - 
+   **OpenSSH certificate**: [key](on-signature-request.md) retains the full certificate blob and the negotiated certificate algorithm. Sign with the certified key; signature blobs use the underlying algorithm. [SshSigning.sign](../-ssh-signing/sign.md) handles this mapping. For SK certificates, decode [SshCertificate.publicKey](../-ssh-certificate/public-key.md) and use its underlying SK algorithm with the existing authenticator helpers.
+- 
    **FIDO2 / Security Key** (`sk-ssh-ed25519@openssh.com`, `sk-ecdsa-sha2-nistp256@openssh.com`): drive your CTAP2 stack with `clientDataHash = SHA-256(dataToSign)`, then return `org.connectbot.sshlib.sk.SkSignatureBlob.pack(algorithm, rawSignature, flags, counter)`. See `org.connectbot.sshlib.sk.SkAuthHelpers` for the matching public-key blob constructor.

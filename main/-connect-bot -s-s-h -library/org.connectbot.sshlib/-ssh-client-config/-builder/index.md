@@ -41,3 +41,4 @@ class [Builder](index.md)
 | Name | Summary |
 |---|---|
 | [build](build.md) | [jvm]<br>fun [build](build.md)(): [SshClientConfig](../index.md) |
+| [enableCertificateHostKeys](enable-certificate-host-keys.md) | [jvm]<br>@[JvmOverloads](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.jvm/-jvm-overloads/index.html)<br>fun [enableCertificateHostKeys](enable-certificate-host-keys.md)(enabled: [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html) = true): [SshClientConfig.Builder](index.md)<br>Prepend certificate counterparts of configured host key algorithms at build time. Assignment order does not matter. Raw keys remain as fallback; CA trust must be configured in [hostKeyVerifier](host-key-verifier.md). Calling with false disables automatic additions. |
