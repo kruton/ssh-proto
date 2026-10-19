@@ -154,8 +154,8 @@ class BlockingSshClientTest {
         coEvery { client.authenticatePassword(any(), any()) } returns AuthResult.Success
         coEvery { client.authenticate(any(), any()) } returns AuthResult.Success
         coEvery { client.authenticateKeyboardInteractive(any(), any()) } returns AuthResult.Success
-        coEvery { client.authenticatePublicKey(any(), any<ByteArray>(), any()) } returns AuthResult.Success
-        coEvery { client.authenticatePublicKey(any(), any<String>(), any()) } returns AuthResult.Success
+        coEvery { client.authenticatePublicKey(any(), any<ByteArray>(), passphrase = any()) } returns AuthResult.Success
+        coEvery { client.authenticatePublicKey(any(), any<String>(), passphrase = any()) } returns AuthResult.Success
         val blockingClient = BlockingSshClient(client)
 
         blockingClient.authenticatePassword("user", "pass")
@@ -171,8 +171,8 @@ class BlockingSshClientTest {
         val cause = Exception("auth")
         coEvery { client.authenticate(any(), any()) } returns AuthResult.Failure(setOf("password"))
         coEvery { client.authenticateKeyboardInteractive(any(), any()) } returns AuthResult.Error("keyboard error", cause)
-        coEvery { client.authenticatePublicKey(any(), any<ByteArray>(), any()) } returns AuthResult.Failure(setOf("publickey"))
-        coEvery { client.authenticatePublicKey(any(), any<String>(), any()) } returns AuthResult.Error("key error", cause)
+        coEvery { client.authenticatePublicKey(any(), any<ByteArray>(), passphrase = any()) } returns AuthResult.Failure(setOf("publickey"))
+        coEvery { client.authenticatePublicKey(any(), any<String>(), passphrase = any()) } returns AuthResult.Error("key error", cause)
         val blockingClient = BlockingSshClient(client)
 
         assertThrows<SshException> { blockingClient.authenticate("user", mockk()) }

@@ -32,6 +32,7 @@ import org.connectbot.sshlib.PortForwarder
 import org.connectbot.sshlib.SftpClient
 import org.connectbot.sshlib.SftpException
 import org.connectbot.sshlib.Socks5Authenticator
+import org.connectbot.sshlib.SshCertificate
 import org.connectbot.sshlib.SshClient
 import org.connectbot.sshlib.SshClientConfig
 import org.connectbot.sshlib.SshException
@@ -205,6 +206,36 @@ class BlockingSshClient internal constructor(
         passphrase: String? = null,
     ) {
         when (val result = runBlocking { client.authenticatePublicKey(username, privateKeyData, passphrase) }) {
+            is AuthResult.Success -> Unit
+            is AuthResult.Failure -> throw SshException("Authentication failed; allowed methods: ${result.allowedMethods}")
+            is AuthResult.Error -> throw SshException(result.message, result.cause)
+        }
+    }
+
+    /** Authenticate with a local private key and its OpenSSH user certificate. */
+    @Throws(SshException::class)
+    fun authenticatePublicKey(
+        username: String,
+        privateKeyData: String,
+        certificate: SshCertificate,
+        passphrase: String? = null,
+    ) {
+        when (val result = runBlocking { client.authenticatePublicKey(username, privateKeyData, certificate, passphrase) }) {
+            is AuthResult.Success -> Unit
+            is AuthResult.Failure -> throw SshException("Authentication failed; allowed methods: ${result.allowedMethods}")
+            is AuthResult.Error -> throw SshException(result.message, result.cause)
+        }
+    }
+
+    /** Authenticate with a local private key and its OpenSSH user certificate. */
+    @Throws(SshException::class)
+    fun authenticatePublicKey(
+        username: String,
+        privateKeyData: ByteArray,
+        certificate: SshCertificate,
+        passphrase: String? = null,
+    ) {
+        when (val result = runBlocking { client.authenticatePublicKey(username, privateKeyData, certificate, passphrase) }) {
             is AuthResult.Success -> Unit
             is AuthResult.Failure -> throw SshException("Authentication failed; allowed methods: ${result.allowedMethods}")
             is AuthResult.Error -> throw SshException(result.message, result.cause)

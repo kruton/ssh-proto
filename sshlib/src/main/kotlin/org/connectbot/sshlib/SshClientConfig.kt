@@ -22,6 +22,7 @@ import org.connectbot.sshlib.crypto.CompressionEntry
 import org.connectbot.sshlib.crypto.KexEntry
 import org.connectbot.sshlib.crypto.MacEntry
 import org.connectbot.sshlib.crypto.SignatureEntry
+import org.connectbot.sshlib.crypto.withCertificateHostKeys
 import org.connectbot.sshlib.transport.IpVersion
 import org.connectbot.sshlib.transport.KtorTcpTransportFactory
 import org.connectbot.sshlib.transport.TransportFactory
@@ -102,6 +103,18 @@ class SshClientConfig private constructor(
 
         var kexAlgorithms: String = KexEntry.defaultString
         var hostKeyAlgorithms: String = SignatureEntry.defaultString
+        private var certificateHostKeysEnabled: Boolean = false
+
+        /**
+         * Prepend certificate counterparts of configured host key algorithms at build time.
+         * Assignment order does not matter. Raw keys remain as fallback; CA trust must be
+         * configured in [hostKeyVerifier]. Calling with false disables automatic additions.
+         */
+        @JvmOverloads
+        fun enableCertificateHostKeys(enabled: Boolean = true): Builder = apply {
+            certificateHostKeysEnabled = enabled
+        }
+
         var encryptionAlgorithms: String = CipherEntry.defaultString
         var macAlgorithms: String = MacEntry.defaultString
 
@@ -209,7 +222,7 @@ class SshClientConfig private constructor(
                 clientVersion,
                 verifier,
                 kexAlgorithms,
-                hostKeyAlgorithms,
+                if (certificateHostKeysEnabled) withCertificateHostKeys(hostKeyAlgorithms) else hostKeyAlgorithms,
                 encryptionAlgorithms,
                 macAlgorithms,
                 compressionAlgorithms,
