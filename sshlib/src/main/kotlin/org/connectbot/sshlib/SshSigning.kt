@@ -21,6 +21,7 @@ import org.connectbot.sshlib.crypto.MldsaAlgorithm
 import org.connectbot.sshlib.crypto.PrivateKeyReader
 import org.connectbot.sshlib.crypto.SignatureEntry
 import org.connectbot.sshlib.crypto.SshPublicKeyEncoder
+import org.connectbot.sshlib.crypto.certificateSignatureAlgorithm
 import org.connectbot.sshlib.crypto.inferKeyType
 import java.security.KeyPair
 import java.security.PublicKey
@@ -50,9 +51,10 @@ object SshSigning {
     ): ByteArray {
         rejectSkAlgorithm(algorithmName)
         val privateKey = PrivateKeyReader.read(privateKeyData, passphrase)
-        val sigEntry = SignatureEntry.fromSshName(algorithmName)
+        val signatureAlgorithm = certificateSignatureAlgorithm(algorithmName)
+        val sigEntry = SignatureEntry.fromSshName(signatureAlgorithm)
             ?: throw SshException("Unknown signature algorithm: $algorithmName")
-        return sigEntry.algorithm.sign(algorithmName, privateKey.jcaKeyPair.private, dataToSign)
+        return sigEntry.algorithm.sign(signatureAlgorithm, privateKey.jcaKeyPair.private, dataToSign)
     }
 
     /**
@@ -142,9 +144,10 @@ object SshSigning {
         if (MldsaAlgorithm.fromSshName(algorithmName) != null && inferKeyType(keyPair) != algorithmName) {
             throw SshException("Key pair does not match $algorithmName")
         }
-        val sigEntry = SignatureEntry.fromSshName(algorithmName)
+        val signatureAlgorithm = certificateSignatureAlgorithm(algorithmName)
+        val sigEntry = SignatureEntry.fromSshName(signatureAlgorithm)
             ?: throw SshException("Unknown signature algorithm: $algorithmName")
-        return sigEntry.algorithm.sign(algorithmName, keyPair.private, dataToSign)
+        return sigEntry.algorithm.sign(signatureAlgorithm, keyPair.private, dataToSign)
     }
 
     private fun rejectSkAlgorithm(algorithmName: String) {

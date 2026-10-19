@@ -18,6 +18,7 @@
 package org.connectbot.sshlib
 
 import org.connectbot.sshlib.crypto.Base64Compat
+import org.connectbot.sshlib.crypto.CERTIFICATE_SUFFIX
 import java.io.File
 
 /**
@@ -86,6 +87,8 @@ data class PublicKey(
  * - Plain hostnames (no hashed hosts yet)
  * - Wildcards (* and ?) in hostnames
  * - Multiple keys per host
+ * - Certificate authorities (`@cert-authority`) and revoked keys (`@revoked`)
+ * - Negated hostname patterns and optional KRL revocation snapshots
  *
  * @param file The `known_hosts` file to read.
  */
@@ -102,40 +105,43 @@ class KnownHostsVerifier(
         file.readLines().mapNotNull { parseLine(it) }
     }
 
-    override suspend fun verify(key: PublicKey): Boolean {
-        val matchingEntries = entries.filter { entry ->
-            entry.hosts.any { pattern -> matchHost(pattern, hostAlias) }
-        }
+    private var revocations: SshKeyRevocationList? = null
 
-        if (matchingEntries.isEmpty()) {
-            return false // Unknown host
-        }
-
-        return matchingEntries.any { it.key == key }
+    /** Use an application-loaded KRL snapshot in addition to known_hosts revocations. */
+    constructor(file: File, hostname: String, port: Int, revocations: SshKeyRevocationList) : this(file, hostname, port) {
+        this.revocations = revocations
     }
 
-    private fun matchHost(pattern: String, hostname: String): Boolean {
-        // TODO: Support hashed hosts (|1|salt|hash)
-        if (pattern.startsWith("|1|")) return false
+    constructor(file: File, hostname: String, revocations: SshKeyRevocationList) : this(file, hostname, 22, revocations)
 
-        // Simple wildcard matching
-        // Note: Java Regex or simple manual matching.
-        // Keeping it simple: exact match or basic wildcard
-        if (pattern.contains("*") || pattern.contains("?")) {
-            val regex = pattern
-                .replace(".", "\\.")
-                .replace("*", ".*")
-                .replace("?", ".")
-            return hostname.matches(regex.toRegex())
+    override suspend fun verify(key: PublicKey): Boolean = try {
+        val matching = entries.filter { matchesHostPatterns(it.hosts, hostAlias) }
+        val certificate = if (key.type.endsWith(CERTIFICATE_SUFFIX)) SshCertificate.decode(key.encoded) else null
+        val revokedKeys = matching.filter { it.marker == "@revoked" }.map { it.key }
+        if (revocations?.isRevoked(key) == true || key in revokedKeys ||
+            (certificate != null && (certificate.publicKey in revokedKeys || certificate.signatureKey in revokedKeys))
+        ) {
+            false
+        } else if (certificate != null) {
+            val authorities = matching.filter { it.marker == "@cert-authority" }.map { it.key }
+            // An explicitly pinned certificate still receives the same validity checks.
+            val trusted = if (matching.any { it.marker == null && it.key == key }) authorities + certificate.signatureKey else authorities
+            verifyHostCertificate(key, hostname, trusted, revocations)
+        } else {
+            matching.any { it.marker == null && it.key == key }
         }
-        return pattern == hostname
+    } catch (_: Exception) {
+        false
     }
 
     private fun parseLine(line: String): Entry? {
         val trimmed = line.trim()
         if (trimmed.isEmpty() || trimmed.startsWith("#")) return null
 
-        val parts = trimmed.split(Regex("\\s+"))
+        val fields = trimmed.split(Regex("\\s+"))
+        val marker = fields.first().takeIf { it.startsWith("@") }
+        if (marker != null && marker !in setOf("@cert-authority", "@revoked")) return null
+        val parts = if (marker == null) fields else fields.drop(1)
         if (parts.size < 3) return null
 
         // Format: hostnames algorithm key [comment]
@@ -147,11 +153,12 @@ class KnownHostsVerifier(
             return null
         }
 
-        return Entry(hosts, PublicKey(algorithm, keyData))
+        return Entry(hosts, PublicKey(algorithm, keyData), marker)
     }
 
     private data class Entry(
         val hosts: List<String>,
         val key: PublicKey,
+        val marker: String?,
     )
 }

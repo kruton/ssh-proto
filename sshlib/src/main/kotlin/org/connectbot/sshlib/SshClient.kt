@@ -333,6 +333,32 @@ class SshClient private constructor(
         }
     }
 
+    /** Authenticate with a local private key and its OpenSSH user certificate. */
+    suspend fun authenticatePublicKey(
+        username: String,
+        privateKeyData: String,
+        certificate: SshCertificate,
+        passphrase: String? = null,
+    ): AuthResult {
+        val conn = connection ?: return AuthResult.Error(ERROR_NOT_CONNECTED)
+        return try {
+            val key = PrivateKeyReader.read(privateKeyData, passphrase)
+            conn.authenticatePublicKey(username, key, certificate).also {
+                if (it is AuthResult.Success) authenticated = true
+            }
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Certificate authentication error", e)
+        }
+    }
+
+    /** Authenticate with a local private key and its OpenSSH user certificate. */
+    suspend fun authenticatePublicKey(
+        username: String,
+        privateKeyData: ByteArray,
+        certificate: SshCertificate,
+        passphrase: String? = null,
+    ): AuthResult = authenticatePublicKey(username, String(privateKeyData, Charsets.UTF_8), certificate, passphrase)
+
     /**
      * Authenticate using the strategy-based [AuthHandler] flow.
      *

@@ -18,9 +18,12 @@
 package org.connectbot.sshlib.crypto
 
 import io.kaitai.struct.ByteBufferKaitaiStream
+import org.connectbot.sshlib.SshCertificate
+import org.connectbot.sshlib.protocol.AsciiString
 import org.connectbot.sshlib.protocol.EcdsaPublicKeyBlob
 import org.connectbot.sshlib.protocol.SshPublicKey
 import org.connectbot.sshlib.protocol.SshSignature
+import org.connectbot.sshlib.validCertificateSignature
 
 internal object SignatureVerifier {
 
@@ -31,13 +34,25 @@ internal object SignatureVerifier {
      * (the negotiated host key algorithm), per RFC 8332 §3.2.
      */
     fun verify(serverHostKey: ByteArray, signatureData: ByteArray, exchangeHash: ByteArray, expectedAlgorithm: String): Boolean {
+        val keyType = AsciiString(ByteBufferKaitaiStream(serverHostKey)).apply { _read() }.value()
+        if (keyType.endsWith(CERTIFICATE_SUFFIX)) {
+            val certificate = SshCertificate.decode(serverHostKey)
+            val underlying = certificateSignatureAlgorithm(expectedAlgorithm)
+            val matches = if (certificate.publicKey.type == "ssh-rsa") {
+                expectedAlgorithm in setOf("ssh-rsa$CERTIFICATE_SUFFIX", "rsa-sha2-256$CERTIFICATE_SUFFIX", "rsa-sha2-512$CERTIFICATE_SUFFIX")
+            } else {
+                expectedAlgorithm == certificate.algorithmName
+            }
+            return matches && certificate.type == SshCertificate.Type.HOST && validCertificateSignature(certificate) &&
+                verify(certificate.publicKey.encoded, signatureData, exchangeHash, underlying)
+        }
         val sig = SshSignature(ByteBufferKaitaiStream(signatureData))
         sig._read()
-        if (MldsaAlgorithm.fromSshName(sig.algorithmName()) != null && !sig._io().isEof) return false
+        if (!sig._io().isEof) return false
 
         // RFC 8332 §3.2: reject if the algorithm in the signature blob doesn't match
         // what was negotiated. Prevents a server from downgrading e.g. rsa-sha2-256 → ssh-rsa.
-        if (sig.algorithmName() != expectedAlgorithm) {
+        if (expectedAlgorithm.endsWith(CERTIFICATE_SUFFIX) || sig.algorithmName() != expectedAlgorithm) {
             return false
         }
 
@@ -66,9 +81,15 @@ internal object SignatureVerifier {
      * of [hostKey].
      */
     fun verifyWithKeyType(hostKey: ByteArray, signatureData: ByteArray, data: ByteArray): Boolean {
+        val keyTypeName = AsciiString(ByteBufferKaitaiStream(hostKey)).apply { _read() }.value()
+        if (keyTypeName.endsWith(CERTIFICATE_SUFFIX)) {
+            val certificate = SshCertificate.decode(hostKey)
+            return certificate.type == SshCertificate.Type.HOST && validCertificateSignature(certificate) &&
+                verifyWithKeyType(certificate.publicKey.encoded, signatureData, data)
+        }
         val sig = SshSignature(ByteBufferKaitaiStream(signatureData))
         sig._read()
-        if (MldsaAlgorithm.fromSshName(sig.algorithmName()) != null && !sig._io().isEof) return false
+        if (!sig._io().isEof) return false
 
         val pubKey = SshPublicKey(ByteBufferKaitaiStream(hostKey))
         pubKey._read()

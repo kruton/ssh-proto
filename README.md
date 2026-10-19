@@ -36,8 +36,8 @@ that runs in reaction to state changes.
 
 The library supports a wide range of post-quantum and other modern SSH algorithms, including:
 
-- **Authentication**: `publickey` (including FIDO2/SK), `password`, `keyboard-interactive`
-- **Host Keys**: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2)
+- **Authentication**: `publickey` (including OpenSSH certificates and FIDO2/SK), `password`, `keyboard-interactive`
+- **Host Keys**: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2), OpenSSH host certificates
 - **Key Exchange**: ML-KEM hybrid, SNTRUP761 hybrid, Curve25519, ECDH, DH groups 14/16/18,
   DH group-exchange
 - **Encryption**: ChaCha20-Poly1305, AES-GCM, AES-CTR
@@ -240,6 +240,12 @@ try {
     sftp.close()
 }
 ```
+
+### OpenSSH Certificate Authentication
+
+The library supports OpenSSH user and host certificates, CA trust, and KRL revocation checks.
+
+See [docs/SSH_CERTIFICATES.md](docs/SSH_CERTIFICATES.md) for configuration and authentication examples.
 
 ### FIDO2 / Security Key Authentication
 

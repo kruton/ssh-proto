@@ -35,6 +35,7 @@ interface AuthHandler {
 
     /**
      * Return public keys to probe. Empty list skips public key auth.
+     * OpenSSH user certificates can be supplied using [SshCertificate.toAuthPublicKey].
      */
     suspend fun onPublicKeysNeeded(): List<AuthPublicKey>
 
@@ -50,6 +51,11 @@ interface AuthHandler {
      * Use cases:
      * - **Local private key**: call [SshSigning.sign].
      * - **SSH agent**: forward [dataToSign] to your agent and return its response.
+     * - **OpenSSH certificate**: [key] retains the full certificate blob and the
+     *   negotiated certificate algorithm. Sign with the certified key; signature
+     *   blobs use the underlying algorithm. [SshSigning.sign] handles this mapping.
+     *   For SK certificates, decode [SshCertificate.publicKey] and use its
+     *   underlying SK algorithm with the existing authenticator helpers.
      * - **FIDO2 / Security Key** (`sk-ssh-ed25519@openssh.com`,
      *   `sk-ecdsa-sha2-nistp256@openssh.com`): drive your CTAP2 stack with
      *   `clientDataHash = SHA-256(dataToSign)`, then return

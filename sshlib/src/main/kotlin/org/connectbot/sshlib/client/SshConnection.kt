@@ -59,7 +59,9 @@ import org.connectbot.sshlib.KeyboardInteractiveCallback
 import org.connectbot.sshlib.PingResult
 import org.connectbot.sshlib.PublicKey
 import org.connectbot.sshlib.SessionExit
+import org.connectbot.sshlib.SshCertificate
 import org.connectbot.sshlib.SshException
+import org.connectbot.sshlib.crypto.CERTIFICATE_SUFFIX
 import org.connectbot.sshlib.crypto.CipherEntry
 import org.connectbot.sshlib.crypto.CompressionEntry
 import org.connectbot.sshlib.crypto.DiffieHellmanGroupExchange
@@ -79,6 +81,8 @@ import org.connectbot.sshlib.crypto.SignatureEntry
 import org.connectbot.sshlib.crypto.SignatureVerifier
 import org.connectbot.sshlib.crypto.SshPrivateKey
 import org.connectbot.sshlib.crypto.SshPublicKeyEncoder
+import org.connectbot.sshlib.crypto.certificateAlgorithm
+import org.connectbot.sshlib.crypto.certificateSignatureAlgorithm
 import org.connectbot.sshlib.crypto.verifyHostKeyProofs
 import org.connectbot.sshlib.kaitaiParseFailureOrNull
 import org.connectbot.sshlib.protocol.AsciiString
@@ -796,11 +800,16 @@ class SshConnection(
      * @param username Username
      * @param privateKey Parsed private key
      */
-    internal suspend fun authenticatePublicKey(username: String, privateKey: SshPrivateKey): PublicAuthResult {
+    internal suspend fun authenticatePublicKey(username: String, privateKey: SshPrivateKey, certificate: SshCertificate? = null): PublicAuthResult {
         try {
             val sid = sessionId ?: throw SshException(ERROR_SESSION_ID_NOT_ESTABLISHED)
 
-            val publicKeyBlob = SshPublicKeyEncoder.encode(privateKey.jcaKeyPair, privateKey.keyType)
+            val rawPublicKey = SshPublicKeyEncoder.encode(privateKey.jcaKeyPair, privateKey.keyType)
+            if (certificate != null) {
+                certificate.toAuthPublicKey()
+                if (!rawPublicKey.contentEquals(certificate.publicKey.encoded)) throw SshException("Private key does not match certificate")
+            }
+            val publicKeyBlob = certificate?.encoded ?: rawPublicKey
 
             val sigAlgorithmName = if (privateKey.keyType == KEY_TYPE_SSH_RSA) {
                 negotiateRsaAlgorithm()
@@ -811,12 +820,13 @@ class SshConnection(
             val sigEntry = SignatureEntry.fromSshName(sigAlgorithmName)
                 ?: throw SshException("Unknown signature algorithm: $sigAlgorithmName")
 
+            val requestAlgorithm = if (certificate != null) certificateAlgorithm(sigAlgorithmName) ?: certificate.algorithmName else sigAlgorithmName
             val hostBoundKeyBlob = serverHostKeyBlob.takeIf { serverAdvertisesHostBound }
 
             val signatureData = if (hostBoundKeyBlob != null) {
-                buildHostBoundSignatureData(sid, username, SERVICE_SSH_CONNECTION, sigAlgorithmName, publicKeyBlob, hostBoundKeyBlob)
+                buildHostBoundSignatureData(sid, username, SERVICE_SSH_CONNECTION, requestAlgorithm, publicKeyBlob, hostBoundKeyBlob)
             } else {
-                buildSignatureData(sid, username, SERVICE_SSH_CONNECTION, sigAlgorithmName, publicKeyBlob)
+                buildSignatureData(sid, username, SERVICE_SSH_CONNECTION, requestAlgorithm, publicKeyBlob)
             }
 
             val signature = sigEntry.algorithm.sign(
@@ -833,7 +843,7 @@ class SshConnection(
                     setMethodName(createAsciiString(METHOD_PUBLICKEY_HOSTBOUND))
                     val pubkeyAuth = UserauthRequestPublickeyHostbound().apply {
                         setHasSignature(1)
-                        setPublicKeyAlgorithmName(createAsciiString(sigAlgorithmName))
+                        setPublicKeyAlgorithmName(createAsciiString(requestAlgorithm))
                         setPublicKeyBlob(createByteString(publicKeyBlob))
                         setServerHostKey(createByteString(hostBoundKeyBlob))
                         setSignature(createByteString(signature))
@@ -844,7 +854,7 @@ class SshConnection(
                     setMethodName(createAsciiString("publickey"))
                     val pubkeyAuth = UserauthRequestPublickey().apply {
                         setHasSignature(1)
-                        setPublicKeyAlgorithmName(createAsciiString(sigAlgorithmName))
+                        setPublicKeyAlgorithmName(createAsciiString(requestAlgorithm))
                         setPublicKeyBlob(createByteString(publicKeyBlob))
                         setSignature(createByteString(signature))
                         _check()
@@ -926,7 +936,9 @@ class SshConnection(
 
     private fun negotiateRsaAlgorithm(): String? = SignatureEntry.negotiateRsaAlgorithm(
         serverSigAlgs,
-        hostKeyAlgorithms.split(',').filter { it.isNotEmpty() }.toSet(),
+        hostKeyAlgorithms.split(',').filter { it.isNotEmpty() }.map {
+            certificateSignatureAlgorithm(it)
+        }.toSet(),
     )
 
     /**
@@ -1022,18 +1034,24 @@ class SshConnection(
         }
     }
 
+    private fun authenticationAlgorithm(key: AuthPublicKey): String? {
+        val type = keyBlobAlgorithmName(key.publicKeyBlob)
+        if (type?.endsWith(CERTIFICATE_SUFFIX) == true) SshCertificate.decode(key.publicKeyBlob).toAuthPublicKey()
+        return when (type) {
+            KEY_TYPE_SSH_RSA -> negotiateRsaAlgorithm()
+            "ssh-rsa$CERTIFICATE_SUFFIX" -> negotiateRsaAlgorithm()?.let { certificateAlgorithm(it) }
+            else -> key.algorithmName
+        }
+    }
+
     private suspend fun probePublicKey(
         username: String,
         key: AuthPublicKey,
         handler: AuthHandler,
         channel: Channel<InternalAuthResult>,
     ): InternalAuthResult {
-        val effectiveAlgorithmName = if (keyBlobAlgorithmName(key.publicKeyBlob) == KEY_TYPE_SSH_RSA) {
-            negotiateRsaAlgorithm()
-                ?: return InternalAuthResult.Failure(allowedAuthentications ?: setOf("publickey"), partialSuccess = false)
-        } else {
-            key.algorithmName
-        }
+        val effectiveAlgorithmName = authenticationAlgorithm(key)
+            ?: return InternalAuthResult.Failure(allowedAuthentications ?: setOf("publickey"), partialSuccess = false)
         sendAuthRequest(username, "publickey") {
             val pubkeyAuth = UserauthRequestPublickey().apply {
                 setHasSignature(0)
@@ -1055,11 +1073,7 @@ class SshConnection(
         val sid = sessionId ?: throw SshException(ERROR_SESSION_ID_NOT_ESTABLISHED)
         val hostBoundKeyBlob = serverHostKeyBlob.takeIf { serverAdvertisesHostBound }
 
-        val effectiveAlgorithmName = if (keyBlobAlgorithmName(key.publicKeyBlob) == KEY_TYPE_SSH_RSA) {
-            negotiateRsaAlgorithm() ?: return null
-        } else {
-            key.algorithmName
-        }
+        val effectiveAlgorithmName = authenticationAlgorithm(key) ?: return null
 
         val signatureData = if (hostBoundKeyBlob != null) {
             buildHostBoundSignatureData(sid, username, SERVICE_SSH_CONNECTION, effectiveAlgorithmName, key.publicKeyBlob, hostBoundKeyBlob)
@@ -2258,6 +2272,7 @@ class SshConnection(
             val sid = sessionId?.copyOf() ?: return
             val authenticatedKey = serverHostKeyBlob?.copyOf() ?: return
             val negotiated = initialHostKeyAlgorithm ?: return
+            if (keyBlobAlgorithmName(authenticatedKey)?.endsWith(CERTIFICATE_SUFFIX) == true) return
             hostKeyUpdates.receive {
                 connectionScope.launch {
                     try {
