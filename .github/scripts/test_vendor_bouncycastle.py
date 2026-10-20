@@ -10,12 +10,12 @@ import unittest
 from unittest.mock import patch
 import zipfile
 
-import vendor_sntrup as vendor
+import vendor_bouncycastle as vendor
 
 
 class ArchiveInputTest(unittest.TestCase):
     def test_cli_rejects_unexpected_artifact_before_reading_archive(self):
-        with patch.object(vendor.sys, "argv", ["vendor_sntrup.py"]), \
+        with patch.object(vendor.sys, "argv", ["vendor_bouncycastle.py"]), \
                 patch.object(vendor, "MANIFEST") as manifest, \
                 patch.object(vendor, "read_archive") as download:
             manifest.read_text.return_value = json.dumps({"artifact": "unexpected:artifact"})
@@ -27,7 +27,7 @@ class ArchiveInputTest(unittest.TestCase):
         archive = io.BytesIO()
         with zipfile.ZipFile(archive, "w") as jar:
             jar.writestr(vendor.LICENSE_ENTRY, b"license")
-        with patch.object(vendor.sys, "argv", ["vendor_sntrup.py", "--check"]), \
+        with patch.object(vendor.sys, "argv", ["vendor_bouncycastle.py", "--check"]), \
                 patch.object(vendor, "MANIFEST") as manifest, \
                 patch.object(vendor, "SOURCE_FILES", []), \
                 patch.object(vendor, "read_archive", return_value=archive.getvalue()), \
@@ -61,7 +61,7 @@ class ArchiveInputTest(unittest.TestCase):
             output = root / "java"
             license_file = root / "LICENSE.md"
             destination = vendor.destination
-            with patch.object(vendor.sys, "argv", ["vendor_sntrup.py", "--update", "--archive-stdin"]), \
+            with patch.object(vendor.sys, "argv", ["vendor_bouncycastle.py", "--update", "--archive-stdin"]), \
                     patch.object(vendor.sys, "stdin") as stdin, \
                     patch.object(vendor.sys, "stdout", io.StringIO()), \
                     patch.object(vendor, "MANIFEST", manifest_file), \
@@ -72,8 +72,8 @@ class ArchiveInputTest(unittest.TestCase):
             manifest = json.loads(manifest_file.read_text())
             self.assertEqual("1.86", manifest["reviewedVersion"])
             self.assertEqual(b"upstream license", license_file.read_bytes())
-            self.assertIn("class Example {}", (output / "Example.java").read_text())
-            self.assertNotIn("public class", (output / "Example.java").read_text())
+            self.assertIn("class Example {}", (output / "sntrup" / "Example.java").read_text())
+            self.assertNotIn("public class", (output / "sntrup" / "Example.java").read_text())
             self.assertEqual([], vendor.verify(manifest, originals, vendor.extract(originals), output, license_file))
 
     def test_download_uses_manifest_version_and_fixed_maven_url(self):
@@ -91,7 +91,7 @@ class ArchiveInputTest(unittest.TestCase):
         manifest = {"artifact": "org.bouncycastle:bcprov-jdk18on", "version": "1.86"}
         for flags in ([], ["--archive-stdin"]):
             with self.subTest(flags=flags), \
-                    patch.object(vendor.sys, "argv", ["vendor_sntrup.py", "--check", *flags]), \
+                    patch.object(vendor.sys, "argv", ["vendor_bouncycastle.py", "--check", *flags]), \
                     patch.object(vendor.sys, "stdin") as stdin, \
                     patch.object(vendor, "MANIFEST") as manifest_file, \
                     patch.object(vendor, "SOURCE_FILES", []), \
@@ -117,7 +117,7 @@ class ArchiveInputTest(unittest.TestCase):
                     [sys.executable, vendor.__file__, "--check", "--archive-stdin"],
                     input=data, capture_output=True, check=False)
                 self.assertEqual(1, result.returncode)
-                self.assertIn(b"SNTRUP source verification failed:", result.stderr)
+                self.assertIn(b"Bouncy Castle source verification failed:", result.stderr)
                 self.assertNotIn(b"Traceback", result.stderr)
 
     def test_cli_rejects_removed_archive_option(self):
@@ -135,8 +135,10 @@ class VerificationTest(unittest.TestCase):
         self.output = Path(self.temp.name) / "java"
         self.license = Path(self.temp.name) / "LICENSE.md"
         self.name = vendor.NTRU + "Example.java"
-        self.originals = {self.name: b"original upstream bytes", vendor.LICENSE_ENTRY: b"license"}
-        self.generated = {self.name: b"adapted Java bytes", vendor.LICENSE_ENTRY: b"license"}
+        self.originals = {self.name: b"original upstream bytes", vendor.POLY: b"original Poly1305",
+                          vendor.PACK: b"original Pack", vendor.LICENSE_ENTRY: b"license"}
+        self.generated = {self.name: b"adapted Java bytes", vendor.POLY: b"adapted Poly1305",
+                          vendor.PACK: b"adapted Pack", vendor.LICENSE_ENTRY: b"license"}
         self.manifest = {"version": "1.86", "reviewedVersion": "1.86", "files": {
             name: {"originalSha256": vendor.sha256(data),
                    "extractedSha256": vendor.sha256(self.generated[name])}
@@ -155,8 +157,12 @@ class VerificationTest(unittest.TestCase):
         self.assertEqual([], self.verify())
 
     def test_upstream_change_fails_even_when_extracted_output_is_unchanged(self):
-        self.originals[self.name] += b" upstream-only comment or helper change"
-        self.assertTrue(any("UPSTREAM CHANGED" in e for e in self.verify()))
+        for name in self.originals:
+            with self.subTest(name=name):
+                original = self.originals[name]
+                self.originals[name] += b" upstream-only comment or helper change"
+                self.assertTrue(any("UPSTREAM CHANGED" in e for e in self.verify()))
+                self.originals[name] = original
 
     def test_adaptation_change_fails_even_when_upstream_is_unchanged(self):
         self.generated[self.name] += b" generator changed"
@@ -165,11 +171,16 @@ class VerificationTest(unittest.TestCase):
         self.assertTrue(any("VENDORED FILE DIFFERS" in e for e in errors))
 
     def test_local_edit_is_detected(self):
-        (self.output / "Example.java").write_bytes(b"local drift")
-        self.assertTrue(any("VENDORED FILE DIFFERS" in e for e in self.verify()))
+        for name in self.generated:
+            with self.subTest(name=name):
+                path = vendor.destination(name, self.output, self.license)
+                original = path.read_bytes()
+                path.write_bytes(b"local drift")
+                self.assertTrue(any("VENDORED FILE DIFFERS" in e for e in self.verify()))
+                path.write_bytes(original)
 
     def test_missing_local_file_is_detected(self):
-        (self.output / "Example.java").unlink()
+        (self.output / "sntrup" / "Example.java").unlink()
         self.assertTrue(any("VENDORED FILE DIFFERS" in e for e in self.verify()))
 
     def test_license_change_is_detected(self):
@@ -190,6 +201,18 @@ class VerificationTest(unittest.TestCase):
 
 
 class ExtractionTest(unittest.TestCase):
+    def test_combines_separate_algorithm_extractions(self):
+        originals = {vendor.POLY: b"poly", vendor.PACK: b"pack", vendor.LICENSE_ENTRY: b"license",
+                     vendor.NTRU + "Utils.java": b"utils"}
+        sntrup = {vendor.NTRU + "Utils.java": b"generated utils", vendor.LICENSE_ENTRY: b"license"}
+        poly = {vendor.POLY: b"generated poly", vendor.PACK: b"generated pack", vendor.LICENSE_ENTRY: b"license"}
+        with patch.object(vendor, "extract_sntrup", return_value=sntrup) as sntrup_extract, \
+                patch.object(vendor, "extract_poly1305", return_value=poly) as poly_extract:
+            self.assertEqual(sntrup | poly, vendor.extract(originals))
+        sntrup_extract.assert_called_once_with({vendor.NTRU + "Utils.java": b"utils", vendor.LICENSE_ENTRY: b"license"})
+        poly_extract.assert_called_once_with(originals)
+
+
     def test_adapts_crypto_dependencies_and_adds_private_key_erasure(self):
         originals = {
             vendor.NTRU + "Utils.java": b"class Utils {\n}\n",
