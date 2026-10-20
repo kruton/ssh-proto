@@ -105,6 +105,38 @@ package org.connectbot.sshlib {
     property public byte[] sessionId;
   }
 
+  public enum AlgorithmCategory {
+    enum_constant public static final org.connectbot.sshlib.AlgorithmCategory CIPHER;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmCategory HOST_KEY;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmCategory KEX;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmCategory MAC;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmCategory PUBKEY;
+  }
+
+  public final class AlgorithmPolicyWarning {
+    ctor public AlgorithmPolicyWarning(org.connectbot.sshlib.AlgorithmCategory category, String algorithm, org.connectbot.sshlib.AlgorithmPolicyWarningReason reason);
+    method public org.connectbot.sshlib.AlgorithmCategory component1();
+    method public String component2();
+    method public org.connectbot.sshlib.AlgorithmPolicyWarningReason component3();
+    method public org.connectbot.sshlib.AlgorithmPolicyWarning copy(optional org.connectbot.sshlib.AlgorithmCategory category, optional String algorithm, optional org.connectbot.sshlib.AlgorithmPolicyWarningReason reason);
+    method public boolean equals(Object? other);
+    method @InaccessibleFromKotlin public String getAlgorithm();
+    method @InaccessibleFromKotlin public org.connectbot.sshlib.AlgorithmCategory getCategory();
+    method @InaccessibleFromKotlin public org.connectbot.sshlib.AlgorithmPolicyWarningReason getReason();
+    method public int hashCode();
+    method public String toString();
+    property public String algorithm;
+    property public org.connectbot.sshlib.AlgorithmCategory category;
+    property public org.connectbot.sshlib.AlgorithmPolicyWarningReason reason;
+  }
+
+  public enum AlgorithmPolicyWarningReason {
+    enum_constant public static final org.connectbot.sshlib.AlgorithmPolicyWarningReason DH_TOO_SMALL;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmPolicyWarningReason RSA_TOO_SMALL;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmPolicyWarningReason UNAVAILABLE;
+    enum_constant public static final org.connectbot.sshlib.AlgorithmPolicyWarningReason UNSUPPORTED;
+  }
+
   public interface AuthHandler {
     method public default suspend java.lang.Object? onAuthMethodsAvailable(java.util.Set<java.lang.String> methods, kotlin.coroutines.Continuation<? super kotlin.Unit>);
     method public default suspend java.lang.Object? onBanner(java.lang.String message, kotlin.coroutines.Continuation<? super kotlin.Unit>);
@@ -252,6 +284,13 @@ package org.connectbot.sshlib {
     property public String? macAlgorithmC2S;
     property public String? macAlgorithmS2C;
     property public String serverHostKeyAlgorithm;
+  }
+
+  public enum CryptoPolicyPreset {
+    enum_constant public static final org.connectbot.sshlib.CryptoPolicyPreset DEFAULT;
+    enum_constant public static final org.connectbot.sshlib.CryptoPolicyPreset FIPS;
+    enum_constant public static final org.connectbot.sshlib.CryptoPolicyPreset FUTURE;
+    enum_constant public static final org.connectbot.sshlib.CryptoPolicyPreset LEGACY;
   }
 
   public final class DestinationConstraint {
@@ -592,6 +631,23 @@ package org.connectbot.sshlib {
     method public boolean authenticate(java.lang.String username, java.lang.String password);
   }
 
+  public final class SshAlgorithm {
+    ctor public SshAlgorithm(String name, boolean available, boolean defaultEnabled);
+    method public String component1();
+    method public boolean component2();
+    method public boolean component3();
+    method public org.connectbot.sshlib.SshAlgorithm copy(optional String name, optional boolean available, optional boolean defaultEnabled);
+    method public boolean equals(Object? other);
+    method @InaccessibleFromKotlin public boolean getAvailable();
+    method @InaccessibleFromKotlin public boolean getDefaultEnabled();
+    method @InaccessibleFromKotlin public String getName();
+    method public int hashCode();
+    method public String toString();
+    property public boolean available;
+    property public boolean defaultEnabled;
+    property public String name;
+  }
+
   public final class SshCertificate {
     method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCertificate decode(byte[] encoded) throws org.connectbot.sshlib.SshException;
     method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCertificate decode(String text) throws org.connectbot.sshlib.SshException;
@@ -646,6 +702,7 @@ package org.connectbot.sshlib {
     method public suspend java.lang.Object? forwardStream(io.ktor.utils.io.ByteReadChannel readChannel, io.ktor.utils.io.ByteWriteChannel writeChannel, java.lang.String remoteHost, int remotePort, optional java.lang.String originAddr, optional int originPort, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.StreamForwarder?>);
     method @InaccessibleFromKotlin public org.connectbot.sshlib.ConnectionInfo? getConnectionInfo();
     method @InaccessibleFromKotlin public kotlinx.coroutines.flow.SharedFlow<java.lang.Throwable?> getDisconnectedFlow();
+    method @InaccessibleFromKotlin public java.util.List<org.connectbot.sshlib.AlgorithmPolicyWarning> getPolicyWarnings();
     method @InaccessibleFromKotlin public boolean isAuthenticated();
     method public boolean isPrivateKeyEncrypted(byte[] privateKeyData);
     method public boolean isPrivateKeyEncrypted(java.lang.String privateKeyData);
@@ -660,6 +717,7 @@ package org.connectbot.sshlib {
     property public org.connectbot.sshlib.ConnectionInfo? connectionInfo;
     property public kotlinx.coroutines.flow.SharedFlow<java.lang.Throwable?> disconnectedFlow;
     property public boolean isAuthenticated;
+    property public java.util.List<org.connectbot.sshlib.AlgorithmPolicyWarning> policyWarnings;
     property public java.net.InetSocketAddress? remoteAddress;
     field public static final org.connectbot.sshlib.SshClient.Companion Companion;
   }
@@ -671,8 +729,10 @@ package org.connectbot.sshlib {
   }
 
   public final class SshClientConfig {
+    method @InaccessibleFromKotlin public kotlin.jvm.functions.Function1<org.connectbot.sshlib.AlgorithmPolicyWarning,kotlin.Unit>? getAlgorithmWarningHandler();
     method @InaccessibleFromKotlin public boolean getAutoDisconnectOnLastChannelClose();
     method @InaccessibleFromKotlin public java.lang.String getClientVersion();
+    method @InaccessibleFromKotlin public org.connectbot.sshlib.SshCryptoPolicy? getCryptoPolicy();
     method @InaccessibleFromKotlin public java.lang.String getEncryptionAlgorithms();
     method @InaccessibleFromKotlin public java.util.Map<java.lang.String,java.lang.String> getEnvironment();
     method @InaccessibleFromKotlin public java.lang.String getHostKeyAlgorithms();
@@ -682,13 +742,16 @@ package org.connectbot.sshlib {
     method @InaccessibleFromKotlin public java.lang.String getMacAlgorithms();
     method @InaccessibleFromKotlin public long getObscureKeystrokeTimingIntervalMs();
     method @InaccessibleFromKotlin public boolean getPreferPasswordAuth();
+    method @InaccessibleFromKotlin public String? getPubkeyAlgorithms();
     method @InaccessibleFromKotlin public long getRekeyBytesLimit();
     method @InaccessibleFromKotlin public long getRekeyIntervalMs();
     method @InaccessibleFromKotlin public int getSessionWindowSize();
     method @InaccessibleFromKotlin public int getSftpWindowSize();
     method @InaccessibleFromKotlin public org.connectbot.sshlib.transport.TransportFactory getTransportFactory();
+    property public kotlin.jvm.functions.Function1<org.connectbot.sshlib.AlgorithmPolicyWarning,kotlin.Unit>? algorithmWarningHandler;
     property public boolean autoDisconnectOnLastChannelClose;
     property public String clientVersion;
+    property public org.connectbot.sshlib.SshCryptoPolicy? cryptoPolicy;
     property public String encryptionAlgorithms;
     property public java.util.Map<java.lang.String,java.lang.String> environment;
     property public String hostKeyAlgorithms;
@@ -698,6 +761,7 @@ package org.connectbot.sshlib {
     property public String macAlgorithms;
     property public long obscureKeystrokeTimingIntervalMs;
     property public boolean preferPasswordAuth;
+    property public String? pubkeyAlgorithms;
     property public long rekeyBytesLimit;
     property public long rekeyIntervalMs;
     property public int sessionWindowSize;
@@ -709,8 +773,10 @@ package org.connectbot.sshlib {
   public static final class SshClientConfig.Builder {
     ctor public SshClientConfig.Builder();
     method public org.connectbot.sshlib.SshClientConfig build();
+    method public org.connectbot.sshlib.SshClientConfig.Builder cryptoPolicy(org.connectbot.sshlib.SshCryptoPolicy value);
     method public org.connectbot.sshlib.SshClientConfig.Builder enableCertificateHostKeys();
     method public org.connectbot.sshlib.SshClientConfig.Builder enableCertificateHostKeys(optional boolean enabled);
+    method @InaccessibleFromKotlin public kotlin.jvm.functions.Function1<org.connectbot.sshlib.AlgorithmPolicyWarning,kotlin.Unit>? getAlgorithmWarningHandler();
     method @InaccessibleFromKotlin public boolean getAutoDisconnectOnLastChannelClose();
     method @InaccessibleFromKotlin public java.lang.String getClientVersion();
     method @InaccessibleFromKotlin public boolean getEnableCompression();
@@ -726,11 +792,13 @@ package org.connectbot.sshlib {
     method @InaccessibleFromKotlin public long getObscureKeystrokeTimingIntervalMs();
     method @InaccessibleFromKotlin public int getPort();
     method @InaccessibleFromKotlin public boolean getPreferPasswordAuth();
+    method @InaccessibleFromKotlin public String? getPubkeyAlgorithms();
     method @InaccessibleFromKotlin public long getRekeyBytesLimit();
     method @InaccessibleFromKotlin public long getRekeyIntervalMs();
     method @InaccessibleFromKotlin public int getSessionWindowSize();
     method @InaccessibleFromKotlin public int getSftpWindowSize();
     method @InaccessibleFromKotlin public org.connectbot.sshlib.transport.TransportFactory? getTransportFactory();
+    method @InaccessibleFromKotlin public void setAlgorithmWarningHandler(kotlin.jvm.functions.Function1<? super org.connectbot.sshlib.AlgorithmPolicyWarning,kotlin.Unit>?);
     method @InaccessibleFromKotlin public void setAutoDisconnectOnLastChannelClose(boolean);
     method @InaccessibleFromKotlin public void setClientVersion(java.lang.String);
     method @InaccessibleFromKotlin public void setEnableCompression(boolean);
@@ -746,11 +814,13 @@ package org.connectbot.sshlib {
     method @InaccessibleFromKotlin public void setObscureKeystrokeTimingIntervalMs(long);
     method @InaccessibleFromKotlin public void setPort(int);
     method @InaccessibleFromKotlin public void setPreferPasswordAuth(boolean);
+    method @InaccessibleFromKotlin public void setPubkeyAlgorithms(String?);
     method @InaccessibleFromKotlin public void setRekeyBytesLimit(long);
     method @InaccessibleFromKotlin public void setRekeyIntervalMs(long);
     method @InaccessibleFromKotlin public void setSessionWindowSize(int);
     method @InaccessibleFromKotlin public void setSftpWindowSize(int);
     method @InaccessibleFromKotlin public void setTransportFactory(org.connectbot.sshlib.transport.TransportFactory?);
+    property public kotlin.jvm.functions.Function1<org.connectbot.sshlib.AlgorithmPolicyWarning,kotlin.Unit>? algorithmWarningHandler;
     property public boolean autoDisconnectOnLastChannelClose;
     property public String clientVersion;
     property public boolean enableCompression;
@@ -766,6 +836,7 @@ package org.connectbot.sshlib {
     property public long obscureKeystrokeTimingIntervalMs;
     property public int port;
     property public boolean preferPasswordAuth;
+    property public String? pubkeyAlgorithms;
     property public long rekeyBytesLimit;
     property public long rekeyIntervalMs;
     property public int sessionWindowSize;
@@ -775,6 +846,37 @@ package org.connectbot.sshlib {
 
   public static final class SshClientConfig.Companion {
     method public operator org.connectbot.sshlib.SshClientConfig invoke(kotlin.jvm.functions.Function1<? super org.connectbot.sshlib.SshClientConfig.Builder,kotlin.Unit> block);
+  }
+
+  public final class SshCryptoPolicy {
+    method public static java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.util.List<org.connectbot.sshlib.SshAlgorithm>> catalog();
+    method @InaccessibleFromKotlin public java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.util.List<java.lang.String>> getAlgorithms();
+    method @InaccessibleFromKotlin public int getMinimumDhBits();
+    method @InaccessibleFromKotlin public int getMinimumRsaBits();
+    method @InaccessibleFromKotlin public org.connectbot.sshlib.CryptoPolicyPreset getPreset();
+    method @InaccessibleFromKotlin public java.util.List<org.connectbot.sshlib.AlgorithmPolicyWarning> getWarnings();
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCryptoPolicy resolve() throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset, optional java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.lang.String> overrides) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset, optional java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.lang.String> overrides, optional Integer? minimumRsaBits) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset, optional java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.lang.String> overrides, optional Integer? minimumRsaBits, optional Integer? minimumDhBits) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public static void validateExpression(String? expression) throws org.connectbot.sshlib.SshException;
+    property public java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.util.List<java.lang.String>> algorithms;
+    property public int minimumDhBits;
+    property public int minimumRsaBits;
+    property public org.connectbot.sshlib.CryptoPolicyPreset preset;
+    property public java.util.List<org.connectbot.sshlib.AlgorithmPolicyWarning> warnings;
+    field public static final org.connectbot.sshlib.SshCryptoPolicy.Companion Companion;
+  }
+
+  public static final class SshCryptoPolicy.Companion {
+    method public java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.util.List<org.connectbot.sshlib.SshAlgorithm>> catalog();
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public org.connectbot.sshlib.SshCryptoPolicy resolve() throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset, optional java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.lang.String> overrides) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset, optional java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.lang.String> overrides, optional Integer? minimumRsaBits) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public org.connectbot.sshlib.SshCryptoPolicy resolve(optional org.connectbot.sshlib.CryptoPolicyPreset preset, optional java.util.Map<org.connectbot.sshlib.AlgorithmCategory,java.lang.String> overrides, optional Integer? minimumRsaBits, optional Integer? minimumDhBits) throws org.connectbot.sshlib.SshException;
+    method @kotlin.jvm.Throws(exceptionClasses=SshException::class) public void validateExpression(String? expression) throws org.connectbot.sshlib.SshException;
   }
 
   public class SshException {
@@ -922,7 +1024,7 @@ package org.connectbot.sshlib.client {
   }
 
   public final class SshConnection {
-    ctor public SshConnection(org.connectbot.sshlib.transport.Transport transport, optional java.lang.String clientVersion, org.connectbot.sshlib.HostKeyVerifier hostKeyVerifier, optional java.lang.String kexAlgorithms, optional java.lang.String hostKeyAlgorithms, optional java.lang.String encryptionAlgorithms, optional java.lang.String macAlgorithms, optional java.lang.String compressionAlgorithms, optional boolean preferPasswordAuth, optional long rekeyIntervalMs, optional long rekeyBytesLimit, optional long obscureKeystrokeTimingIntervalMs, optional kotlinx.coroutines.CoroutineDispatcher coroutineDispatcher);
+    ctor public SshConnection(org.connectbot.sshlib.transport.Transport transport, optional String clientVersion, org.connectbot.sshlib.HostKeyVerifier hostKeyVerifier, optional String kexAlgorithms, optional String hostKeyAlgorithms, optional String encryptionAlgorithms, optional String macAlgorithms, optional String compressionAlgorithms, optional boolean preferPasswordAuth, optional long rekeyIntervalMs, optional long rekeyBytesLimit, optional long obscureKeystrokeTimingIntervalMs, optional kotlinx.coroutines.CoroutineDispatcher coroutineDispatcher, optional String? pubkeyAlgorithms, optional org.connectbot.sshlib.SshCryptoPolicy? cryptoPolicy, optional kotlin.jvm.functions.Function1<? super org.connectbot.sshlib.AlgorithmPolicyWarning,kotlin.Unit> onAlgorithmWarning);
     method public suspend java.lang.Object? authenticateKeyboardInteractive(java.lang.String username, org.connectbot.sshlib.KeyboardInteractiveCallback callback, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AuthResult>);
     method public suspend java.lang.Object? authenticatePassword(java.lang.String username, java.lang.String password, kotlin.coroutines.Continuation<? super org.connectbot.sshlib.AuthResult>);
     method public suspend java.lang.Object? close(kotlin.coroutines.Continuation<? super kotlin.Unit>);

@@ -50,6 +50,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.connectbot.sshlib.AgentProvider
+import org.connectbot.sshlib.AlgorithmCategory
+import org.connectbot.sshlib.AlgorithmPolicyWarning
+import org.connectbot.sshlib.AlgorithmPolicyWarningReason
 import org.connectbot.sshlib.AuthHandler
 import org.connectbot.sshlib.AuthPublicKey
 import org.connectbot.sshlib.ConnectResult
@@ -60,6 +63,7 @@ import org.connectbot.sshlib.PingResult
 import org.connectbot.sshlib.PublicKey
 import org.connectbot.sshlib.SessionExit
 import org.connectbot.sshlib.SshCertificate
+import org.connectbot.sshlib.SshCryptoPolicy
 import org.connectbot.sshlib.SshException
 import org.connectbot.sshlib.crypto.CERTIFICATE_SUFFIX
 import org.connectbot.sshlib.crypto.CipherEntry
@@ -269,7 +273,13 @@ class SshConnection(
     private val rekeyBytesLimit: Long = 1_073_741_824L,
     private val obscureKeystrokeTimingIntervalMs: Long = 20L,
     coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    pubkeyAlgorithms: String? = null,
+    private val cryptoPolicy: SshCryptoPolicy? = null,
+    private val onAlgorithmWarning: (AlgorithmPolicyWarning) -> Unit = {},
 ) {
+    private val restrictPubkeyAlgorithms = pubkeyAlgorithms != null || cryptoPolicy != null
+    private val pubkeyAlgorithms = pubkeyAlgorithms ?: cryptoPolicy?.algorithms?.getValue(AlgorithmCategory.PUBKEY)?.joinToString(",") ?: hostKeyAlgorithms
+
     internal var autoDisconnectOnLastChannelClose: Boolean = true
 
     /** Default receive window for [openSessionChannel], set from `SshClientConfig.sessionWindowSize`. */
@@ -821,6 +831,9 @@ class SshConnection(
                 ?: throw SshException("Unknown signature algorithm: $sigAlgorithmName")
 
             val requestAlgorithm = if (certificate != null) certificateAlgorithm(sigAlgorithmName) ?: certificate.algorithmName else sigAlgorithmName
+            if ((restrictPubkeyAlgorithms && requestAlgorithm !in pubkeyAlgorithms.split(',')) || cryptoPolicy?.acceptsKey(publicKeyBlob, AlgorithmCategory.PUBKEY) == false) {
+                return PublicAuthResult.Failure(allowedAuthentications ?: setOf("publickey"))
+            }
             val hostBoundKeyBlob = serverHostKeyBlob.takeIf { serverAdvertisesHostBound }
 
             val signatureData = if (hostBoundKeyBlob != null) {
@@ -934,12 +947,16 @@ class SshConnection(
         return data.toByteArray()
     }
 
-    private fun negotiateRsaAlgorithm(): String? = SignatureEntry.negotiateRsaAlgorithm(
-        serverSigAlgs,
-        hostKeyAlgorithms.split(',').filter { it.isNotEmpty() }.map {
-            certificateSignatureAlgorithm(it)
-        }.toSet(),
-    )
+    private fun negotiateRsaAlgorithm(): String? {
+        val allowed = pubkeyAlgorithms.split(',').filter { it.isNotEmpty() }.map(::certificateSignatureAlgorithm).toSet()
+        return if (!restrictPubkeyAlgorithms) {
+            SignatureEntry.negotiateRsaAlgorithm(serverSigAlgs, allowed)
+        } else if (serverSigAlgs == null) {
+            "ssh-rsa".takeIf { it in allowed }
+        } else {
+            allowed.firstOrNull { it in setOf("rsa-sha2-512", "rsa-sha2-256", "ssh-rsa") && it in serverSigAlgs.orEmpty() }
+        }
+    }
 
     /**
      * Authenticate using the strategy-based [AuthHandler] flow.
@@ -988,7 +1005,15 @@ class SshConnection(
             val allowedMethods = allowedAuthentications.orEmpty()
             handler.onAuthMethodsAvailable(allowedMethods)
             val candidate = if ("publickey" in allowedMethods) {
-                if (keys == null) keys = handler.onPublicKeysNeeded()
+                if (keys == null) {
+                    val supplied = handler.onPublicKeysNeeded()
+                    keys = if (cryptoPolicy == null) {
+                        supplied
+                    } else {
+                        supplied.mapNotNull { key -> authenticationAlgorithm(key)?.let { key to it } }
+                            .sortedBy { (_, algorithm) -> pubkeyAlgorithms.split(',').indexOf(algorithm) }.map { it.first }
+                    }
+                }
                 keys.firstOrNull { it !in triedPublicKeys && it !in completedPublicKeys }
             } else {
                 null
@@ -1037,11 +1062,16 @@ class SshConnection(
     private fun authenticationAlgorithm(key: AuthPublicKey): String? {
         val type = keyBlobAlgorithmName(key.publicKeyBlob)
         if (type?.endsWith(CERTIFICATE_SUFFIX) == true) SshCertificate.decode(key.publicKeyBlob).toAuthPublicKey()
-        return when (type) {
+        if (cryptoPolicy?.acceptsKey(key.publicKeyBlob, AlgorithmCategory.PUBKEY) == false) {
+            onAlgorithmWarning(AlgorithmPolicyWarning(AlgorithmCategory.PUBKEY, key.algorithmName, AlgorithmPolicyWarningReason.RSA_TOO_SMALL))
+            return null
+        }
+        val selected = when (type) {
             KEY_TYPE_SSH_RSA -> negotiateRsaAlgorithm()
             "ssh-rsa$CERTIFICATE_SUFFIX" -> negotiateRsaAlgorithm()?.let { certificateAlgorithm(it) }
             else -> key.algorithmName
         }
+        return selected?.takeIf { !restrictPubkeyAlgorithms || it in pubkeyAlgorithms.split(',') }
     }
 
     private suspend fun probePublicKey(
@@ -1373,6 +1403,7 @@ class SshConnection(
     private suspend fun sendKexDhInit(kexEntry: KexEntry) {
         logger.debug("Sending DH_INIT")
 
+        if (cryptoPolicy != null && (SshCryptoPolicy.fixedDhBits(kexEntry.sshName) ?: Int.MAX_VALUE) < cryptoPolicy.minimumDhBits) throw SshException("DH group below policy minimum")
         val dh = kexEntry.create()
         kex = dh
         clientPublicKey = dh.generateClientKeys()
@@ -1409,7 +1440,7 @@ class SshConnection(
     private suspend fun sendKexDhGexRequest(kexEntry: KexEntry) {
         logger.debug("Sending DH_GEX_REQUEST (${kexEntry.sshName})")
 
-        val dhGex = kexEntry.create() as DiffieHellmanGroupExchange
+        val dhGex = DiffieHellmanGroupExchange(kexEntry.hashAlgorithm, cryptoPolicy?.minimumDhBits ?: 2048)
         kex = dhGex
 
         val msg = SshMsgKexDhGexRequest().apply {
@@ -1524,6 +1555,7 @@ class SshConnection(
 
         val negotiatedAlg = negotiatedHostKeyAlgorithm
             ?: throw SshException("No host key algorithm negotiated")
+        if (cryptoPolicy?.acceptsKey(serverHostKey, AlgorithmCategory.HOST_KEY) == false) throw SshException("Server host key or certificate violates cryptographic policy (minimum RSA: ${cryptoPolicy.minimumRsaBits} bits)")
         if (!SignatureVerifier.verify(serverHostKey, signature, hash, negotiatedAlg)) {
             logger.error("Server signature verification failed")
             throw SshException("Server signature verification failed")
@@ -2308,7 +2340,7 @@ class SshConnection(
                 key.type in allowed && SignatureEntry.fromSshName(key.type) != null &&
                     (MldsaAlgorithm.fromSshName(key.type)?.isAvailable() != false)
             }
-            key.takeIf { supported }
+            key.takeIf { supported && cryptoPolicy?.acceptsKey(blob, AlgorithmCategory.HOST_KEY) != false }
         }
         if (keys.isEmpty()) return
         val data = GlobalRequestHostkeysProve00Openssh().apply {

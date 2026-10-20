@@ -65,6 +65,9 @@ class SshClientConfig private constructor(
     val sftpWindowSize: Int,
     val environment: Map<String, String>,
     val keepAliveIntervalMs: Long,
+    val pubkeyAlgorithms: String?,
+    val cryptoPolicy: SshCryptoPolicy?,
+    val algorithmWarningHandler: ((AlgorithmPolicyWarning) -> Unit)?,
 ) {
     class Builder {
         /**
@@ -117,6 +120,30 @@ class SshClientConfig private constructor(
 
         var encryptionAlgorithms: String = CipherEntry.defaultString
         var macAlgorithms: String = MacEntry.defaultString
+
+        /** Null preserves the historical authentication behavior for existing callers. */
+        var pubkeyAlgorithms: String? = null
+        private var policy: SshCryptoPolicy? = null
+
+        /** Called when authentication skips a key because of policy. Must return promptly. */
+        var algorithmWarningHandler: ((AlgorithmPolicyWarning) -> Unit)? = null
+
+        /**
+         * Apply a freshly resolved [SshCryptoPolicy] before any explicit preference reordering.
+         * Resolve after installing platform crypto providers. The policy controls all algorithm categories,
+         * including public-key authentication, and enforces RSA/DH minimum key sizes.
+         * See [SshCryptoPolicy] for presets, custom expression syntax, and capability warnings.
+         *
+         * Example: `cryptoPolicy(SshCryptoPolicy.resolve(CryptoPolicyPreset.FUTURE))`.
+         */
+        fun cryptoPolicy(value: SshCryptoPolicy): Builder = apply {
+            policy = value
+            kexAlgorithms = value.algorithms.getValue(AlgorithmCategory.KEX).joinToString(",") + ",kex-strict-c-v00@openssh.com,ext-info-c"
+            hostKeyAlgorithms = value.algorithms.getValue(AlgorithmCategory.HOST_KEY).joinToString(",")
+            encryptionAlgorithms = value.algorithms.getValue(AlgorithmCategory.CIPHER).joinToString(",")
+            macAlgorithms = value.algorithms.getValue(AlgorithmCategory.MAC).joinToString(",")
+            pubkeyAlgorithms = value.algorithms.getValue(AlgorithmCategory.PUBKEY).joinToString(",")
+        }
 
         /**
          * Enable zlib compression. When true, the client offers
@@ -209,6 +236,18 @@ class SshClientConfig private constructor(
                 "keepAliveIntervalMs must be non-negative"
             }
 
+            policy?.let { selected ->
+                val configured = mapOf(
+                    AlgorithmCategory.KEX to kexAlgorithms.split(',').filterNot { it in listOf("kex-strict-c-v00@openssh.com", "ext-info-c") },
+                    AlgorithmCategory.CIPHER to encryptionAlgorithms.split(','),
+                    AlgorithmCategory.MAC to macAlgorithms.split(','),
+                    AlgorithmCategory.HOST_KEY to hostKeyAlgorithms.split(','),
+                    AlgorithmCategory.PUBKEY to pubkeyAlgorithms.orEmpty().split(','),
+                )
+                configured.forEach { (category, names) ->
+                    if (names.isEmpty() || names.any { it.isEmpty() || it !in selected.algorithms.getValue(category) }) throw SshException("Configured $category algorithms violate cryptographic policy")
+                }
+            }
             val verifier = hostKeyVerifier
             requireNotNull(verifier) { "hostKeyVerifier must be set" }
             val compressionAlgorithms = if (enableCompression) {
@@ -235,6 +274,9 @@ class SshClientConfig private constructor(
                 sftpWindowSize,
                 Collections.unmodifiableMap(environmentSnapshot),
                 keepAliveIntervalMs,
+                pubkeyAlgorithms,
+                policy,
+                algorithmWarningHandler,
             )
         }
     }
