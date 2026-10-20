@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Changes for library users since `0.6.2`.
+
 ## [0.6.2][0.6.2]
 
 Changes for library users since `0.6.1`.
