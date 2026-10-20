@@ -35,8 +35,10 @@ val config = SshClientConfig {
 
 | Name | Summary |
 |---|---|
+| [algorithmWarningHandler](algorithm-warning-handler.md) | [jvm]<br>val [algorithmWarningHandler](algorithm-warning-handler.md): ([AlgorithmPolicyWarning](../-algorithm-policy-warning/index.md)) -&gt; [Unit](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html)? |
 | [autoDisconnectOnLastChannelClose](auto-disconnect-on-last-channel-close.md) | [jvm]<br>val [autoDisconnectOnLastChannelClose](auto-disconnect-on-last-channel-close.md): [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html) |
 | [clientVersion](client-version.md) | [jvm]<br>val [clientVersion](client-version.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
+| [cryptoPolicy](crypto-policy.md) | [jvm]<br>val [cryptoPolicy](crypto-policy.md): [SshCryptoPolicy](../-ssh-crypto-policy/index.md)? |
 | [encryptionAlgorithms](encryption-algorithms.md) | [jvm]<br>val [encryptionAlgorithms](encryption-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
 | [environment](environment.md) | [jvm]<br>val [environment](environment.md): [Map](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html)&lt;[String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)&gt; |
 | [hostKeyAlgorithms](host-key-algorithms.md) | [jvm]<br>val [hostKeyAlgorithms](host-key-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
@@ -46,6 +48,7 @@ val config = SshClientConfig {
 | [macAlgorithms](mac-algorithms.md) | [jvm]<br>val [macAlgorithms](mac-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
 | [obscureKeystrokeTimingIntervalMs](obscure-keystroke-timing-interval-ms.md) | [jvm]<br>val [obscureKeystrokeTimingIntervalMs](obscure-keystroke-timing-interval-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [preferPasswordAuth](prefer-password-auth.md) | [jvm]<br>val [preferPasswordAuth](prefer-password-auth.md): [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html) |
+| [pubkeyAlgorithms](pubkey-algorithms.md) | [jvm]<br>val [pubkeyAlgorithms](pubkey-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)? |
 | [rekeyBytesLimit](rekey-bytes-limit.md) | [jvm]<br>val [rekeyBytesLimit](rekey-bytes-limit.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [rekeyIntervalMs](rekey-interval-ms.md) | [jvm]<br>val [rekeyIntervalMs](rekey-interval-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [sessionWindowSize](session-window-size.md) | [jvm]<br>val [sessionWindowSize](session-window-size.md): [Int](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html) |

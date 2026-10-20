@@ -51,6 +51,7 @@ For blocking Java compatibility, use [org.connectbot.sshlib.blocking.BlockingSsh
 | [connectionInfo](connection-info.md) | [jvm]<br>val [connectionInfo](connection-info.md): [ConnectionInfo](../-connection-info/index.md)?<br>Negotiated algorithm details for the current connection. |
 | [disconnectedFlow](disconnected-flow.md) | [jvm]<br>val [disconnectedFlow](disconnected-flow.md): SharedFlow&lt;[Throwable](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-throwable/index.html)?&gt;<br>Emits when the connection drops unexpectedly. |
 | [isAuthenticated](is-authenticated.md) | [jvm]<br>val [isAuthenticated](is-authenticated.md): [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html)<br>Check if connected and authenticated. |
+| [policyWarnings](policy-warnings.md) | [jvm]<br>val [policyWarnings](policy-warnings.md): [List](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html)&lt;[AlgorithmPolicyWarning](../-algorithm-policy-warning/index.md)&gt;<br>Policy diagnostics retained after disconnect. |
 | [remoteAddress](remote-address.md) | [jvm]<br>val [remoteAddress](remote-address.md): [InetSocketAddress](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/net/InetSocketAddress.html)?<br>Actual connected network peer; null for jump-host channels and disconnected clients. |
 
 ## Functions
