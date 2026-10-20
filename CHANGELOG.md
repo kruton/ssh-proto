@@ -1,8 +1,29 @@
 # Changelog
 
-## Unreleased
+## [0.6.2][0.6.2]
 
 Changes for library users since `0.6.1`.
+
+### Added
+
+- Added OpenSSH user and host certificate support for Ed25519, RSA, and ECDSA,
+  including certificate authentication overloads for async and blocking clients.
+  Security Key user certificates are supported through application-provided signers.
+- Added opt-in host certificate negotiation, CA trust through `KnownHostsVerifier`
+  and `CertificateAuthorityVerifier`, and OpenSSH key revocation list support
+  through `SshKeyRevocationList`. See [SSH certificates](docs/SSH_CERTIFICATES.md).
+- Added `SshCryptoPolicy` with `DEFAULT`, `FUTURE`, `FIPS`, and `LEGACY` presets,
+  custom algorithm expressions, and minimum RSA and Diffie-Hellman key sizes.
+  The `FIPS` preset filters algorithms; it does not establish FIPS validation.
+- Added an algorithm catalog with provider availability, independent public-key
+  authentication algorithm selection, and structured policy warnings.
+
+### Fixed
+
+- Fixed a Poly1305 final-carry error that could cause intermittent
+  `chacha20-poly1305@openssh.com` interoperability failures by using the
+  Bouncy Castle implementation
+  (thanks [@THEBMOREJOKER](https://github.com/THEBMOREJOKER)).
 
 ## [0.6.1][0.6.1]
 
@@ -231,6 +252,7 @@ Changes for library users since `0.2.1`.
 - Limited zlib decompression output per packet to reduce decompression-bomb
   denial-of-service risk.
 
+[0.6.2]: https://github.com/connectbot/cbssh/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/connectbot/cbssh/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/connectbot/cbssh/compare/v0.5.1...v0.6.0
 [0.5.1]: https://github.com/connectbot/cbssh/compare/v0.5.0...v0.5.1
