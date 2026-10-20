@@ -290,7 +290,6 @@ class SshConnection(
         private const val KEX_EXT_INFO_C = "ext-info-c"
         private const val SERVICE_SSH_CONNECTION = "ssh-connection"
         private const val KEY_TYPE_SSH_RSA = "ssh-rsa"
-        private const val METHOD_PUBLICKEY_HOSTBOUND = "publickey-hostbound-v00@openssh.com"
         private const val CHANNEL_FORWARDED_TCPIP = "forwarded-tcpip"
         private const val ERROR_SESSION_ID_NOT_ESTABLISHED = "Session ID not established"
         private const val ERROR_CLIENT_PUBLIC_KEY_NOT_GENERATED = "Client public key not generated"
@@ -675,7 +674,7 @@ class SshConnection(
             val req = SshMsgUserauthRequest().apply {
                 setUserName(createAsciiString(username))
                 setServiceName(createAsciiString(SERVICE_SSH_CONNECTION))
-                setMethodName(createAsciiString("password"))
+                setMethodName(createAsciiString(AuthMethod.PASSWORD))
 
                 val passAuth = UserauthRequestPassword().apply {
                     setChangePassword(0)
@@ -727,7 +726,7 @@ class SshConnection(
             val req = SshMsgUserauthRequest().apply {
                 setUserName(createAsciiString(username))
                 setServiceName(createAsciiString(SERVICE_SSH_CONNECTION))
-                setMethodName(createAsciiString("keyboard-interactive"))
+                setMethodName(createAsciiString(AuthMethod.KEYBOARD_INTERACTIVE))
 
                 val kbdInteractive = UserauthRequestKeyboardInteractive().apply {
                     setLanguageTag(createByteString(ByteArray(0)))
@@ -823,7 +822,7 @@ class SshConnection(
 
             val sigAlgorithmName = if (privateKey.keyType == KEY_TYPE_SSH_RSA) {
                 negotiateRsaAlgorithm()
-                    ?: return PublicAuthResult.Failure(allowedAuthentications ?: setOf("publickey"))
+                    ?: return PublicAuthResult.Failure(allowedAuthentications ?: setOf(AuthMethod.PUBLIC_KEY))
             } else {
                 privateKey.signatureAlgorithm
             }
@@ -832,7 +831,7 @@ class SshConnection(
 
             val requestAlgorithm = if (certificate != null) certificateAlgorithm(sigAlgorithmName) ?: certificate.algorithmName else sigAlgorithmName
             if ((restrictPubkeyAlgorithms && requestAlgorithm !in pubkeyAlgorithms.split(',')) || cryptoPolicy?.acceptsKey(publicKeyBlob, AlgorithmCategory.PUBKEY) == false) {
-                return PublicAuthResult.Failure(allowedAuthentications ?: setOf("publickey"))
+                return PublicAuthResult.Failure(allowedAuthentications ?: setOf(AuthMethod.PUBLIC_KEY))
             }
             val hostBoundKeyBlob = serverHostKeyBlob.takeIf { serverAdvertisesHostBound }
 
@@ -853,7 +852,7 @@ class SshConnection(
                 setServiceName(createAsciiString(SERVICE_SSH_CONNECTION))
 
                 if (hostBoundKeyBlob != null) {
-                    setMethodName(createAsciiString(METHOD_PUBLICKEY_HOSTBOUND))
+                    setMethodName(createAsciiString(AuthMethod.PUBLIC_KEY_HOSTBOUND))
                     val pubkeyAuth = UserauthRequestPublickeyHostbound().apply {
                         setHasSignature(1)
                         setPublicKeyAlgorithmName(createAsciiString(requestAlgorithm))
@@ -864,7 +863,7 @@ class SshConnection(
                     }
                     setMethodSpecificFields(pubkeyAuth)
                 } else {
-                    setMethodName(createAsciiString("publickey"))
+                    setMethodName(createAsciiString(AuthMethod.PUBLIC_KEY))
                     val pubkeyAuth = UserauthRequestPublickey().apply {
                         setHasSignature(1)
                         setPublicKeyAlgorithmName(createAsciiString(requestAlgorithm))
@@ -915,7 +914,7 @@ class SshConnection(
             setMessageType(byteArrayOf(50))
             setUserName(createByteString(username.toByteArray(Charsets.UTF_8)))
             setServiceName(createByteString(serviceName.toByteArray(Charsets.US_ASCII)))
-            setMethodName(createByteString("publickey".toByteArray(Charsets.US_ASCII)))
+            setMethodName(createByteString(AuthMethod.PUBLIC_KEY.toByteArray(Charsets.US_ASCII)))
             setHasSignature(byteArrayOf(1))
             setPublicKeyAlgorithmName(createByteString(algorithmName.toByteArray(Charsets.US_ASCII)))
             setPublicKeyBlob(createByteString(publicKeyBlob))
@@ -937,7 +936,7 @@ class SshConnection(
             setMessageType(byteArrayOf(50))
             setUserName(createByteString(username.toByteArray(Charsets.UTF_8)))
             setServiceName(createByteString(serviceName.toByteArray(Charsets.US_ASCII)))
-            setMethodName(createByteString(METHOD_PUBLICKEY_HOSTBOUND.toByteArray(Charsets.US_ASCII)))
+            setMethodName(createByteString(AuthMethod.PUBLIC_KEY_HOSTBOUND.toByteArray(Charsets.US_ASCII)))
             setHasSignature(byteArrayOf(1))
             setPublicKeyAlgorithmName(createByteString(algorithmName.toByteArray(Charsets.US_ASCII)))
             setPublicKeyBlob(createByteString(publicKeyBlob))
@@ -987,7 +986,7 @@ class SshConnection(
     ): PublicAuthResult {
         if (allowedAuthentications == null) {
             // Step 1: Send "none" auth to discover allowed methods
-            sendAuthRequest(username, "none") {
+            sendAuthRequest(username, AuthMethod.NONE) {
                 val noneAuth = UserauthRequestNone().apply { _check() }
                 setMethodSpecificFields(noneAuth)
             }
@@ -1004,7 +1003,7 @@ class SshConnection(
         while (true) {
             val allowedMethods = allowedAuthentications.orEmpty()
             handler.onAuthMethodsAvailable(allowedMethods)
-            val candidate = if ("publickey" in allowedMethods) {
+            val candidate = if (AuthMethod.PUBLIC_KEY in allowedMethods) {
                 if (keys == null) {
                     val supplied = handler.onPublicKeysNeeded()
                     keys = if (cryptoPolicy == null) {
@@ -1081,8 +1080,8 @@ class SshConnection(
         channel: Channel<InternalAuthResult>,
     ): InternalAuthResult {
         val effectiveAlgorithmName = authenticationAlgorithm(key)
-            ?: return InternalAuthResult.Failure(allowedAuthentications ?: setOf("publickey"), partialSuccess = false)
-        sendAuthRequest(username, "publickey") {
+            ?: return InternalAuthResult.Failure(allowedAuthentications ?: setOf(AuthMethod.PUBLIC_KEY), partialSuccess = false)
+        sendAuthRequest(username, AuthMethod.PUBLIC_KEY) {
             val pubkeyAuth = UserauthRequestPublickey().apply {
                 setHasSignature(0)
                 setPublicKeyAlgorithmName(createAsciiString(effectiveAlgorithmName))
@@ -1115,7 +1114,7 @@ class SshConnection(
         val signature = handler.onSignatureRequest(signingKey, signatureData) ?: return null
 
         if (hostBoundKeyBlob != null) {
-            sendAuthRequest(username, METHOD_PUBLICKEY_HOSTBOUND) {
+            sendAuthRequest(username, AuthMethod.PUBLIC_KEY_HOSTBOUND) {
                 val pubkeyAuth = UserauthRequestPublickeyHostbound().apply {
                     setHasSignature(1)
                     setPublicKeyAlgorithmName(createAsciiString(effectiveAlgorithmName))
@@ -1127,7 +1126,7 @@ class SshConnection(
                 setMethodSpecificFields(pubkeyAuth)
             }
         } else {
-            sendAuthRequest(username, "publickey") {
+            sendAuthRequest(username, AuthMethod.PUBLIC_KEY) {
                 val pubkeyAuth = UserauthRequestPublickey().apply {
                     setHasSignature(1)
                     setPublicKeyAlgorithmName(createAsciiString(effectiveAlgorithmName))
@@ -1147,7 +1146,7 @@ class SshConnection(
         handler: AuthHandler,
         channel: Channel<InternalAuthResult>,
     ): InternalAuthResult? {
-        sendAuthRequest(username, "keyboard-interactive") {
+        sendAuthRequest(username, AuthMethod.KEYBOARD_INTERACTIVE) {
             val kbdInteractive = UserauthRequestKeyboardInteractive().apply {
                 setLanguageTag(createByteString(ByteArray(0)))
                 setSubmethods(createByteString(ByteArray(0)))
@@ -1205,7 +1204,7 @@ class SshConnection(
         handler: AuthHandler,
         channel: Channel<InternalAuthResult>,
     ): InternalAuthResult? {
-        sendAuthRequest(username, "password") {
+        sendAuthRequest(username, AuthMethod.PASSWORD) {
             val passAuth = UserauthRequestPassword().apply {
                 setChangePassword(0)
                 setPlaintextPassword(createUtf8String(password))
