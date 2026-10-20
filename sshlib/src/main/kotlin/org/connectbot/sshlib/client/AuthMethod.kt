@@ -1,6 +1,6 @@
 /*
  * ConnectBot SSH Library
- * Copyright 2025 Kenny Root
+ * Copyright 2025-2026 Kenny Root
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,23 @@ internal sealed class AuthMethod {
     data class Unknown(val name: String) : AuthMethod()
 
     companion object {
+        const val PASSWORD = "password"
+        const val PUBLIC_KEY = "publickey"
+        const val KEYBOARD_INTERACTIVE = "keyboard-interactive"
+        const val NONE = "none"
+        const val PUBLIC_KEY_HOSTBOUND = "publickey-hostbound-v00@openssh.com"
+
         fun fromString(name: String): AuthMethod = when (name) {
-            "password" -> Password
-            "publickey" -> PublicKey
-            "keyboard-interactive" -> KeyboardInteractive
+            PASSWORD -> Password
+            PUBLIC_KEY -> PublicKey
+            KEYBOARD_INTERACTIVE -> KeyboardInteractive
             else -> Unknown(name)
         }
 
         fun toSshName(method: AuthMethod): String = when (method) {
-            is Password -> "password"
-            is PublicKey -> "publickey"
-            is KeyboardInteractive -> "keyboard-interactive"
+            is Password -> PASSWORD
+            is PublicKey -> PUBLIC_KEY
+            is KeyboardInteractive -> KEYBOARD_INTERACTIVE
             is Unknown -> method.name
         }
     }

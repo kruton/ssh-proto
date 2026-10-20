@@ -187,8 +187,6 @@ internal class AgentProtocolHandler(
 
         private const val MAX_BINDINGS = 16
         private const val SERVICE_CONNECTION = "ssh-connection"
-        private const val METHOD_PUBLICKEY = "publickey"
-        private const val METHOD_PUBLICKEY_HOSTBOUND = "publickey-hostbound-v00@openssh.com"
         private const val KEY_TYPE_SSH_RSA = "ssh-rsa"
         private const val KEY_TYPE_SSH_RSA_CERT = "ssh-rsa-cert-v01@openssh.com"
     }
@@ -371,7 +369,7 @@ internal class AgentProtocolHandler(
                 return createFailureResponse()
             }
 
-            if (bindingList.size > 1 && components.methodName != METHOD_PUBLICKEY_HOSTBOUND) {
+            if (bindingList.size > 1 && components.methodName != AuthMethod.PUBLIC_KEY_HOSTBOUND) {
                 logger.warn("Forwarded connection requires publickey-hostbound method, got: ${components.methodName}")
                 return createFailureResponse()
             }
@@ -463,7 +461,7 @@ internal class AgentProtocolHandler(
 
         if (!isFullyConsumed ||
             serviceName != SERVICE_CONNECTION ||
-            (methodName != METHOD_PUBLICKEY && methodName != METHOD_PUBLICKEY_HOSTBOUND) ||
+            (methodName != AuthMethod.PUBLIC_KEY && methodName != AuthMethod.PUBLIC_KEY_HOSTBOUND) ||
             !embeddedPublicKey.contentEquals(expectedPublicKeyBlob) ||
             !algorithmMatches
         ) {
