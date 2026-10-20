@@ -5,63 +5,71 @@
   "files": {
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimeKEMExtractor.java": {
       "originalSha256": "85a252478fd33b48e804738f6d45c53d5e60b59b0eb2451ef520b2f61c17ca8f",
-      "extractedSha256": "3842c08b57612a69823e7940af66531b8ca4e834baa12fcabb387d080a804335"
+      "extractedSha256": "e25b65a08f7bc3d6e9d5a613ba44e09d5336341c8977eb360fd627d40f4e8cf1"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimeKeyGenerationParameters.java": {
       "originalSha256": "4cd69716f2e806aeb3617eede613503a46882b94576ecc24943384a34fb31488",
-      "extractedSha256": "68cb7a79cb1659f2091a2e123ff0a3f0f6c7fbb1ac9929c24d8af67bc7ba8a7d"
+      "extractedSha256": "8a48eba0f873b4160d58991aad84368e26d5127ca9abc0d235abe7bacda4c205"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimeKeyPairGenerator.java": {
       "originalSha256": "71439ef7d4a0d88fa5710794f124452d80da4aec01868c46d13810d7bc710887",
-      "extractedSha256": "51b5472470b9af3f0314cd6595e2315871b054fbec18fbdaa2fe443795bbf3be"
+      "extractedSha256": "1c19e8e55579c51c522db11aa4039b561cd4c424f1f4190340adab494d3e4260"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimeKeyParameters.java": {
       "originalSha256": "2534ad5a79597b1a6d6fbf84689969ba6ef19e3e63e1bcbd79042add8ca0b46e",
-      "extractedSha256": "17544a51504fd80a1d350e6818f4cdc3891cfc8d7012d5f724cdea78f142cafe"
+      "extractedSha256": "0a6fb1640b05758a5d0220c2aadf0c3153b9e37a88d190e267b1a670f5636cb3"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimeParameters.java": {
       "originalSha256": "2955a85e3dfb22b659ce5033b76f09322ec67dbdb13f2e2cade58a094af8e0ed",
-      "extractedSha256": "d3b676c5c055a83e7a23aebf7dd6bfb101ee78e7deeb52278b80328edb064034"
+      "extractedSha256": "bf3c5713091dae1da599f07b269a03ca03654d206137c83ce796e863d48ad1be"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimePrivateKeyParameters.java": {
       "originalSha256": "150262e2dcf1fdb897492122b6379aa6cf8bd9da49c029316cdd823d41dd1da0",
-      "extractedSha256": "8fb3a8926cbd91185426d24db6b4c26685b709c26b6b182dc1349d3abb589f71"
+      "extractedSha256": "802d17a3b57dce1881f86f6bc7ca0356449d2ba28c6dbdca0d1edaf72889df16"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/SNTRUPrimePublicKeyParameters.java": {
       "originalSha256": "0b334851bcdaaacb9454eb4dc9024fc05034a16233ce90d5c34f0a52f7baaea0",
-      "extractedSha256": "87f31280bc01cb3fa78ddab2e787425e16732a6a99b644f36fbcc39c92aa81ae"
+      "extractedSha256": "193f317b4a5f77e836a5cc698ffb90ae2e2716b2b136a2a5413cca7bd9ac8b87"
     },
     "org/bouncycastle/pqc/crypto/ntruprime/Utils.java": {
       "originalSha256": "21fca15a0d94e6c1aca6c7091f18e28cfdaaf92c2dfcc9a9ba74c695724d1157",
-      "extractedSha256": "aa4a1be481e8a972891349ac4e27761f3afde7688c24bfac001e59ce3e5e6041"
+      "extractedSha256": "5445bc60de298c8ecd779c0464159a278cb31a692957df4dd61a9fc2e9667c2f"
     },
     "org/bouncycastle/crypto/AsymmetricCipherKeyPair.java": {
       "originalSha256": "7c898609c9a6377f9b8be32459b428c752bb980595a0c322931b4edf25c17212",
-      "extractedSha256": "bd3ba09e3292d930f225a545600340c4399a67e01f53362df47925193ba4e8df"
+      "extractedSha256": "05f5de082512d9f957e941aafbff2a4e0ec06d3ab935e92560217810393eb1da"
     },
     "org/bouncycastle/crypto/AsymmetricCipherKeyPairGenerator.java": {
       "originalSha256": "97debb19427049ed4cc25b02f95458ef7a5b25a11a00b0b3e6fe2419ef50bfe2",
-      "extractedSha256": "2f344a19a72b8f824bcbac35d307a96963e89145d8c860e53b8fa6ab615732b4"
+      "extractedSha256": "4799bb8e8c91d814a38a4458235050ff0b92eb6e206103ad75160de65089957c"
     },
     "org/bouncycastle/crypto/KeyGenerationParameters.java": {
       "originalSha256": "9194caee9ce205b9cd46166222fe2d706f26edd7b62c0642637b34a25e88b8c8",
-      "extractedSha256": "3494ee8723d23f5bddbc6b6efe6cde1d512fb0954ec81f7dbe96993a1d6b03cd"
+      "extractedSha256": "4091cde62ffec35608f56d4150506dcf654d96b354e1c8065c65fd6ad5dbee19"
     },
     "org/bouncycastle/crypto/params/AsymmetricKeyParameter.java": {
       "originalSha256": "75adec82d927cbef515bada736330880594966aa12723b5b4640a7338f6f98dd",
-      "extractedSha256": "5e30847d03884331ee2526c6cafdfc5550da575c69d0f38d205cf9d60275808d"
+      "extractedSha256": "7889003fc4964b02ce6383471ada22ac2fbc863dddccaa233f583f1ee0d400c5"
     },
     "org/bouncycastle/pqc/crypto/KEMParameters.java": {
       "originalSha256": "81b888010266847c7ba8fb70a1c2eb0b7c921e3c8f71822b88b18b8efade018d",
-      "extractedSha256": "8bc0e3873d93cc416b6cde60b2e03b18947a1e2d6636c8c711b7b254d649a693"
+      "extractedSha256": "42a781aec127c508f0fe62afcb183d79c275bff6eee23133fe344984d6e454f7"
     },
     "org/bouncycastle/crypto/EncapsulatedSecretExtractor.java": {
       "originalSha256": "ba69318204e88acb844ca475f21a07fa3dd85db1dce64ed612a29128efa590f1",
-      "extractedSha256": "86a8aba9b6146934358fc8b4b69021d083363167408f2d9094a1066e65c3dde5"
+      "extractedSha256": "ad6f977f9c80718ab439f9c5b4ba80441a9df46d2e5c49044458efb11c92d4ac"
     },
     "org/bouncycastle/crypto/CipherParameters.java": {
       "originalSha256": "30d32bdb9c782a37b1c8437bc522b344767418b06f0ee5d0f710023c89041a7e",
-      "extractedSha256": "819585a616b3360ef384dc216bef22eb4978c20aed38dddd8f386e5d5e40bb87"
+      "extractedSha256": "180f0a50d755c2c2223b2fc7ba388707f8f1e8529ecb3ab50f0cd2c40e5eb35f"
+    },
+    "org/bouncycastle/crypto/macs/Poly1305.java": {
+      "originalSha256": "975d3c7ecd48225a4a579e132ff2b7b69ac9cd9225aaf770d23f0a9b1247bfd7",
+      "extractedSha256": "193408df1897f1fa19589766a06bdb8356b9e64b3ae796719dd754a4b91a0fc1"
+    },
+    "org/bouncycastle/util/Pack.java": {
+      "originalSha256": "60e9b5a533ff3c4bbc5f0f86060c289153332d19544f3d312e847b8495d60cf4",
+      "extractedSha256": "17d905b8ae428983731074bd5896fabfe9a595e8dfbc1324147b3b4e93c29228"
     },
     "META-INF/LICENSE.md": {
       "originalSha256": "0e01f1549c9022f406392ac2947d32223b7c2e977d21ea2f8c182fdeb4dae5fd",

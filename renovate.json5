@@ -9,7 +9,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^third_party/sntrup/upstream\\.json$/"],
+      "managerFilePatterns": ["/^third_party/bouncycastle/upstream\\.json$/"],
       "matchStrings": ["\"version\":\\s*\"(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "org.bouncycastle:bcprov-jdk18on",
       "datasourceTemplate": "maven",
@@ -29,10 +29,10 @@
   "packageRules": [
     {
       "matchDepNames": ["org.bouncycastle:bcprov-jdk18on"],
-      "groupName": "Bouncy Castle and vendored SNTRUP sources",
+      "groupName": "Bouncy Castle and vendored crypto sources",
       "automerge": false,
       "prBodyNotes": [
-        "The SNTRUP source check compares released upstream files and the reproducible extraction against recorded SHA-256 hashes. If upstream changed, review it against third_party/sntrup/upstream.json reviewedVersion, run python3 .github/scripts/vendor_sntrup.py --update, review the generated changes, and run the crypto tests. Do not accept new hashes without reviewing the upstream changes."
+        "The Bouncy Castle source check compares released upstream files and the reproducible extraction against recorded SHA-256 hashes. If upstream changed, review it against third_party/bouncycastle/upstream.json reviewedVersion, run .github/scripts/vendor_bouncycastle.py --update, review the generated changes, and run the crypto tests. Do not accept new hashes without reviewing the upstream changes."
       ]
     }
   ]

@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   vendored-sources:
-    name: Vendored SNTRUP source provenance
+    name: Vendored crypto source provenance
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -24,10 +24,11 @@ jobs:
           persist-credentials: false
 
       - name: Test source verification
-        run: python3 -m unittest discover -s .github/scripts -p 'test_vendor_sntrup.py' -v
+        run: python3 -m unittest discover -s .github/scripts -p 'test_vendor_bouncycastle.py' -v
 
       - name: Verify published upstream sources and extraction
-        run: python3 .github/scripts/vendor_sntrup.py --check
+        run: |
+          python3 .github/scripts/vendor_bouncycastle.py --check
 
   workflow-tests:
     name: Workflow scripts
@@ -114,7 +115,7 @@ jobs:
         run: |
           python3 -m venv build/python-coverage
           build/python-coverage/bin/pip install -r .github/scripts/requirements-coverage.txt
-          build/python-coverage/bin/python -m coverage run -m unittest discover -s .github/scripts -p 'test_vendor_sntrup.py' -v
+          build/python-coverage/bin/python -m coverage run -m unittest discover -s .github/scripts -p 'test_vendor_bouncycastle.py' -v
           build/python-coverage/bin/python -m coverage xml
 
       - name: Stage isolated analysis inputs
