@@ -116,6 +116,7 @@ class FakeSshServer(
     var advertisePing: Boolean = false
     var advertiseExtInfo: Boolean = false
     var kexAlgorithms: String? = null
+    var encryptionAlgorithm: String = "aes128-ctr"
 
     private val kexHashAlgorithm: String
         get() = when (kexAlgorithms?.split(',')?.first()) {
@@ -433,8 +434,8 @@ class FakeSshServer(
             setCookie(cookie)
             setKexAlgorithms(createNameList(kexAlgs))
             setServerHostKeyAlgorithms(createNameList("ssh-ed25519"))
-            setEncryptionAlgorithmsClientToServer(createNameList("aes128-ctr"))
-            setEncryptionAlgorithmsServerToClient(createNameList("aes128-ctr"))
+            setEncryptionAlgorithmsClientToServer(createNameList(encryptionAlgorithm))
+            setEncryptionAlgorithmsServerToClient(createNameList(encryptionAlgorithm))
             setMacAlgorithmsClientToServer(createNameList("hmac-sha2-256-etm@openssh.com"))
             setMacAlgorithmsServerToClient(createNameList("hmac-sha2-256-etm@openssh.com"))
             setCompressionAlgorithmsClientToServer(createNameList("none"))
@@ -536,7 +537,7 @@ class FakeSshServer(
         val sid = sessionId ?: return
 
         val keyDerivation = KeyDerivation(sharedSecret, exchangeHash, sid, kexHashAlgorithm)
-        val cipherEntry = CipherEntry.fromSshName("aes128-ctr") ?: return
+        val cipherEntry = CipherEntry.fromSshName(encryptionAlgorithm) ?: return
         val macEntry = MacEntry.fromSshName("hmac-sha2-256-etm@openssh.com") ?: return
 
         val keys = keyDerivation.deriveKeys(

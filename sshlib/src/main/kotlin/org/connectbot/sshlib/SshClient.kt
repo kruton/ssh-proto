@@ -144,6 +144,11 @@ class SshClient private constructor(
 
     private var transport: Transport? = initialTransport
     private var connection: SshConnection? = initialConnection
+    private val algorithmWarnings = java.util.concurrent.CopyOnWriteArrayList<AlgorithmPolicyWarning>()
+
+    /** Policy diagnostics retained after disconnect. */
+    val policyWarnings: List<AlgorithmPolicyWarning> get() = algorithmWarnings.toList()
+
     private var authenticated = initialAuthenticated
     private val forwardingScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var disconnectForwardJob: Job? = null
@@ -177,6 +182,12 @@ class SshClient private constructor(
             hostKeyVerifier = config.hostKeyVerifier,
             kexAlgorithms = config.kexAlgorithms,
             hostKeyAlgorithms = config.hostKeyAlgorithms,
+            pubkeyAlgorithms = config.pubkeyAlgorithms,
+            cryptoPolicy = config.cryptoPolicy,
+            onAlgorithmWarning = { warning ->
+                algorithmWarnings.add(warning)
+                config.algorithmWarningHandler?.invoke(warning)
+            },
             encryptionAlgorithms = config.encryptionAlgorithms,
             macAlgorithms = config.macAlgorithms,
             compressionAlgorithms = config.compressionAlgorithms,

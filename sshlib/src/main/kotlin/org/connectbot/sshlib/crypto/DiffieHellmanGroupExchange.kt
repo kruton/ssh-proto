@@ -29,7 +29,7 @@ import java.security.SecureRandom
  * Uses a 4-message protocol where the client requests DH parameters from
  * the server before performing the key exchange.
  */
-internal class DiffieHellmanGroupExchange(override val hashAlgorithm: String) : KexAlgorithm {
+internal class DiffieHellmanGroupExchange(override val hashAlgorithm: String, val min: Int = 2048) : KexAlgorithm {
     companion object {
         private val secureRandom = SecureRandom()
         private const val ERROR_GROUP_NOT_SET = "DH group not set; call setGroup() first"
@@ -49,8 +49,7 @@ internal class DiffieHellmanGroupExchange(override val hashAlgorithm: String) : 
         internal fun cachedGroupValidationCount(): Int = groupValidationCache.size
     }
 
-    val min = 2048
-    val n = 4096
+    val n = maxOf(4096, min)
     val max = 8192
 
     private var p: BigInteger? = null

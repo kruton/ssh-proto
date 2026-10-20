@@ -117,10 +117,7 @@ class LegacyOpenSshCompatibilityTest {
                             }
                         }
                         // Opt in locally; this test must never weaken library defaults.
-                        kexAlgorithms = "curve25519-sha256,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1"
-                        hostKeyAlgorithms = "ssh-rsa"
-                        encryptionAlgorithms = "aes128-ctr,aes128-cbc"
-                        macAlgorithms = "hmac-sha1"
+                        cryptoPolicy(org.connectbot.sshlib.SshCryptoPolicy.resolve(org.connectbot.sshlib.CryptoPolicyPreset.LEGACY))
                     },
                 )
                 try {

@@ -191,6 +191,7 @@ internal enum class KexEntry(
     val type: KexType,
     val isPostQuantum: Boolean,
     private val factory: () -> KexAlgorithm,
+    val isHybrid: Boolean = false,
 ) {
     MLKEM768X25519_SHA256(
         "mlkem768x25519-sha256",
@@ -198,6 +199,7 @@ internal enum class KexEntry(
         KexType.ECDH,
         true,
         { MlKemHybridKeyExchange() },
+        true,
     ),
     MLKEM768NISTP256_SHA256(
         "mlkem768nistp256-sha256",
@@ -205,6 +207,7 @@ internal enum class KexEntry(
         KexType.ECDH,
         true,
         { MlKemNistHybridKeyExchange(MlKemNistParameters.NISTP256) },
+        true,
     ),
     MLKEM1024NISTP384_SHA384(
         "mlkem1024nistp384-sha384",
@@ -212,6 +215,7 @@ internal enum class KexEntry(
         KexType.ECDH,
         true,
         { MlKemNistHybridKeyExchange(MlKemNistParameters.NISTP384) },
+        true,
     ),
     MLKEM768_SHA256("mlkem768-sha256", HASH_SHA256, KexType.ECDH, true, { MlKemKeyExchange(MlKemParameterSet.ML_KEM_768) }),
     MLKEM1024_SHA384("mlkem1024-sha384", "SHA-384", KexType.ECDH, true, { MlKemKeyExchange(MlKemParameterSet.ML_KEM_1024) }),
@@ -221,6 +225,7 @@ internal enum class KexEntry(
         KexType.ECDH,
         true,
         { SntrupHybridKeyExchange() },
+        true,
     ),
     SNTRUP761X25519_SHA512_OPENSSH(
         "sntrup761x25519-sha512@openssh.com",
@@ -228,6 +233,7 @@ internal enum class KexEntry(
         KexType.ECDH,
         true,
         { SntrupHybridKeyExchange() },
+        true,
     ),
     CURVE25519_SHA256(
         "curve25519-sha256",
