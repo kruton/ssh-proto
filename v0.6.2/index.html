@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>ConnectBot SSH Library</title>
+    <link href="images/logo-icon.svg" rel="icon" type="image/svg">
+        <script>var pathToRoot = "";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="scripts/sourceset_dependencies.js" async="async"></script>
+<link href="styles/style.css" rel="Stylesheet">
+<link href="styles/main.css" rel="Stylesheet">
+<link href="styles/prism.css" rel="Stylesheet">
+<link href="styles/logo-styles.css" rel="Stylesheet">
+<link href="ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="ui-kit/ui-kit.min.js" defer="defer"></script>
+<!-- BEGIN DOCS NAVIGATION -->
+<link rel="stylesheet" href="https://sshlib.connectbot.org/docs-version.css">
+<script src="https://sshlib.connectbot.org/docs-version.js" defer data-docs-root="https://sshlib.connectbot.org/" data-docs-version="v0.6.2"></script>
+<!-- END DOCS NAVIGATION -->
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="index.html" tabindex="1">
+                    ConnectBot SSH Library
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version"><label class="docs-version-label">Version <select id="docs-version" aria-label="Documentation version"><option value="v0.6.2" selected>v0.6.2</option><option value="v0.6.1">v0.6.1</option><option value="v0.6.0">v0.6.0</option><option value="v0.5.1">v0.5.1</option><option value="v0.5.0">v0.5.0</option><option value="main">main</option></select></label></div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":sshlib/main">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":sshlib/main"
+                                       data-filter=":sshlib/main"/>
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    ConnectBot SSH Library
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" id="content" pageIds="ConnectBot SSH Library::////PointingToDeclaration//-1357994179">
+  <div class="breadcrumbs"></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Connect</span><wbr></wbr><span><span>Bot</span></span> <span><span>SSH</span></span> <span><span>Library</span></span></h1>
+    <div class="platform-hinted UnderCoverText" data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><p class="paragraph"><a href="https://github.com/connectbot/cbssh/actions/workflows/ci.yml?query=branch%3Amain"></a> <a href="https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib"></a> <a href="https://slsa.dev/spec/v1.0/levels#build-l3-hardened-builds"></a> <a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/LICENSE"></a> <a href="https://sonarcloud.io/summary/overall?id=connectbot_cbssh"></a> <a href="https://sonarcloud.io/summary/overall?id=connectbot_cbssh"></a></p><p class="paragraph">ConnectBot SSH is a Kotlin client library for SSH connections, authentication, interactive shells, command execution, SFTP, and port forwarding. It uses coroutines, declarative protocol definitions, and explicit state machines.</p><p class="paragraph">The protocol parsing uses declarative Kaitai Struct specifications that auto-generate code from <code class="lang-kotlin">.ksy</code> definitions. The internal state machine is defined in KStateMachine for clear separation of protocol states from the code that runs in reaction to state changes.</p><h2 class="">Features</h2><ul><li><p class="paragraph"><strong>SSH Client</strong>: Coroutine API (<code class="lang-kotlin">SshClient</code>) and blocking connection/authentication   wrapper (<code class="lang-kotlin">BlockingSshClient</code>)</p></li><li><p class="paragraph"><strong>Protocol Parsing</strong>: SSH message parsing and serialization (RFCs 4250-4256,   4419, 5656, 8308, 8709, 8731, 9142)</p></li><li><p class="paragraph"><strong>Channel I/O</strong>: Interactive shells with PTY, command execution, subsystems,   stdout/stderr streams, exit status/signals, and flow control</p></li><li><p class="paragraph"><strong>SFTP</strong>: Version 3 file transfer with read/write/stat/directory operations   (<a href="https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer">draft-ietf-secsh-filexfer</a>)</p></li><li><p class="paragraph"><strong>Port Forwarding</strong>: Local, remote, and dynamic (SOCKS5) port forwarding</p></li><li><p class="paragraph"><strong>Agent Forwarding</strong>: Forward SSH agent requests with session binding support</p></li><li><p class="paragraph"><strong>Transport</strong>: Pluggable transport layer (TCP via Ktor, or custom)</p></li><li><p class="paragraph"><strong>Configuration</strong>: Session environment variables, receive windows, automatic   rekeying, and optional zlib compression</p></li></ul><h2 class="">Algorithm Support</h2><p class="paragraph">The library supports a wide range of post-quantum and other modern SSH algorithms, including:</p><ul><li><p class="paragraph"><strong>Authentication</strong>: <code class="lang-kotlin">publickey</code> (including OpenSSH certificates and FIDO2/SK), <code class="lang-kotlin">password</code>, <code class="lang-kotlin">keyboard-interactive</code></p></li><li><p class="paragraph"><strong>Host Keys</strong>: ML-DSA hybrid, Ed25519, Ed448, ECDSA, RSA (SHA-2), OpenSSH host certificates</p></li><li><p class="paragraph"><strong>Key Exchange</strong>: ML-KEM hybrid, SNTRUP761 hybrid, Curve25519, ECDH, DH groups 14/16/18,   DH group-exchange</p></li><li><p class="paragraph"><strong>Encryption</strong>: ChaCha20-Poly1305, AES-GCM, AES-CTR</p></li><li><p class="paragraph"><strong>MACs</strong>: HMAC-SHA2 (including ETM variants)</p></li></ul><p class="paragraph">For a complete list of supported algorithms and their respective RFCs, see <a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/ALGORITHMS.md">docs/ALGORITHMS.md</a>.</p><p class="paragraph">The defaults offer only encrypt-then-MAC (ETM) HMAC-SHA2 variants and exclude SHA-1 key exchange and MACs, CBC/3DES ciphers, and <code class="lang-kotlin">ssh-rsa</code> host-key signatures. These legacy algorithms and non-ETM MACs remain available only through the explicit <code class="lang-kotlin">kexAlgorithms</code>, <code class="lang-kotlin">hostKeyAlgorithms</code>, <code class="lang-kotlin">encryptionAlgorithms</code>, and <code class="lang-kotlin">macAlgorithms</code> settings in <code class="lang-kotlin">SshClientConfig</code>. RSA user authentication normally requires the server to advertise <code class="lang-kotlin">rsa-sha2-256</code> or <code class="lang-kotlin">rsa-sha2-512</code> through <code class="lang-kotlin">server-sig-algs</code>. Explicitly including <code class="lang-kotlin">ssh-rsa</code> in the configured host-key algorithm wishlist also permits the legacy RSA/SHA-1 signature when advertised, or as the base-key algorithm when that extension is absent.</p><h2 class="">Quick Start</h2><h3 class="">Add the Library</h3><p class="paragraph">The library targets JVM 17. Add the dependency from <a href="https://central.sonatype.com/artifact/org.connectbot.sshlib/sshlib">Maven Central</a>:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">repositories {<br>    mavenCentral()<br>}<br><br>dependencies {<br>    implementation(&quot;org.connectbot.sshlib:sshlib:0.5.0&quot;)<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><h3 class="">Build</h3><p class="paragraph">Published artifacts from the attested build pipeline include SLSA provenance and SBOM attestations. See <a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/BUILD_PROVENANCE.md">verifying build provenance</a> for Maven/Gradle downloads, standard verification commands, and downstream build use.</p><p class="paragraph">Building from source requires JDK 17 and a running Docker daemon for integration tests. The Gradle wrapper handles Gradle installation.</p><div class="sample-container"><pre><code class="block lang-bash" theme="idea">./gradlew build<br><br># Compile the library without running tests:<br>./gradlew :sshlib:compileKotlin</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><h3 class="">Use the Test CLI Client</h3><p class="paragraph">There is a &quot;testapp&quot; that allows you to try the library from a test client app. You can use it by running the following commands:</p><div class="sample-container"><pre><code class="block lang-bash" theme="idea">./gradlew :testapp:installDist<br>./testapp/build/install/testapp/bin/testapp user@host<br>./testapp/build/install/testapp/bin/testapp -p 2222 user@host<br><br># Authenticate with a private key:<br>./testapp/build/install/testapp/bin/testapp -i ~/.ssh/id_ed25519 user@host<br><br># Enable more debug logging:<br>./testapp/build/install/testapp/bin/testapp -d user@host</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><h3 class="">Library API</h3><p class="paragraph">Connection, authentication, and channel I/O use suspend functions. Every client requires an explicit <code class="lang-kotlin">HostKeyVerifier</code>. This example trusts keys already present in an OpenSSH <code class="lang-kotlin">known_hosts</code> file; <code class="lang-kotlin">KnownHostsVerifier</code> supports plain hostnames and wildcards, but does not support hashed hostnames.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">import java.io.File<br>import kotlinx.coroutines.coroutineScope<br>import kotlinx.coroutines.launch<br>import org.connectbot.sshlib.*<br><br>suspend fun main() {<br>    val verifier = KnownHostsVerifier(<br>        File(System.getProperty(&quot;user.home&quot;), &quot;.ssh/known_hosts&quot;),<br>        &quot;example.com&quot;<br>    )<br>    val client = SshClient(&quot;example.com&quot;, port = 22, hostKeyVerifier = verifier)<br>    try {<br>        check(client.connect() is ConnectResult.Success) { &quot;SSH connection failed&quot; }<br>        check(client.authenticatePassword(&quot;user&quot;, &quot;pass&quot;) is AuthResult.Success) {<br>            &quot;SSH authentication failed&quot;<br>        }<br><br>        val session = checkNotNull(client.openSession()) { &quot;Failed to open SSH session&quot; }<br>        try {<br>            check(session.requestPty()) { &quot;Server rejected PTY request&quot; }<br>            check(session.requestShell()) { &quot;Server rejected shell request&quot; }<br><br>            coroutineScope {<br>                launch {<br>                    for (chunk in session.stderr) System.err.write(chunk)<br>                }<br>                session.write(&quot;ls\nexit\n&quot;.toByteArray())<br>                for (chunk in session.stdout) System.out.write(chunk)<br>            }<br>        } finally {<br>            session.close()<br>        }<br>    } finally {<br>        client.disconnect()<br>    }<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph"><code class="lang-kotlin">stdout</code> and <code class="lang-kotlin">stderr</code> are <code class="lang-kotlin">ReceiveChannel&lt;ByteArray&gt;</code> streams. Alternatively, <code class="lang-kotlin">session.read()</code> reads stdout and returns <code class="lang-kotlin">null</code> at EOF. Read both streams concurrently when the remote process may produce both. Output remains readable after remote channel close and automatic disconnect; explicit <code class="lang-kotlin">session.close()</code> or <code class="lang-kotlin">client.disconnect()</code> discards unread output.</p><p class="paragraph">For synchronous connection and authentication calls, use <code class="lang-kotlin">org.connectbot.sshlib.blocking.BlockingSshClient</code>. Its session and SFTP objects still expose suspend functions for I/O.</p><p class="paragraph">By default, the client disconnects when its last channel closes. Set <code class="lang-kotlin">autoDisconnectOnLastChannelClose = false</code> to keep an authenticated connection available for later sessions or transfers, then disconnect it explicitly.</p><h3 class="">Configuration</h3><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val client = SshClient(SshClientConfig {<br>    host = &quot;example.com&quot;<br>    hostKeyVerifier = myVerifier<br>    autoDisconnectOnLastChannelClose = false<br>    enableCompression = true // Offers zlib@openssh.com, zlib, and none<br>    environment = mapOf(&quot;LANG&quot; to &quot;en_US.UTF-8&quot;)<br>    sessionWindowSize = 2 * 1024 * 1024 // Default: 2 MiB per session<br>    sftpWindowSize = 8 * 1024 * 1024    // Default: 8 MiB per SFTP channel<br>})</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><p class="paragraph">Environment defaults are sent before starting each session, including SFTP. Servers may reject variables according to their policy (OpenSSH <code class="lang-kotlin">AcceptEnv</code>). For individual sessions, call <code class="lang-kotlin">session.requestEnv(name, value)</code> before requesting a shell, command, or subsystem. Each channel can buffer up to its configured receive window in unread data.</p><h3 class="">Command Execution</h3><p class="paragraph">With an already connected and authenticated <code class="lang-kotlin">client</code>, open a fresh session for each command. Only one shell, command, or subsystem can start on a session.</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val session = checkNotNull(client.openSession())<br>try {<br>    check(session.requestExec(&quot;uname -a&quot;)) { &quot;Server rejected command&quot; }<br>    coroutineScope {<br>        launch {<br>            for (chunk in session.stderr) System.err.write(chunk)<br>        }<br>        for (chunk in session.stdout) System.out.write(chunk)<br>    }<br>    when (val exit = session.exitInfo.await()) {<br>        is SessionExit.Status -&gt; println(&quot;Exit code: ${exit.code}&quot;)<br>        is SessionExit.Signal -&gt; println(&quot;Terminated by signal: ${exit.signalName}&quot;)<br>        null -&gt; println(&quot;Server did not report an exit status or signal&quot;)<br>    }<br>} finally {<br>    session.close()<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><h3 class="">SFTP File Transfer</h3><p class="paragraph">With an already connected and authenticated <code class="lang-kotlin">client</code>:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val sftp = when (val result = client.openSftp()) {<br>    is SftpResult.Success -&gt; result.value<br>    else -&gt; error(&quot;Failed to open SFTP: $result&quot;)<br>}<br><br>try {<br>    // List a directory<br>    when (val result = sftp.listdir(&quot;/home/user&quot;)) {<br>        is SftpResult.Success -&gt; result.value.forEach { println(it.filename) }<br>        is SftpResult.ServerError -&gt; println(&quot;Server error: ${result.message}&quot;)<br>        else -&gt; println(&quot;Error: $result&quot;)<br>    }<br><br>    // Read a file<br>    val handle = sftp.open(&quot;/home/user/file.txt&quot;, setOf(SftpOpenFlag.READ)).getOrThrow()<br>    try {<br>        val data = sftp.read(handle, 0L, 4096).getOrThrow() // ByteArray? (null on EOF)<br>    } finally {<br>        sftp.close(handle).getOrThrow()<br>    }<br>} finally {<br>    sftp.close()<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><h3 class="">OpenSSH Certificate Authentication</h3><p class="paragraph">The library supports OpenSSH user and host certificates, CA trust, and KRL revocation checks.</p><p class="paragraph">See <a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/SSH_CERTIFICATES.md">docs/SSH_CERTIFICATES.md</a> for configuration and authentication examples.</p><h3 class="">FIDO2 / Security Key Authentication</h3><p class="paragraph">The library supports authentication with <code class="lang-kotlin">sk-ssh-ed25519@openssh.com</code> and <code class="lang-kotlin">sk-ecdsa-sha2-nistp256@openssh.com</code> keys. Callers provide their own FIDO2 stack and surface the resulting assertion through the library's helpers.</p><p class="paragraph">See <a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/SK_AUTH.md">docs/SK_AUTH.md</a> for detailed implementation details and examples.</p><h3 class="">SSH Agent Forwarding</h3><p class="paragraph">Enable SSH agent forwarding to allow remote servers to use your keys:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">// Implement an agent provider<br>class MyAgentProvider : AgentProvider {<br>    override suspend fun getIdentities(): AgentResult&lt;List&lt;AgentIdentity&gt;&gt; {<br>        val keyBlob = loadPublicKeyBlob()<br>        return AgentResult.Success(listOf(AgentIdentity(keyBlob, &quot;my-key&quot;)))<br>    }<br><br>    override suspend fun signData(context: AgentSigningContext): AgentResult&lt;ByteArray?&gt; {<br>        // Show approval UI to user with session context<br>        val approved = showSigningPrompt(<br>            &quot;Remote server ${context.serverHostKey.joinToString(&quot;&quot;) { &quot;%02x&quot;.format(it) }} wants to use your key&quot;,<br>            &quot;Session bound: ${context.isBound}&quot;<br>        )<br><br>        return AgentResult.Success(if (approved) {<br>            // Return an SSH-encoded signature blob, honoring RSA SHA-2 flags.<br>            signWithPrivateKey(context.publicKeyBlob, context.dataToSign, context.flags)<br>        } else {<br>            null  // Deny the request<br>        })<br>    }<br>}<br><br>// Enable agent forwarding<br>val client = SshClient(&quot;bastion.example.com&quot;, hostKeyVerifier = myVerifier)<br>check(client.connect() is ConnectResult.Success) { &quot;SSH connection failed&quot; }<br>check(client.authenticatePassword(&quot;user&quot;, &quot;pass&quot;) is AuthResult.Success) {<br>    &quot;SSH authentication failed&quot;<br>}<br>client.enableAgentForwarding(MyAgentProvider())<br><br>// Now remote servers can use your agent through forwarding<br>val session = checkNotNull(client.openSession()) { &quot;Failed to open SSH session&quot; }<br>check(session.requestShell()) { &quot;Server rejected shell request&quot; }<br>// When you SSH from bastion to another server, it can request signatures</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div><h2 class="">Compatibility Testing</h2><p class="paragraph">The library is tested against multiple SSH server implementations using Docker (via Testcontainers):</p><ul><li><p class="paragraph"><strong>OpenSSH</strong> 9.9p2 — full integration tests including port forwarding</p></li><li><p class="paragraph"><strong>AsyncSSH</strong> (Python) — compatibility tests for ciphers, key exchange, MACs,   and public key auth</p></li><li><p class="paragraph"><strong>Dropbear</strong> — compatibility tests including ML-KEM post-quantum key exchange</p></li></ul><p class="paragraph">Run integration tests with: <code class="lang-kotlin">./gradlew :sshlib:test</code> (requires Docker).</p><h2 class="">Current Limitations</h2><ul><li><p class="paragraph">Client-only (no server implementation)</p></li><li><p class="paragraph">JVM library (targets Java 17 bytecode; not Kotlin Multiplatform)</p></li><li><p class="paragraph"><code class="lang-kotlin">KnownHostsVerifier</code> does not support hashed hostnames</p></li></ul><h2 class="">Documentation</h2><ul><li><p class="paragraph"><a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/CHANGELOG.md">Changelog</a></p></li><li><p class="paragraph"><a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/ALGORITHMS.md">Supported algorithms</a></p></li><li><p class="paragraph"><a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/SK_AUTH.md">Security Key authentication</a></p></li><li><p class="paragraph"><a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/agents/testing.md">Integration testing</a></p></li></ul><h2 class="">License</h2><p class="paragraph">Apache License 2.0 - See LICENSE file</p><h2 class="">Copyright</h2><p class="paragraph">Copyright 2019-2026, <a href="https://github.com/kruton/">Kenny Root</a></p></div></div>
+  </div>
+  <!-- BEGIN DOCS API CHANGES -->
+<section id="api-changes"><h2>New and changed APIs</h2>
+<p>Changes since v0.6.1.</p>
+<p><a href="https://github.com/connectbot/cbssh/compare/v0.6.1...v0.6.2">Compare source versions</a></p>
+<h3>SSH</h3>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/index.html"><code class="language-kotlin">org.connectbot.sshlib.AlgorithmCategory</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/-c-i-p-h-e-r/index.html"><code class="language-kotlin">CIPHER</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/-h-o-s-t_-k-e-y/index.html"><code class="language-kotlin">HOST_KEY</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/-k-e-x/index.html"><code class="language-kotlin">KEX</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/-m-a-c/index.html"><code class="language-kotlin">MAC</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/-p-u-b-k-e-y/index.html"><code class="language-kotlin">PUBKEY</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-category/index.html"><code class="language-kotlin">enum AlgorithmCategory : Enum&lt;AlgorithmCategory&gt; </code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning/index.html"><code class="language-kotlin">org.connectbot.sshlib.AlgorithmPolicyWarning</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning/-algorithm-policy-warning.html"><code class="language-kotlin">constructor(category: AlgorithmCategory, algorithm: String, reason: AlgorithmPolicyWarningReason)</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning/algorithm.html"><code class="language-kotlin">val algorithm: String</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning/category.html"><code class="language-kotlin">val category: AlgorithmCategory</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning/reason.html"><code class="language-kotlin">val reason: AlgorithmPolicyWarningReason</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning/index.html"><code class="language-kotlin">data class AlgorithmPolicyWarning(val category: AlgorithmCategory, val algorithm: String, val reason: AlgorithmPolicyWarningReason)</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning-reason/index.html"><code class="language-kotlin">org.connectbot.sshlib.AlgorithmPolicyWarningReason</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning-reason/-d-h_-t-o-o_-s-m-a-l-l/index.html"><code class="language-kotlin">DH_TOO_SMALL</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning-reason/-r-s-a_-t-o-o_-s-m-a-l-l/index.html"><code class="language-kotlin">RSA_TOO_SMALL</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning-reason/-u-n-a-v-a-i-l-a-b-l-e/index.html"><code class="language-kotlin">UNAVAILABLE</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning-reason/-u-n-s-u-p-p-o-r-t-e-d/index.html"><code class="language-kotlin">UNSUPPORTED</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-algorithm-policy-warning-reason/index.html"><code class="language-kotlin">enum AlgorithmPolicyWarningReason : Enum&lt;AlgorithmPolicyWarningReason&gt; </code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/index.html"><code class="language-kotlin">org.connectbot.sshlib.CertificateAuthorityVerifier</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/-certificate-authority-verifier.html"><code class="language-kotlin">constructor(hostname: String, trustedAuthorities: List&lt;PublicKey&gt;, revocations: SshKeyRevocationList? = null)</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/verify.html"><code class="language-kotlin">open suspend override fun verify(key: PublicKey): Boolean</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-certificate-authority-verifier/index.html"><code class="language-kotlin">class CertificateAuthorityVerifier constructor(hostname: String, trustedAuthorities: List&lt;PublicKey&gt;, revocations: SshKeyRevocationList? = null) : HostKeyVerifier</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-crypto-policy-preset/index.html"><code class="language-kotlin">org.connectbot.sshlib.CryptoPolicyPreset</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-crypto-policy-preset/-d-e-f-a-u-l-t/index.html"><code class="language-kotlin">DEFAULT</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-crypto-policy-preset/-f-i-p-s/index.html"><code class="language-kotlin">FIPS</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-crypto-policy-preset/-f-u-t-u-r-e/index.html"><code class="language-kotlin">FUTURE</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-crypto-policy-preset/-l-e-g-a-c-y/index.html"><code class="language-kotlin">LEGACY</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-crypto-policy-preset/index.html"><code class="language-kotlin">enum CryptoPolicyPreset : Enum&lt;CryptoPolicyPreset&gt; </code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/index.html"><code class="language-kotlin">org.connectbot.sshlib.KnownHostsVerifier</code></a></h4><ul>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/-known-hosts-verifier.html"><code class="language-kotlin">constructor(file: File, hostname: String, port: Int = 22)</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/-known-hosts-verifier.html"><code class="language-kotlin">constructor(file: File, hostname: String, port: Int, revocations: SshKeyRevocationList)</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-known-hosts-verifier/-known-hosts-verifier.html"><code class="language-kotlin">constructor(file: File, hostname: String, revocations: SshKeyRevocationList)</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-algorithm/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshAlgorithm</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-algorithm/-ssh-algorithm.html"><code class="language-kotlin">constructor(name: String, available: Boolean, defaultEnabled: Boolean)</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-algorithm/available.html"><code class="language-kotlin">val available: Boolean</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-algorithm/default-enabled.html"><code class="language-kotlin">val defaultEnabled: Boolean</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-algorithm/name.html"><code class="language-kotlin">val name: String</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-algorithm/index.html"><code class="language-kotlin">data class SshAlgorithm(val name: String, val available: Boolean, val defaultEnabled: Boolean)</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshCertificate</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/to-auth-public-key.html"><code class="language-kotlin">fun toAuthPublicKey(): AuthPublicKey</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/index.html"><code class="language-kotlin">object Companion</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/algorithm-name.html"><code class="language-kotlin">val algorithmName: String</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/critical-options.html"><code class="language-kotlin">val criticalOptions: Map&lt;String, ByteArray&gt;</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/encoded.html"><code class="language-kotlin">val encoded: ByteArray</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/extensions.html"><code class="language-kotlin">val extensions: Map&lt;String, ByteArray&gt;</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/key-id.html"><code class="language-kotlin">val keyId: String</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/principals.html"><code class="language-kotlin">val principals: List&lt;String&gt;</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/public-key.html"><code class="language-kotlin">val publicKey: PublicKey</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/serial.html"><code class="language-kotlin">val serial: ULong</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/signature-key.html"><code class="language-kotlin">val signatureKey: PublicKey</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/type.html"><code class="language-kotlin">val type: SshCertificate.Type</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/valid-after.html"><code class="language-kotlin">val validAfter: ULong</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/valid-before.html"><code class="language-kotlin">val validBefore: ULong</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/index.html"><code class="language-kotlin">class SshCertificate</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshCertificate.Companion</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/decode.html"><code class="language-kotlin">fun decode(encoded: ByteArray): SshCertificate</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/decode.html"><code class="language-kotlin">fun decode(text: String): SshCertificate</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-companion/index.html"><code class="language-kotlin">object Companion</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshCertificate.Type</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/-h-o-s-t/index.html"><code class="language-kotlin">HOST</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/-u-s-e-r/index.html"><code class="language-kotlin">USER</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-certificate/-type/index.html"><code class="language-kotlin">enum Type : Enum&lt;SshCertificate.Type&gt; </code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshClient</code></a></h4><ul>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html"><code class="language-kotlin">suspend fun authenticatePublicKey(username: String, privateKeyData: ByteArray, certificate: SshCertificate, passphrase: String? = null): AuthResult</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html"><code class="language-kotlin">suspend fun authenticatePublicKey(username: String, privateKeyData: ByteArray, passphrase: String? = null): AuthResult</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html"><code class="language-kotlin">suspend fun authenticatePublicKey(username: String, privateKeyData: String, certificate: SshCertificate, passphrase: String? = null): AuthResult</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/authenticate-public-key.html"><code class="language-kotlin">suspend fun authenticatePublicKey(username: String, privateKeyData: String, passphrase: String? = null): AuthResult</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client/policy-warnings.html"><code class="language-kotlin">val policyWarnings: List&lt;AlgorithmPolicyWarning&gt;</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshClientConfig</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/algorithm-warning-handler.html"><code class="language-kotlin">val algorithmWarningHandler: (AlgorithmPolicyWarning) -&gt; Unit?</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/crypto-policy.html"><code class="language-kotlin">val cryptoPolicy: SshCryptoPolicy?</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/pubkey-algorithms.html"><code class="language-kotlin">val pubkeyAlgorithms: String?</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/-builder/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshClientConfig.Builder</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/-builder/crypto-policy.html"><code class="language-kotlin">fun cryptoPolicy(value: SshCryptoPolicy): SshClientConfig.Builder</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/-builder/enable-certificate-host-keys.html"><code class="language-kotlin">fun enableCertificateHostKeys(enabled: Boolean = true): SshClientConfig.Builder</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/-builder/algorithm-warning-handler.html"><code class="language-kotlin">var algorithmWarningHandler: (AlgorithmPolicyWarning) -&gt; Unit?</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-client-config/-builder/pubkey-algorithms.html"><code class="language-kotlin">var pubkeyAlgorithms: String?</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshCryptoPolicy</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/index.html"><code class="language-kotlin">object Companion</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/algorithms.html"><code class="language-kotlin">val algorithms: Map&lt;AlgorithmCategory, List&lt;String&gt;&gt;</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/minimum-dh-bits.html"><code class="language-kotlin">val minimumDhBits: Int</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/minimum-rsa-bits.html"><code class="language-kotlin">val minimumRsaBits: Int</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/preset.html"><code class="language-kotlin">val preset: CryptoPolicyPreset</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/warnings.html"><code class="language-kotlin">val warnings: List&lt;AlgorithmPolicyWarning&gt;</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/index.html"><code class="language-kotlin">class SshCryptoPolicy</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshCryptoPolicy.Companion</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/catalog.html"><code class="language-kotlin">fun catalog(): Map&lt;AlgorithmCategory, List&lt;SshAlgorithm&gt;&gt;</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/resolve.html"><code class="language-kotlin">fun resolve(preset: CryptoPolicyPreset = CryptoPolicyPreset.DEFAULT, overrides: Map&lt;AlgorithmCategory, String&gt; = emptyMap(), minimumRsaBits: Int? = null, minimumDhBits: Int? = null): SshCryptoPolicy</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/validate-expression.html"><code class="language-kotlin">fun validateExpression(expression: String?)</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/index.html"><code class="language-kotlin">object Companion</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshKeyRevocationList</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/is-revoked.html"><code class="language-kotlin">fun isRevoked(key: PublicKey): Boolean</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/index.html"><code class="language-kotlin">object Companion</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/index.html"><code class="language-kotlin">class SshKeyRevocationList</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/index.html"><code class="language-kotlin">org.connectbot.sshlib.SshKeyRevocationList.Companion</code></a></h4><ul>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/decode.html"><code class="language-kotlin">fun decode(encoded: ByteArray): SshKeyRevocationList</code></a></li>
+<li>Added: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib/-ssh-key-revocation-list/-companion/index.html"><code class="language-kotlin">object Companion</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/index.html"><code class="language-kotlin">org.connectbot.sshlib.blocking.BlockingSshClient</code></a></h4><ul>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html"><code class="language-kotlin">fun authenticatePublicKey(username: String, privateKeyData: ByteArray, certificate: SshCertificate, passphrase: String? = null)</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html"><code class="language-kotlin">fun authenticatePublicKey(username: String, privateKeyData: ByteArray, passphrase: String? = null)</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html"><code class="language-kotlin">fun authenticatePublicKey(username: String, privateKeyData: String, certificate: SshCertificate, passphrase: String? = null)</code></a></li>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.blocking/-blocking-ssh-client/authenticate-public-key.html"><code class="language-kotlin">fun authenticatePublicKey(username: String, privateKeyData: String, passphrase: String? = null)</code></a></li>
+</ul>
+<h4><a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.client/-ssh-connection/index.html"><code class="language-kotlin">org.connectbot.sshlib.client.SshConnection</code></a></h4><ul>
+<li>Changed: <a href="-connect-bot%20-s-s-h%20-library/org.connectbot.sshlib.client/-ssh-connection/-ssh-connection.html"><code class="language-kotlin">constructor(transport: Transport, clientVersion: String = &quot;SSH-2.0-CBSSH_1.0&quot;, hostKeyVerifier: HostKeyVerifier, kexAlgorithms: String = KexEntry.defaultString, hostKeyAlgorithms: String = SignatureEntry.defaultString, encryptionAlgorithms: String = CipherEntry.defaultString, macAlgorithms: String = MacEntry.defaultString, compressionAlgorithms: String = CompressionEntry.defaultString, preferPasswordAuth: Boolean = false, rekeyIntervalMs: Long, rekeyBytesLimit: Long, obscureKeystrokeTimingIntervalMs: Long = 20, coroutineDispatcher: CoroutineDispatcher = Dispatchers.IO, pubkeyAlgorithms: String? = null, cryptoPolicy: SshCryptoPolicy? = null, onAlgorithmWarning: (AlgorithmPolicyWarning) -&gt; Unit = {})</code></a></li>
+</ul>
+<h3>Release notes</h3><div class="docs-release-notes"><p>Changes for library users since <code>0.6.1</code>.</p>
+<h4>Added</h4>
+<ul>
+<li>Added OpenSSH user and host certificate support for Ed25519, RSA, and ECDSA,
+including certificate authentication overloads for async and blocking clients.
+Security Key user certificates are supported through application-provided signers.</li>
+<li>Added opt-in host certificate negotiation, CA trust through <code>KnownHostsVerifier</code>
+and <code>CertificateAuthorityVerifier</code>, and OpenSSH key revocation list support
+through <code>SshKeyRevocationList</code>. See <a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/docs/SSH_CERTIFICATES.md">SSH certificates</a>.</li>
+<li>Added <code>SshCryptoPolicy</code> with <code>DEFAULT</code>, <code>FUTURE</code>, <code>FIPS</code>, and <code>LEGACY</code> presets,
+custom algorithm expressions, and minimum RSA and Diffie-Hellman key sizes.
+The <code>FIPS</code> preset filters algorithms; it does not establish FIPS validation.</li>
+<li>Added an algorithm catalog with provider availability, independent public-key
+authentication algorithm selection, and structured policy warnings.</li>
+</ul>
+<h4>Fixed</h4>
+<ul>
+<li>Fixed a Poly1305 final-carry error that could cause intermittent
+<code>chacha20-poly1305@openssh.com</code> interoperability failures by using the
+Bouncy Castle implementation
+(thanks <a href="https://github.com/THEBMOREJOKER">@THEBMOREJOKER</a>).</li>
+</ul>
+</div><p><a href="https://github.com/connectbot/cbssh/blob/1a1c6547814ae75f96469598e374bfc5c32f11e1/CHANGELOG.md">View changelog</a></p>
+</section>
+<!-- END DOCS API CHANGES -->
+<h2 class="">Packages</h2>
+  <div class="table"><a data-name="1117901126%2FPackages%2F-1357994179" anchor-label="org.connectbot.sshlib" id="1117901126%2FPackages%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="-connect-bot -s-s-h -library/org.connectbot.sshlib/index.html">org.connectbot.sshlib</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1117901126%2FPackages%2F-1357994179"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">jvm</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="-1510086239%2FPackages%2F-1357994179" anchor-label="org.connectbot.sshlib.blocking" id="-1510086239%2FPackages%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="-connect-bot -s-s-h -library/org.connectbot.sshlib.blocking/index.html">org.connectbot.sshlib.blocking</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1510086239%2FPackages%2F-1357994179"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">jvm</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="1194011703%2FPackages%2F-1357994179" anchor-label="org.connectbot.sshlib.client" id="1194011703%2FPackages%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="-connect-bot -s-s-h -library/org.connectbot.sshlib.client/index.html">org.connectbot.sshlib.client</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1194011703%2FPackages%2F-1357994179"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">jvm</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="-635095676%2FPackages%2F-1357994179" anchor-label="org.connectbot.sshlib.sk" id="-635095676%2FPackages%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="-connect-bot -s-s-h -library/org.connectbot.sshlib.sk/index.html">org.connectbot.sshlib.sk</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-635095676%2FPackages%2F-1357994179"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">jvm</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+<a data-name="-627725503%2FPackages%2F-1357994179" anchor-label="org.connectbot.sshlib.transport" id="-627725503%2FPackages%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+    <div class="table-row table-row_platform-tagged" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+      <div>
+        <div class="main-subrow ">
+          <div class=""><span class="inline-flex">
+              <div><a href="-connect-bot -s-s-h -library/org.connectbot.sshlib.transport/index.html">org.connectbot.sshlib.transport</a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-627725503%2FPackages%2F-1357994179"></span>
+                <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+              </span></span></div>
+          <div class="pull-right platform-tags--wrapper">
+            <div class="platform-tags no-gutters">
+              <div class="platform-tag jvm-like">jvm</div>
+            </div>
+          </div>
+        </div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>Copyright Kenny Root</div>
+                    <div>
+                        <a class="footer--link" id="markdown-link" href="index.md">View as Markdown</a>
+                        <script>
+                            document.getElementById("markdown-link").href =
+                                location.pathname.split("/").pop().replace(/\.html$/, ".md") || "index.md";
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
