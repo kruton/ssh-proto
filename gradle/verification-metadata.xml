@@ -63,6 +63,7 @@
          </trusted-key>
          <trusted-key id="3690C240CE51B4670D30AD1C38EE757D69184620" group="org.tukaani" name="xz"/>
          <trusted-key id="3B878F7D9C4119AA9837D089A0C56CE5FB6663C0" group="io.kaitai" name="kaitai-struct-runtime"/>
+         <trusted-key id="3EC80CAD1A3D50AFBBEFC136C2B98E64C61147AC" group="org.conscrypt" name="conscrypt-openjdk-uber" version="2.8.0"/>
          <trusted-key id="41CD49B4EF5876F9E9F691DABAC30622339994C4" group="org.jspecify" name="jspecify"/>
          <trusted-key id="42F84FEFCC27042638FE9C2A2C552BCF2C08FBBC" group="com.lihaoyi"/>
          <trusted-key id="44FBDBBC1A00FE414F1C1873586654072EAD6677" group="org.sonatype.oss" name="oss-parent"/>

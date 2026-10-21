@@ -8,7 +8,7 @@ kstatemachine = "0.38.1"
 ktor = "3.6.0"
 slf4j = "2.0.20"
 tink = "1.24.0"
-conscrypt = "2.7.0"
+conscrypt = "2.8.0"
 bouncycastle = "1.86"
 kyber = "2.1.0"
 # Keccak 2.3.0 requires Java 21; retain Java 17 compatibility.
