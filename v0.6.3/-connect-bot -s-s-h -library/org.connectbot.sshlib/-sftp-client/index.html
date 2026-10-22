@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SftpClient</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
+<!-- BEGIN DOCS NAVIGATION -->
+<link rel="stylesheet" href="https://sshlib.connectbot.org/docs-version.css">
+<script src="https://sshlib.connectbot.org/docs-version.js" defer data-docs-root="https://sshlib.connectbot.org/" data-docs-version="v0.6.3"></script>
+<!-- END DOCS NAVIGATION -->
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    ConnectBot SSH Library
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version"><label class="docs-version-label">Version <select id="docs-version" aria-label="Documentation version"><option value="v0.6.3" selected>v0.6.3</option><option value="v0.6.2">v0.6.2</option><option value="v0.6.1">v0.6.1</option><option value="v0.6.0">v0.6.0</option><option value="v0.5.1">v0.5.1</option><option value="v0.5.0">v0.5.0</option><option value="main">main</option></select></label></div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":sshlib/main">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":sshlib/main"
+                                       data-filter=":sshlib/main"/>
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    ConnectBot SSH Library
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="ConnectBot SSH Library::org.connectbot.sshlib/SftpClient///PointingToDeclaration//-1357994179">
+  <div class="breadcrumbs"><a href="../../../index.html">ConnectBot SSH Library</a><span class="delimiter">/</span><a href="../index.html">org.connectbot.sshlib</a><span class="delimiter">/</span><span class="current">SftpClient</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Sftp</span><wbr></wbr><span><span>Client</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">SftpClient</a> : <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/AutoCloseable.html">AutoCloseable</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/ab40ef9933f09aade796a3db8e594a9eb404e82e/sshlib/src/main/kotlin/org/connectbot/sshlib/SftpClient.kt#L45">source</a>)</span></span></div><p class="paragraph">SFTP client for file transfer over SSH (draft-ietf-secsh-filexfer).</p><p class="paragraph">Obtain an instance via <a href="../-ssh-client/open-sftp.html">SshClient.openSftp</a>. All methods are suspend functions for use with Kotlin coroutines. Multiple concurrent operations are supported via SFTP request pipelining.</p><p class="paragraph">All operations return <a href="../-sftp-result/index.html">SftpResult</a> instead of throwing exceptions, so errors can be handled structurally. Use <a href="../get-or-null.html">getOrNull</a> or <a href="../get-or-throw.html">getOrThrow</a> for convenience.</p><p class="paragraph">Usage:</p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">val sftp = client.openSftp() ?: error(&quot;Failed to open SFTP&quot;)<br>try {<br>    when (val result = sftp.listdir(&quot;/home/user&quot;)) {<br>        is SftpResult.Success -&gt; result.value.forEach { println(it.filename) }<br>        is SftpResult.ServerError -&gt; println(&quot;Error: ${result.message}&quot;)<br>        is SftpResult.ProtocolError -&gt; println(&quot;Protocol error: ${result.message}&quot;)<br>        is SftpResult.IoError -&gt; println(&quot;I/O error: ${result.cause}&quot;)<br>    }<br>} finally {<br>    sftp.close()<br>}</code></pre><span class="copy-tooltip"><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div><span class="copy-icon"></span></span></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-734500993%2FProperties%2F-1357994179" anchor-label="extensions" id="-734500993%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="extensions.html"><span><span>extensions</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-734500993%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="extensions.html">extensions</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">SFTP protocol extensions the server advertised as <code class="lang-kotlin">extension-name</code>/<code class="lang-kotlin">extension-data</code> pairs trailing its <code class="lang-kotlin">SSH_FXP_VERSION</code> reply (draft-ietf-secsh-filexfer-02 section 3). Only the names are kept; extension-specific data (if any) is discarded.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1193264129%2FProperties%2F-1357994179" anchor-label="isOpen" id="-1193264129%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-open.html"><span>is</span><wbr></wbr><span><span>Open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1193264129%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="is-open.html">isOpen</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Whether this SFTP session is still open.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="431395079%2FProperties%2F-1357994179" anchor-label="protocolVersion" id="431395079%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="protocol-version.html"><span>protocol</span><wbr></wbr><span><span>Version</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="431395079%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="protocol-version.html">protocolVersion</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div><div class="brief "><p class="paragraph">The negotiated SFTP protocol version (typically 3).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="165558703%2FFunctions%2F-1357994179" anchor-label="close" id="165558703%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="close.html"><span><span>close</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="165558703%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Close this SFTP session and the underlying SSH channel.</p></div><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="close.html"><span class="token function">close</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Close a file or directory handle.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="654062891%2FFunctions%2F-1357994179" anchor-label="copyData" id="654062891%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="copy-data.html"><span>copy</span><wbr></wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="654062891%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="copy-data.html"><span class="token function">copyData</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">srcHandle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token punctuation">, </span></span><span class="parameter ">srcOffset<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">length<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">dstHandle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token punctuation">, </span></span><span class="parameter ">dstOffset<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">timeoutMs<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token operator"> = </span><span class="token constant">0</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Copies <a href="copy-data.html">length</a> bytes from <a href="copy-data.html">srcHandle</a> at <a href="copy-data.html">srcOffset</a> into <a href="copy-data.html">dstHandle</a> at <a href="copy-data.html">dstOffset</a>, entirely on the server — no data crosses the wire. This is the <code class="lang-kotlin">&quot;copy-data&quot;</code> SFTP protocol extension OpenSSH added in 9.0 (April 2022); it lets the server use an efficient server-side copy (e.g. <code class="lang-kotlin">copy_file_range()</code> on Linux) instead of the client reading the whole file and writing it back, and works even for accounts restricted to <code class="lang-kotlin">internal-sftp</code> with no shell access (where server-side <code class="lang-kotlin">cp</code> via SSH exec cannot run at all).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1598901833%2FFunctions%2F-1357994179" anchor-label="fsetstat" id="1598901833%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="fsetstat.html"><span><span>fsetstat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1598901833%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="fsetstat.html"><span class="token function">fsetstat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token punctuation">, </span></span><span class="parameter ">attrs<span class="token operator">: </span><a href="../-sftp-attributes/index.html">SftpAttributes</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Set attributes of an open file handle.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1002633584%2FFunctions%2F-1357994179" anchor-label="fstat" id="1002633584%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="fstat.html"><span><span>fstat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1002633584%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="fstat.html"><span class="token function">fstat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="../-sftp-attributes/index.html">SftpAttributes</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Get attributes of an open file handle.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-853937620%2FFunctions%2F-1357994179" anchor-label="listdir" id="-853937620%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="listdir.html"><span><span>listdir</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-853937620%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="listdir.html"><span class="token function">listdir</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-sftp-directory-entry/index.html">SftpDirectoryEntry</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">List all entries in a directory. Convenience method that handles opendir/readdir/close internally.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1428685949%2FFunctions%2F-1357994179" anchor-label="lstat" id="1428685949%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="lstat.html"><span><span>lstat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1428685949%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="lstat.html"><span class="token function">lstat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="../-sftp-attributes/index.html">SftpAttributes</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Get file attributes without following symlinks.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2006975907%2FFunctions%2F-1357994179" anchor-label="mkdir" id="2006975907%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="mkdir.html"><span><span>mkdir</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2006975907%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="mkdir.html"><span class="token function">mkdir</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">attrs<span class="token operator">: </span><a href="../-sftp-attributes/index.html">SftpAttributes</a><span class="token operator"> = </span>SftpAttributes.EMPTY</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Create a directory.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="802736346%2FFunctions%2F-1357994179" anchor-label="open" id="802736346%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="open.html"><span><span>open</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="802736346%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="open.html"><span class="token function">open</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">flags<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="../-sftp-open-flag/index.html">SftpOpenFlag</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">attrs<span class="token operator">: </span><a href="../-sftp-attributes/index.html">SftpAttributes</a><span class="token operator"> = </span>SftpAttributes.EMPTY</span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Open a file. Returns a handle for subsequent read/write/close operations.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="998231552%2FFunctions%2F-1357994179" anchor-label="opendir" id="998231552%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="opendir.html"><span><span>opendir</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="998231552%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="opendir.html"><span class="token function">opendir</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Open a directory for reading.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="643829187%2FFunctions%2F-1357994179" anchor-label="read" id="643829187%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read.html"><span><span>read</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="643829187%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="read.html"><span class="token function">read</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">length<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Read data from an open file at the given offset. Returns <a href="../-sftp-result/-success/index.html">SftpResult.Success</a> with data, or with null at EOF.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2140983149%2FFunctions%2F-1357994179" anchor-label="readdir" id="-2140983149%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="readdir.html"><span><span>readdir</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2140983149%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="readdir.html"><span class="token function">readdir</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-sftp-directory-entry/index.html">SftpDirectoryEntry</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Read the next batch of directory entries. Returns <a href="../-sftp-result/-success/index.html">SftpResult.Success</a> with entries, or with null at end of directory.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1963800607%2FFunctions%2F-1357994179" anchor-label="readlink" id="-1963800607%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="readlink.html"><span><span>readlink</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1963800607%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="readlink.html"><span class="token function">readlink</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Read the target of a symbolic link.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="490895828%2FFunctions%2F-1357994179" anchor-label="realpath" id="490895828%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="realpath.html"><span><span>realpath</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="490895828%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="realpath.html"><span class="token function">realpath</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Resolve a path to its canonical absolute form.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1114927787%2FFunctions%2F-1357994179" anchor-label="remove" id="-1114927787%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove.html"><span><span>remove</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1114927787%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="remove.html"><span class="token function">remove</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Delete a file.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1037915340%2FFunctions%2F-1357994179" anchor-label="rename" id="-1037915340%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rename.html"><span><span>rename</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1037915340%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="rename.html"><span class="token function">rename</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">oldPath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">newPath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Rename or move a file.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-449034577%2FFunctions%2F-1357994179" anchor-label="rmdir" id="-449034577%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="rmdir.html"><span><span>rmdir</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-449034577%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="rmdir.html"><span class="token function">rmdir</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Remove an empty directory.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-411498180%2FFunctions%2F-1357994179" anchor-label="setstat" id="-411498180%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="setstat.html"><span><span>setstat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-411498180%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="setstat.html"><span class="token function">setstat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">attrs<span class="token operator">: </span><a href="../-sftp-attributes/index.html">SftpAttributes</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Set file attributes by path.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1337364901%2FFunctions%2F-1357994179" anchor-label="stat" id="1337364901%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="stat.html"><span><span>stat</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1337364901%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="stat.html"><span class="token function">stat</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">path<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="../-sftp-attributes/index.html">SftpAttributes</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Get file attributes, following symlinks.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1484153565%2FFunctions%2F-1357994179" anchor-label="symlink" id="-1484153565%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="symlink.html"><span><span>symlink</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1484153565%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="symlink.html"><span class="token function">symlink</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">targetPath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">linkPath<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Create a symbolic link.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-989976330%2FFunctions%2F-1357994179" anchor-label="write" id="-989976330%2FFunctions%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="write.html"><span><span>write</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-989976330%2FFunctions%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="write.html"><span class="token function">write</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">handle<span class="token operator">: </span><a href="../-sftp-file-handle/index.html">SftpFileHandle</a><span class="token punctuation">, </span></span><span class="parameter ">offset<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html">Long</a><span class="token punctuation">, </span></span><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-sftp-result/index.html">SftpResult</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Write data to an open file at the given offset.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>Copyright Kenny Root</div>
+                    <div>
+                        <a class="footer--link" id="markdown-link" href="index.md">View as Markdown</a>
+                        <script>
+                            document.getElementById("markdown-link").href =
+                                location.pathname.split("/").pop().replace(/\.html$/, ".md") || "index.md";
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

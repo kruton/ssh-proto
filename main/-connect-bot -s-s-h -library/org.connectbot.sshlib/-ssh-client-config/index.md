@@ -39,9 +39,12 @@ val config = SshClientConfig {
 | [autoDisconnectOnLastChannelClose](auto-disconnect-on-last-channel-close.md) | [jvm]<br>val [autoDisconnectOnLastChannelClose](auto-disconnect-on-last-channel-close.md): [Boolean](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html) |
 | [clientVersion](client-version.md) | [jvm]<br>val [clientVersion](client-version.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
 | [cryptoPolicy](crypto-policy.md) | [jvm]<br>val [cryptoPolicy](crypto-policy.md): [SshCryptoPolicy](../-ssh-crypto-policy/index.md)? |
+| [disconnectTimeoutMs](disconnect-timeout-ms.md) | [jvm]<br>val [disconnectTimeoutMs](disconnect-timeout-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [encryptionAlgorithms](encryption-algorithms.md) | [jvm]<br>val [encryptionAlgorithms](encryption-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
 | [environment](environment.md) | [jvm]<br>val [environment](environment.md): [Map](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html)&lt;[String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html), [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html)&gt; |
+| [handshakeTimeoutMs](handshake-timeout-ms.md) | [jvm]<br>val [handshakeTimeoutMs](handshake-timeout-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [hostKeyAlgorithms](host-key-algorithms.md) | [jvm]<br>val [hostKeyAlgorithms](host-key-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
+| [hostKeyUpdateTimeoutMs](host-key-update-timeout-ms.md) | [jvm]<br>val [hostKeyUpdateTimeoutMs](host-key-update-timeout-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [hostKeyVerifier](host-key-verifier.md) | [jvm]<br>val [hostKeyVerifier](host-key-verifier.md): [HostKeyVerifier](../-host-key-verifier/index.md) |
 | [keepAliveIntervalMs](keep-alive-interval-ms.md) | [jvm]<br>val [keepAliveIntervalMs](keep-alive-interval-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [kexAlgorithms](kex-algorithms.md) | [jvm]<br>val [kexAlgorithms](kex-algorithms.md): [String](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html) |
@@ -52,5 +55,6 @@ val config = SshClientConfig {
 | [rekeyBytesLimit](rekey-bytes-limit.md) | [jvm]<br>val [rekeyBytesLimit](rekey-bytes-limit.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [rekeyIntervalMs](rekey-interval-ms.md) | [jvm]<br>val [rekeyIntervalMs](rekey-interval-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [sessionWindowSize](session-window-size.md) | [jvm]<br>val [sessionWindowSize](session-window-size.md): [Int](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html) |
+| [sftpRequestTimeoutMs](sftp-request-timeout-ms.md) | [jvm]<br>val [sftpRequestTimeoutMs](sftp-request-timeout-ms.md): [Long](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-long/index.html) |
 | [sftpWindowSize](sftp-window-size.md) | [jvm]<br>val [sftpWindowSize](sftp-window-size.md): [Int](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html) |
 | [transportFactory](transport-factory.md) | [jvm]<br>val [transportFactory](transport-factory.md): [TransportFactory](../../org.connectbot.sshlib.transport/-transport-factory/index.md) |

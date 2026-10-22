@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>SshCryptoPolicy</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
+<!-- BEGIN DOCS NAVIGATION -->
+<link rel="stylesheet" href="https://sshlib.connectbot.org/docs-version.css">
+<script src="https://sshlib.connectbot.org/docs-version.js" defer data-docs-root="https://sshlib.connectbot.org/" data-docs-version="v0.6.3"></script>
+<!-- END DOCS NAVIGATION -->
+</head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
+                    ConnectBot SSH Library
+            </a>
+        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
+                type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version"><label class="docs-version-label">Version <select id="docs-version" aria-label="Documentation version"><option value="v0.6.3" selected>v0.6.3</option><option value="v0.6.2">v0.6.2</option><option value="v0.6.1">v0.6.1</option><option value="v0.6.0">v0.6.0</option><option value="v0.5.1">v0.5.1</option><option value="v0.5.0">v0.5.0</option><option value="main">main</option></select></label></div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true"
+                        data-filter=":sshlib/main">jvm</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
+                        data-role="dropdown-toggle"
+                        aria-controls="platform-tags-listbox"
+                        aria-haspopup="listbox"
+                        aria-expanded="false"
+                        aria-label="Toggle source sets"
+                ></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":sshlib/main"
+                                       data-filter=":sshlib/main"/>
+                                <span class="checkbox--icon"></span>
+                                jvm
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
+                    type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    ConnectBot SSH Library
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="ConnectBot SSH Library::org.connectbot.sshlib/SshCryptoPolicy///PointingToDeclaration//-1357994179">
+  <div class="breadcrumbs"><a href="../../../index.html">ConnectBot SSH Library</a><span class="delimiter">/</span><a href="../index.html">org.connectbot.sshlib</a><span class="delimiter">/</span><span class="current">SshCryptoPolicy</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Ssh</span><wbr></wbr><span>Crypto</span><wbr></wbr><span><span>Policy</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">SshCryptoPolicy</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/connectbot/cbssh/blob/ab40ef9933f09aade796a3db8e594a9eb404e82e/sshlib/src/main/kotlin/org/connectbot/sshlib/SshCryptoPolicy.kt#L71">source</a>)</span></span></div><p class="paragraph">Resolved connection policy. Obtain a fresh snapshot with <a href="-companion/resolve.html">resolve</a> after installing crypto providers. Expressions contain bare names (an exact list), or individually prefixed ^ / + / - entries. Custom overrides always use DEFAULT as their base. Protocol KEX markers are managed separately.</p><p class="paragraph">Preset definitions evolve with library releases:</p><ul><li><p class="paragraph"><a href="../-crypto-policy-preset/-d-e-f-a-u-l-t/index.html">CryptoPolicyPreset.DEFAULT</a>: modern algorithms, with RSA and finite-field DH minimum 2048 bits.</p></li><li><p class="paragraph"><a href="../-crypto-policy-preset/-f-u-t-u-r-e/index.html">CryptoPolicyPreset.FUTURE</a>: hybrid post-quantum KEX only, 256-bit encryption keys, and RSA/DH minimum 3072 bits.</p></li><li><p class="paragraph"><a href="../-crypto-policy-preset/-f-i-p-s/index.html">CryptoPolicyPreset.FIPS</a>: an AES/SHA-2/NIST ECDH/fixed-DH/RSA-SHA2/ECDSA subset. This is an algorithm filter, not a claim of FIPS validation for the provider or application.</p></li><li><p class="paragraph"><a href="../-crypto-policy-preset/-l-e-g-a-c-y/index.html">CryptoPolicyPreset.LEGACY</a>: modern preferences followed by compatibility algorithms, with RSA/DH minimum 1024 bits.</p></li></ul><p class="paragraph">An exact expression is an ordered comma-separated list of names. Delta entries individually use <code class="lang-kotlin">^</code> (prepend), <code class="lang-kotlin">+</code> (append), or <code class="lang-kotlin">-</code> (exclude), for example <code class="lang-kotlin">^curve25519-sha256,+diffie-hellman-group1-sha1,-ecdh-sha2-nistp256</code>. Unsupported or unavailable positive entries are skipped and reported in <span data-unresolved-link="org.connectbot.sshlib/SshCryptoPolicy//#org.connectbot.sshlib.CryptoPolicyPreset#kotlin.collections.Map[org.connectbot.sshlib.AlgorithmCategory,kotlin.collections.List[kotlin.String]]#kotlin.Int#kotlin.Int#kotlin.collections.List[org.connectbot.sshlib.AlgorithmPolicyWarning]/PointingToCallableParameters(4)/">warnings</span>; callers should preserve the original expression. <span data-unresolved-link="org.connectbot.sshlib/SshCryptoPolicy//#org.connectbot.sshlib.CryptoPolicyPreset#kotlin.collections.Map[org.connectbot.sshlib.AlgorithmCategory,kotlin.collections.List[kotlin.String]]#kotlin.Int#kotlin.Int#kotlin.collections.List[org.connectbot.sshlib.AlgorithmPolicyWarning]/PointingToCallableParameters(2)/">minimumRsaBits</span> and <span data-unresolved-link="org.connectbot.sshlib/SshCryptoPolicy//#org.connectbot.sshlib.CryptoPolicyPreset#kotlin.collections.Map[org.connectbot.sshlib.AlgorithmCategory,kotlin.collections.List[kotlin.String]]#kotlin.Int#kotlin.Int#kotlin.collections.List[org.connectbot.sshlib.AlgorithmPolicyWarning]/PointingToCallableParameters(3)/">minimumDhBits</span> are independent numeric requirements that explicit algorithm selections cannot bypass. The group1 example therefore also requires <code class="lang-kotlin">minimumDhBits = 1024</code>.</p><p class="paragraph">Install platform crypto providers before resolving and apply the snapshot with <a href="../-ssh-client-config/-builder/crypto-policy.html">SshClientConfig.Builder.cryptoPolicy</a>. Persist user expressions and preset names, rather than the runtime <a href="-companion/catalog.html">catalog</a> or resolved algorithm lists. Public-key authentication selections are independent of server host-key selections.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="494034627%2FClasslikes%2F-1357994179" anchor-label="Companion" id="494034627%2FClasslikes%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="494034627%2FClasslikes%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1651851386%2FProperties%2F-1357994179" anchor-label="algorithms" id="1651851386%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="algorithms.html"><span><span>algorithms</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1651851386%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="algorithms.html">algorithms</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><a href="../-algorithm-category/index.html">AlgorithmCategory</a><span class="token punctuation">, </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-758756444%2FProperties%2F-1357994179" anchor-label="minimumDhBits" id="-758756444%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="minimum-dh-bits.html"><span>minimum</span><wbr></wbr><span>Dh</span><wbr></wbr><span><span>Bits</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-758756444%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="minimum-dh-bits.html">minimumDhBits</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-434822938%2FProperties%2F-1357994179" anchor-label="minimumRsaBits" id="-434822938%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="minimum-rsa-bits.html"><span>minimum</span><wbr></wbr><span>Rsa</span><wbr></wbr><span><span>Bits</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-434822938%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="minimum-rsa-bits.html">minimumRsaBits</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1939214241%2FProperties%2F-1357994179" anchor-label="preset" id="-1939214241%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="preset.html"><span><span>preset</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1939214241%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="preset.html">preset</a><span class="token operator">: </span><a href="../-crypto-policy-preset/index.html">CryptoPolicyPreset</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2017099353%2FProperties%2F-1357994179" anchor-label="warnings" id="-2017099353%2FProperties%2F-1357994179" data-filterable-set=":sshlib/main"></a>
+          <div class="table-row table-row_content" data-filterable-current=":sshlib/main" data-filterable-set=":sshlib/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="warnings.html"><span><span>warnings</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2017099353%2FProperties%2F-1357994179"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":sshlib/main"><div class="symbol monospace"><span class="token keyword">val </span><a href="warnings.html">warnings</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-algorithm-policy-warning/index.html">AlgorithmPolicyWarning</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>Copyright Kenny Root</div>
+                    <div>
+                        <a class="footer--link" id="markdown-link" href="index.md">View as Markdown</a>
+                        <script>
+                            document.getElementById("markdown-link").href =
+                                location.pathname.split("/").pop().replace(/\.html$/, ".md") || "index.md";
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

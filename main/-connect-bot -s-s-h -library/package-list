@@ -462,12 +462,15 @@ $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/autoDisconnectOnLa
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/build/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/build.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/clientVersion/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/client-version.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/cryptoPolicy/#org.connectbot.sshlib.SshCryptoPolicy/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/crypto-policy.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/disconnectTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/disconnect-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/enableCertificateHostKeys/#kotlin.Boolean/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/enable-certificate-host-keys.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/enableCompression/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/enable-compression.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/encryptionAlgorithms/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/encryption-algorithms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/environment/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/environment.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/handshakeTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/handshake-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/host/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/host.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/hostKeyAlgorithms/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/host-key-algorithms.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/hostKeyUpdateTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/host-key-update-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/hostKeyVerifier/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/host-key-verifier.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/ipVersion/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/ip-version.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/keepAliveIntervalMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/keep-alive-interval-ms.html
@@ -480,6 +483,7 @@ $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/pubkeyAlgorithms/#
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/rekeyBytesLimit/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/rekey-bytes-limit.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/rekeyIntervalMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/rekey-interval-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/sessionWindowSize/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/session-window-size.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/sftpRequestTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/sftp-request-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/sftpWindowSize/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/sftp-window-size.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Builder/transportFactory/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-builder/transport-factory.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig.Companion///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/-companion/index.html
@@ -489,9 +493,12 @@ $dokka.location:org.connectbot.sshlib/SshClientConfig/algorithmWarningHandler/#/
 $dokka.location:org.connectbot.sshlib/SshClientConfig/autoDisconnectOnLastChannelClose/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/auto-disconnect-on-last-channel-close.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/clientVersion/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/client-version.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/cryptoPolicy/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/crypto-policy.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig/disconnectTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/disconnect-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/encryptionAlgorithms/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/encryption-algorithms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/environment/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/environment.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig/handshakeTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/handshake-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/hostKeyAlgorithms/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/host-key-algorithms.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig/hostKeyUpdateTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/host-key-update-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/hostKeyVerifier/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/host-key-verifier.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/keepAliveIntervalMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/keep-alive-interval-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/kexAlgorithms/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/kex-algorithms.html
@@ -502,6 +509,7 @@ $dokka.location:org.connectbot.sshlib/SshClientConfig/pubkeyAlgorithms/#/Pointin
 $dokka.location:org.connectbot.sshlib/SshClientConfig/rekeyBytesLimit/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/rekey-bytes-limit.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/rekeyIntervalMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/rekey-interval-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/sessionWindowSize/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/session-window-size.html
+$dokka.location:org.connectbot.sshlib/SshClientConfig/sftpRequestTimeoutMs/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/sftp-request-timeout-ms.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/sftpWindowSize/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/sftp-window-size.html
 $dokka.location:org.connectbot.sshlib/SshClientConfig/transportFactory/#/PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-client-config/transport-factory.html
 $dokka.location:org.connectbot.sshlib/SshCryptoPolicy.Companion///PointingToDeclaration/-connect-bot -s-s-h -library/org.connectbot.sshlib/-ssh-crypto-policy/-companion/index.html
