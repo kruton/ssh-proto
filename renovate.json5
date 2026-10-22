@@ -28,6 +28,20 @@
   ],
   "packageRules": [
     {
+      "description": "Keep release workflows on main to match Octo STS job_workflow_ref trust policies",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchFileNames": [
+        ".github/workflows/release.yml"
+      ],
+      "matchDepNames": [
+        "connectbot/actions",
+        "connectbot/actions/**"
+      ],
+      "enabled": false
+    },
+    {
       "matchDepNames": ["org.bouncycastle:bcprov-jdk18on"],
       "groupName": "Bouncy Castle and vendored crypto sources",
       "automerge": false,
