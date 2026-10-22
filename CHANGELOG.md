@@ -1,8 +1,18 @@
 # Changelog
 
-## Unreleased
+## [0.6.3][0.6.3]
 
 Changes for library users since `0.6.2`.
+
+### Added
+
+- Added `SshClientConfig.handshakeTimeoutMs`, `sftpRequestTimeoutMs`,
+  `hostKeyUpdateTimeoutMs`, and `disconnectTimeoutMs` to configure initial
+  handshake, ordinary SFTP response, host-key update, and final disconnect-write
+  deadlines. Defaults are 30 seconds for the first three and 5 seconds for
+  disconnect writes; set any of them to `0` for an unlimited wait.
+- Added debug timing logs for Diffie-Hellman group-exchange validation and
+  client key generation to help diagnose slow handshakes.
 
 ## [0.6.2][0.6.2]
 
@@ -256,6 +266,7 @@ Changes for library users since `0.2.1`.
 - Limited zlib decompression output per packet to reduce decompression-bomb
   denial-of-service risk.
 
+[0.6.3]: https://github.com/connectbot/cbssh/compare/v0.6.2...v0.6.3
 [0.6.2]: https://github.com/connectbot/cbssh/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/connectbot/cbssh/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/connectbot/cbssh/compare/v0.5.1...v0.6.0
