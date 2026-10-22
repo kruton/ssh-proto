@@ -42,6 +42,8 @@ import org.connectbot.sshlib.SftpStatusCode
 import org.connectbot.sshlib.SshSession
 import org.connectbot.sshlib.protocol.SftpCopyData
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.nio.ByteBuffer
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -409,11 +411,49 @@ class SftpClientImplTest {
         }
     }
 
+    @ParameterizedTest
+    @ValueSource(longs = [100, 30_000, 60_000])
+    fun `ordinary requests use configured response deadline`(timeoutMs: Long) = runTest {
+        val session = FakeSshSession(respondAutomatically = false)
+        session.enqueueRead(packet(SSH_FXP_VERSION, ByteBuffer.allocate(4).putInt(3).array()))
+        val client = assertSuccess(SftpClientImpl.create(session, SftpPacketIO(session), backgroundScope, requestTimeoutMs = timeoutMs))
+        try {
+            val request = async { client.remove("/tmp/file") }
+            runCurrent()
+            advanceTimeBy(timeoutMs - 1)
+            runCurrent()
+            assertFalse(request.isCompleted)
+            advanceTimeBy(1)
+            runCurrent()
+            assertIs<SftpResult.IoError>(request.await())
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun `ordinary requests support unlimited response waits`() = runTest {
+        val session = FakeSshSession(respondAutomatically = false)
+        session.enqueueRead(packet(SSH_FXP_VERSION, ByteBuffer.allocate(4).putInt(3).array()))
+        val client = assertSuccess(SftpClientImpl.create(session, SftpPacketIO(session), backgroundScope, requestTimeoutMs = 0))
+        try {
+            val request = async { client.remove("/tmp/file") }
+            runCurrent()
+            advanceTimeBy(31_000)
+            runCurrent()
+            assertFalse(request.isCompleted)
+            session.enqueueRead(responsePacket(SSH_FXP_STATUS, session.requestIds.single(), statusPayload(SftpStatusCode.OK)))
+            assertEquals(SftpResult.Success(Unit), request.await())
+        } finally {
+            client.close()
+        }
+    }
+
     @Test
     fun `copyData waits beyond thirty seconds by default`() = runTest {
         val session = FakeSshSession(respondAutomatically = false)
         session.enqueueRead(packet(SSH_FXP_VERSION, ByteBuffer.allocate(4).putInt(3).array()))
-        val client = assertSuccess(SftpClientImpl.create(session, SftpPacketIO(session), backgroundScope))
+        val client = assertSuccess(SftpClientImpl.create(session, SftpPacketIO(session), backgroundScope, requestTimeoutMs = 100))
         try {
             val copy = async { client.copyData(SftpFileHandle(byteArrayOf(1)), 0, 0, SftpFileHandle(byteArrayOf(2)), 0) }
             runCurrent()

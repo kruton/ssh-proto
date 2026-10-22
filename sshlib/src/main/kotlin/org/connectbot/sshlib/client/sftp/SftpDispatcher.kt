@@ -28,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import org.connectbot.sshlib.SftpResult
+import org.connectbot.sshlib.Timeouts
 import org.connectbot.sshlib.protocol.SftpFrameHeader
 import org.connectbot.sshlib.protocol.SftpStateMachine
 import org.slf4j.LoggerFactory
@@ -59,7 +60,7 @@ internal class SftpDispatcher(
      * @param timeoutMs Maximum time to wait for a response; 0 waits until completion or disconnect
      * @return The raw response packet
      */
-    suspend fun request(type: Int, payload: ByteArray, timeoutMs: Long = 30_000L): SftpResult<SftpRawPacket> = request(type, payload, timeoutMs) { action ->
+    suspend fun request(type: Int, payload: ByteArray, timeoutMs: Long = Timeouts.DEFAULT_SFTP_REQUEST_TIMEOUT_MS): SftpResult<SftpRawPacket> = request(type, payload, timeoutMs) { action ->
         action()
         true
     }
@@ -71,14 +72,14 @@ internal class SftpDispatcher(
     suspend fun request(
         type: Int,
         payload: ByteArray,
-        timeoutMs: Long = 30_000L,
+        timeoutMs: Long = Timeouts.DEFAULT_SFTP_REQUEST_TIMEOUT_MS,
         authorize: suspend (suspend () -> Unit) -> Boolean,
     ): SftpResult<SftpRawPacket> = request(type, listOf(payload), timeoutMs, authorize)
 
     suspend fun request(
         type: Int,
         payload: List<ByteArray>,
-        timeoutMs: Long = 30_000L,
+        timeoutMs: Long = Timeouts.DEFAULT_SFTP_REQUEST_TIMEOUT_MS,
         authorize: suspend (suspend () -> Unit) -> Boolean,
     ): SftpResult<SftpRawPacket> {
         var requestId = 0

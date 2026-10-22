@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
@@ -38,6 +39,8 @@ import org.connectbot.sshlib.PublicKey
 import org.connectbot.sshlib.protocol.SshEnums
 import org.connectbot.sshlib.transport.PipedTransport
 import org.connectbot.sshlib.transport.Transport
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -200,15 +203,38 @@ class ConnectionBackpressureTest {
         }
     }
 
-    @Test
-    fun `auto disconnect times out a stuck final write`() = runTest {
+    @ParameterizedTest
+    @ValueSource(longs = [100, 5_000])
+    fun `auto disconnect times out a stuck final write`(timeoutMs: Long) = runTest {
         fixture(ignoreTransportErrors = true) { connection, server, transport ->
+            connection.disconnectTimeoutMs = timeoutMs
             val session = openSession(connection, server)
             transport.pauseNextWrite(afterDelivery = false)
             server.sendChannelClose(session.localChannelNumber)
             runCurrent()
             assertFalse(transport.closed.isCompleted)
-            withTimeout(6_000) { transport.closed.await() }
+            advanceTimeBy(timeoutMs - 1)
+            runCurrent()
+            assertFalse(transport.closed.isCompleted)
+            advanceTimeBy(1)
+            runCurrent()
+            assertTrue(transport.closed.isCompleted)
+        }
+    }
+
+    @Test
+    fun `unlimited disconnect deadline permits a slow final write`() = runTest {
+        fixture(ignoreTransportErrors = true) { connection, server, transport ->
+            connection.disconnectTimeoutMs = 0
+            val session = openSession(connection, server)
+            val gate = transport.pauseNextWrite(afterDelivery = false)
+            server.sendChannelClose(session.localChannelNumber)
+            runCurrent()
+            advanceTimeBy(6_000)
+            runCurrent()
+            assertFalse(transport.closed.isCompleted)
+            gate.release.complete(Unit)
+            withTimeout(1_000) { transport.closed.await() }
         }
     }
 

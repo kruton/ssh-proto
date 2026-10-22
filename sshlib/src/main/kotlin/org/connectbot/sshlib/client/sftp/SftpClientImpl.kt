@@ -31,6 +31,7 @@ import org.connectbot.sshlib.SftpOpenFlag
 import org.connectbot.sshlib.SftpResult
 import org.connectbot.sshlib.SftpStatusCode
 import org.connectbot.sshlib.SshSession
+import org.connectbot.sshlib.Timeouts
 import org.connectbot.sshlib.client.asReadOnlyBuffer
 import org.connectbot.sshlib.kaitaiParseFailureOrNull
 import org.connectbot.sshlib.protocol.ByteString
@@ -60,6 +61,7 @@ internal class SftpClientImpl private constructor(
     override val protocolVersion: Int,
     private val stateMachine: SftpStateMachine,
     override val extensions: Set<String>,
+    private val requestTimeoutMs: Long,
 ) : SftpClient {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -372,7 +374,7 @@ internal class SftpClientImpl private constructor(
         type: Int,
         payload: ByteArray,
         transition: SftpTransition = stateMachine::request,
-        timeoutMs: Long = 30_000L,
+        timeoutMs: Long = requestTimeoutMs,
         map: (SftpRawPacket) -> SftpResult<T>,
     ): SftpResult<T> = dispatchRequest(type, listOf(payload), transition, timeoutMs, map)
 
@@ -380,7 +382,7 @@ internal class SftpClientImpl private constructor(
         type: Int,
         payload: List<ByteArray>,
         transition: SftpTransition = stateMachine::request,
-        timeoutMs: Long = 30_000L,
+        timeoutMs: Long = requestTimeoutMs,
         map: (SftpRawPacket) -> SftpResult<T>,
     ): SftpResult<T> = when (val result = dispatcher.request(type, payload, timeoutMs) { action -> transition { action() } }) {
         is SftpResult.Success -> try {
@@ -403,14 +405,14 @@ internal class SftpClientImpl private constructor(
         type: Int,
         payload: ByteArray,
         transition: SftpTransition = stateMachine::request,
-        timeoutMs: Long = 30_000L,
+        timeoutMs: Long = requestTimeoutMs,
     ): SftpResult<Unit> = dispatchStatusRequest(type, listOf(payload), transition, timeoutMs)
 
     private suspend fun dispatchStatusRequest(
         type: Int,
         payload: List<ByteArray>,
         transition: SftpTransition = stateMachine::request,
-        timeoutMs: Long = 30_000L,
+        timeoutMs: Long = requestTimeoutMs,
     ): SftpResult<Unit> = dispatchRequest(type, payload, transition, timeoutMs) { response ->
         if (response.type == SSH_FXP_STATUS) {
             val status = decodeStatus(response.payloadBuffer)
@@ -473,12 +475,16 @@ internal class SftpClientImpl private constructor(
         /**
          * Create an SFTP client by performing the INIT/VERSION handshake.
          */
-        suspend fun create(session: SshSession): SftpResult<SftpClient> = create(session, SftpPacketIO(session))
+        suspend fun create(
+            session: SshSession,
+            requestTimeoutMs: Long = Timeouts.DEFAULT_SFTP_REQUEST_TIMEOUT_MS,
+        ): SftpResult<SftpClient> = create(session, SftpPacketIO(session), requestTimeoutMs = requestTimeoutMs)
 
         internal suspend fun create(
             session: SshSession,
             packetIO: SftpPacketTransport,
             readScope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
+            requestTimeoutMs: Long = Timeouts.DEFAULT_SFTP_REQUEST_TIMEOUT_MS,
         ): SftpResult<SftpClient> {
             val stateMachine = SftpStateMachine()
             val dispatcher = SftpDispatcher(packetIO, stateMachine)
@@ -526,7 +532,7 @@ internal class SftpClientImpl private constructor(
             // Start the background read loop
             val readJob = dispatcher.startReadLoop(readScope)
 
-            return SftpResult.Success(SftpClientImpl(session, dispatcher, readJob, negotiatedVersion, stateMachine, extensions))
+            return SftpResult.Success(SftpClientImpl(session, dispatcher, readJob, negotiatedVersion, stateMachine, extensions, requestTimeoutMs))
         }
 
         // --- Wire format helpers ---

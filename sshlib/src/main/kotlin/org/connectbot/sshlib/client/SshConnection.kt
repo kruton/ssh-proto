@@ -32,7 +32,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelAndJoin
@@ -48,7 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import org.connectbot.sshlib.AgentProvider
 import org.connectbot.sshlib.AlgorithmCategory
 import org.connectbot.sshlib.AlgorithmPolicyWarning
@@ -65,6 +64,7 @@ import org.connectbot.sshlib.SessionExit
 import org.connectbot.sshlib.SshCertificate
 import org.connectbot.sshlib.SshCryptoPolicy
 import org.connectbot.sshlib.SshException
+import org.connectbot.sshlib.Timeouts
 import org.connectbot.sshlib.crypto.CERTIFICATE_SUFFIX
 import org.connectbot.sshlib.crypto.CipherEntry
 import org.connectbot.sshlib.crypto.CompressionEntry
@@ -163,6 +163,7 @@ import org.connectbot.sshlib.protocol.toByteArray
 import org.connectbot.sshlib.transport.PacketIO
 import org.connectbot.sshlib.transport.Transport
 import org.connectbot.sshlib.transport.TransportException
+import org.connectbot.sshlib.withOptionalTimeout
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -281,6 +282,10 @@ class SshConnection(
     private val pubkeyAlgorithms = pubkeyAlgorithms ?: cryptoPolicy?.algorithms?.getValue(AlgorithmCategory.PUBKEY)?.joinToString(",") ?: hostKeyAlgorithms
 
     internal var autoDisconnectOnLastChannelClose: Boolean = true
+
+    internal var handshakeTimeoutMs: Long = Timeouts.DEFAULT_HANDSHAKE_TIMEOUT_MS
+    internal var hostKeyUpdateTimeoutMs: Long = Timeouts.DEFAULT_HOST_KEY_UPDATE_TIMEOUT_MS
+    internal var disconnectTimeoutMs: Long = Timeouts.DEFAULT_DISCONNECT_TIMEOUT_MS
 
     /** Default receive window for [openSessionChannel], set from `SshClientConfig.sessionWindowSize`. */
     internal var sessionWindowSize: Int = 2 * 1024 * 1024
@@ -617,6 +622,8 @@ class SshConnection(
      * Returns [ConnectResult.Success] when the transport is ready for authentication calls.
      */
     suspend fun connect(): ConnectResult {
+        val startedAt = System.nanoTime()
+        logger.debug("SSH handshake started")
         val deferred = CompletableDeferred<ConnectResult>()
         pendingConnect = deferred
 
@@ -639,9 +646,15 @@ class SshConnection(
             // Start packet loop — handles all binary SSH packets from here
             startPacketLoop()
 
-            withTimeout(30_000L) { deferred.await() }
-        } catch (e: TimeoutCancellationException) {
-            ConnectResult.TransportError(Exception("Connection timed out"))
+            if (handshakeTimeoutMs == 0L) {
+                deferred.await()
+            } else {
+                withTimeoutOrNull(handshakeTimeoutMs) { deferred.await() }
+                    ?: ConnectResult.TransportError(Exception("Connection timed out"))
+            }
+        } catch (e: CancellationException) {
+            close()
+            throw e
         } catch (e: HostKeyRejectedException) {
             ConnectResult.HostKeyRejected(e.key)
         } catch (e: SshException) {
@@ -660,6 +673,7 @@ class SshConnection(
             ConnectResult.TransportError(e)
         } finally {
             pendingConnect = null
+            logger.debug("SSH handshake finished after {} ms", (System.nanoTime() - startedAt) / 1_000_000)
         }
     }
 
@@ -1481,11 +1495,17 @@ class SshConnection(
         val group = dhGexGroup ?: throw SshException("DH-GEX group not received")
         val dhGex = kex as? DiffieHellmanGroupExchange
             ?: throw SshException("KEX algorithm is not DH-GEX")
+        logger.debug("DH-GEX group received; validating group")
+        val validationStartedAt = System.nanoTime()
         dhGex.setGroup(
             BigInteger(1, group.p().body()),
             BigInteger(1, group.g().body()),
         )
+        logger.debug("DH-GEX group validated in {} ms", (System.nanoTime() - validationStartedAt) / 1_000_000)
+        logger.debug("Generating DH-GEX client key")
+        val keyGenerationStartedAt = System.nanoTime()
         clientPublicKey = dhGex.generateClientKeys()
+        logger.debug("DH-GEX client key generated in {} ms", (System.nanoTime() - keyGenerationStartedAt) / 1_000_000)
 
         val initMsg = SshMsgKexDhGexInit().apply {
             setE(createMpint(clientPublicKey!!))
@@ -2307,7 +2327,7 @@ class SshConnection(
             hostKeyUpdates.receive {
                 connectionScope.launch {
                     try {
-                        withTimeout(30_000) { updateHostKeys(advertised, sid, authenticatedKey, negotiated) }
+                        withOptionalTimeout(hostKeyUpdateTimeoutMs) { updateHostKeys(advertised, sid, authenticatedKey, negotiated) }
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
@@ -3173,7 +3193,7 @@ class SshConnection(
         // writer can finish CHANNEL_CLOSE and DISCONNECT before transport teardown.
         connectionScope.launch {
             try {
-                withTimeout(5_000L) { receipt?.await() }
+                withOptionalTimeout(disconnectTimeoutMs) { receipt?.await() }
             } catch (e: Exception) {
                 logger.debug("Disconnect write did not complete", e)
             } finally {
@@ -3228,7 +3248,7 @@ class SshConnection(
                         if (e is KeyExchangeFailedException) {
                             // Register the effect with the protocol owner, then await its write
                             // outside the owner before closing (RFC 10042 section 2.1).
-                            withTimeout(5_000L) {
+                            withOptionalTimeout(disconnectTimeoutMs) {
                                 val receipt = protocolExecutor.run(awaitWrites = false) {
                                     sendErrorDisconnect(
                                         SshEnums.DisconnectReason.SSH_DISCONNECT_KEY_EXCHANGE_FAILED,

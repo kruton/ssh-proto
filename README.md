@@ -173,12 +173,26 @@ val client = SshClient(SshClientConfig {
     host = "example.com"
     hostKeyVerifier = myVerifier
     autoDisconnectOnLastChannelClose = false
+    handshakeTimeoutMs = 0 // Unlimited initial KEX/service wait for interactive use
+    sftpRequestTimeoutMs = 60_000 // Default: 30 seconds
+    hostKeyUpdateTimeoutMs = 60_000 // Default: 30 seconds
+    disconnectTimeoutMs = 10_000 // Default: 5 seconds
     enableCompression = true // Offers zlib@openssh.com, zlib, and none
     environment = mapOf("LANG" to "en_US.UTF-8")
     sessionWindowSize = 2 * 1024 * 1024 // Default: 2 MiB per session
     sftpWindowSize = 8 * 1024 * 1024    // Default: 8 MiB per SFTP channel
 })
 ```
+
+The handshake deadline defaults to 30 seconds and starts after version
+exchange.  Set `handshakeTimeoutMs = 0` for slow servers or interactive
+host-key approval.  `sftpRequestTimeoutMs` sets the response deadline for
+ordinary SFTP requests.  `copyData` keeps its per-call `timeoutMs` override and
+unlimited default. `hostKeyUpdateTimeoutMs` limits the background proof and
+persistence work for host-key updates. `disconnectTimeoutMs` limits final
+disconnect writes during automatic shutdown and key-exchange failures; explicit
+`disconnect()` still aborts immediately. Each setting accepts `0` for an
+unlimited wait, and negative values are rejected.
 
 Environment defaults are sent before starting each session, including SFTP.
 Servers may reject variables according to their policy (OpenSSH `AcceptEnv`).
