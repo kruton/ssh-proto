@@ -65,6 +65,10 @@ class SshClientConfig private constructor(
     val sftpWindowSize: Int,
     val environment: Map<String, String>,
     val keepAliveIntervalMs: Long,
+    val handshakeTimeoutMs: Long,
+    val sftpRequestTimeoutMs: Long,
+    val hostKeyUpdateTimeoutMs: Long,
+    val disconnectTimeoutMs: Long,
     val pubkeyAlgorithms: String?,
     val cryptoPolicy: SshCryptoPolicy?,
     val algorithmWarningHandler: ((AlgorithmPolicyWarning) -> Unit)?,
@@ -217,6 +221,41 @@ class SshClientConfig private constructor(
          */
         var keepAliveIntervalMs: Long = 0L
 
+        /**
+         * Maximum wait for initial key exchange and service negotiation after version
+         * exchange, including host-key verification. Does not limit TCP connection,
+         * version exchange, authentication, or reads from an established session.
+         *
+         * Defaults to 30 seconds. Set to 0 to wait until completion, transport failure,
+         * or coroutine cancellation, for example when an interactive user may take
+         * time to approve a host key or the server performs slow DH calculations.
+         */
+        var handshakeTimeoutMs: Long = Timeouts.DEFAULT_HANDSHAKE_TIMEOUT_MS
+
+        /**
+         * Default response timeout for ordinary requests on clients opened by
+         * [SshClient.openSftp]. Defaults to 30 seconds; 0 waits until completion,
+         * disconnect, or coroutine cancellation. Excludes SFTP version negotiation
+         * and request writes. [SftpClient.copyData] uses its per-call timeout instead.
+         */
+        var sftpRequestTimeoutMs: Long = Timeouts.DEFAULT_SFTP_REQUEST_TIMEOUT_MS
+
+        /**
+         * Timeout for processing a server's host-key update, including proof requests
+         * and verifier persistence callbacks. Defaults to 30 seconds; 0 waits until
+         * completion or connection shutdown. Failed or timed-out updates do not replace
+         * trusted keys unless their proofs have been verified.
+         */
+        var hostKeyUpdateTimeoutMs: Long = Timeouts.DEFAULT_HOST_KEY_UPDATE_TIMEOUT_MS
+
+        /**
+         * Maximum wait for sending the final disconnect packet during automatic
+         * last-channel shutdown or a key-exchange failure. Defaults to 5 seconds;
+         * 0 waits until the write completes or the connection is closed explicitly.
+         * Explicit [SshClient.disconnect] always aborts outstanding writes immediately.
+         */
+        var disconnectTimeoutMs: Long = Timeouts.DEFAULT_DISCONNECT_TIMEOUT_MS
+
         fun build(): SshClientConfig {
             val environmentSnapshot = LinkedHashMap(environment)
             require(environmentSnapshot.all { (name, value) -> '\u0000' !in name && '\u0000' !in value }) {
@@ -232,6 +271,10 @@ class SshClientConfig private constructor(
             }
             require(sessionWindowSize > 0) { "sessionWindowSize must be positive" }
             require(sftpWindowSize > 0) { "sftpWindowSize must be positive" }
+            require(handshakeTimeoutMs >= 0) { "handshakeTimeoutMs must be non-negative" }
+            require(sftpRequestTimeoutMs >= 0) { "sftpRequestTimeoutMs must be non-negative" }
+            require(hostKeyUpdateTimeoutMs >= 0) { "hostKeyUpdateTimeoutMs must be non-negative" }
+            require(disconnectTimeoutMs >= 0) { "disconnectTimeoutMs must be non-negative" }
             require(keepAliveIntervalMs >= 0) {
                 "keepAliveIntervalMs must be non-negative"
             }
@@ -274,6 +317,10 @@ class SshClientConfig private constructor(
                 sftpWindowSize,
                 Collections.unmodifiableMap(environmentSnapshot),
                 keepAliveIntervalMs,
+                handshakeTimeoutMs,
+                sftpRequestTimeoutMs,
+                hostKeyUpdateTimeoutMs,
+                disconnectTimeoutMs,
                 pubkeyAlgorithms,
                 policy,
                 algorithmWarningHandler,

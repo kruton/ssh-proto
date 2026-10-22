@@ -19,14 +19,17 @@ package org.connectbot.sshlib
 
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.connectbot.sshlib.PingResult
 import org.connectbot.sshlib.client.DynamicPortForwarder
 import org.connectbot.sshlib.client.LocalPortForwarder
@@ -199,6 +202,9 @@ class SshClient private constructor(
         sshConnection.autoDisconnectOnLastChannelClose = config.autoDisconnectOnLastChannelClose
         sshConnection.sessionWindowSize = config.sessionWindowSize
         sshConnection.keepAliveIntervalMs = config.keepAliveIntervalMs
+        sshConnection.handshakeTimeoutMs = config.handshakeTimeoutMs
+        sshConnection.hostKeyUpdateTimeoutMs = config.hostKeyUpdateTimeoutMs
+        sshConnection.disconnectTimeoutMs = config.disconnectTimeoutMs
         val result = sshConnection.connect()
 
         if (result is ConnectResult.Success) {
@@ -215,6 +221,9 @@ class SshClient private constructor(
         }
 
         result
+    } catch (e: CancellationException) {
+        withContext(NonCancellable) { disconnect() }
+        throw e
     } catch (e: Exception) {
         logger.error("Connection failed", e)
         disconnect()
@@ -516,7 +525,7 @@ class SshClient private constructor(
                 session.close()
                 return SftpResult.ProtocolError("Server rejected SFTP subsystem request")
             }
-            SftpClientImpl.create(session)
+            SftpClientImpl.create(session, config.sftpRequestTimeoutMs)
         } catch (e: Exception) {
             logger.error("Failed to open SFTP session", e)
             SftpResult.IoError(e)

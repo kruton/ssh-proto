@@ -262,16 +262,18 @@ internal class HostKeyUpdateTest {
         }
     }
 
-    @Test
-    fun `timed out proofs retain their reply slot without persisting keys`() = runTest {
+    @ParameterizedTest
+    @ValueSource(longs = [100, 30_000])
+    fun `timed out proofs retain their reply slot without persisting keys`(timeoutMs: Long) = runTest {
         val recorder = Recorder()
         val pair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair()
         val newKey = key(pair)
         val (connection, server) = fixture(recorder)
+        connection.hostKeyUpdateTimeoutMs = timeoutMs
         try {
             server.sendGlobalRequest("hostkeys-00@openssh.com", false, strings(listOf(newKey.encoded)))
             server.awaitGlobalRequest()
-            advanceTimeBy(30_001)
+            advanceTimeBy(timeoutMs + 1)
             runCurrent()
             val forward = async { connection.sendTcpipForwardRequest("localhost", 1234) }
             assertEquals("tcpip-forward", server.awaitGlobalRequest().requestName().value())
@@ -280,6 +282,28 @@ internal class HostKeyUpdateTest {
             assertEquals(1234, forward.await())
             assertTrue(recorder.added.isEmpty())
             assertTrue(recorder.removed.isEmpty())
+        } finally {
+            connection.close()
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = [0, 120_000])
+    fun `extended host key deadline permits a slow proof`(timeoutMs: Long) = runTest {
+        val recorder = Recorder()
+        val pair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair()
+        val newKey = key(pair)
+        val (connection, server) = fixture(recorder)
+        connection.hostKeyUpdateTimeoutMs = timeoutMs
+        try {
+            server.sendGlobalRequest("hostkeys-00@openssh.com", false, strings(listOf(newKey.encoded)))
+            server.awaitGlobalRequest()
+            advanceTimeBy(31_000)
+            runCurrent()
+            assertTrue(recorder.added.isEmpty())
+            server.sendRequestSuccess(strings(listOf(proof(pair, server.sessionIdentifier, newKey.encoded))))
+            runCurrent()
+            assertEquals(listOf(newKey), recorder.added)
         } finally {
             connection.close()
         }
